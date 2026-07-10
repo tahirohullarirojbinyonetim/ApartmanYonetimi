@@ -176,6 +176,15 @@
   tbody tr:hover{background:#f8fafc;}
   .table-wrap{overflow-x:auto;}
 
+  /* Tıklanabilir Genel Bakış Tablosu Tasarımı */
+  .clickable-row { cursor: pointer; transition: background 0.2s; }
+  .clickable-row:hover { background: #f1f5f9 !important; }
+  .details-row { background: #fafafa !important; display: none; }
+  .details-row td { padding: 12px 20px; border-bottom: 2px solid #e2e8f0; }
+  .details-container { display: flex; flex-wrap: wrap; gap: 20px; font-size: 0.8rem; color: #334155; }
+  .details-block { background: #fff; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; flex: 1; min-width: 180px; }
+  .details-block strong { color: var(--primary); display: block; margin-bottom: 4px; font-size: 0.7rem; text-transform: uppercase; }
+
   .tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .tab-btn{
     padding:9px 16px;border-radius:8px;border:1px solid #d8dee8;background:#fff;
@@ -248,7 +257,7 @@
     grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
     gap:12px;
   }
-  .resident-info .info-item{
+  .resident-info .info-item {
     background:#f8fafc;
     padding:12px 16px;
     border-radius:10px;
@@ -357,7 +366,7 @@
         <h3>Yönetici Girişi</h3>
         <div class="field">
           <label>Yönetici Şifresi</label>
-          <input type="password" id="adminPassword" placeholder="Şifreyi girin" value="admin123">
+          <input type="password" id="adminPassword" placeholder="Şifreyi girin" autocomplete="new-password">
         </div>
         <button class="btn btn-primary" id="adminLoginBtn"><i class="fa-solid fa-key"></i> Giriş Yap</button>
       </div>
@@ -464,11 +473,17 @@
 
     <div id="tabOverview" class="tab-panel active">
       <div class="card">
-        <h2><i class="fa-solid fa-table-list"></i> Tüm Daireler - Genel Durum</h2>
+        <h2><i class="fa-solid fa-table-list"></i> Tüm Daireler - Genel Durum (Detaylar İçin Satıra Tıklayın)</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Blok</th><th>Daire</th><th>Ad Soyad</th><th>Telefon</th><th>Plaka</th><th>Durum</th><th>WhatsApp</th></tr></thead>
-            <tbody id="overviewBody"><tr><td colspan="7" class="empty-note">Yükleniyor...</td></tr></tbody>
+            <thead>
+              <tr>
+                <th>Blok</th>
+                <th>Daire No</th>
+                <th>Ad Soyad</th>
+              </tr>
+            </thead>
+            <tbody id="overviewBody"><tr><td colspan="3" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -489,9 +504,9 @@
           <div class="field">
             <label>Ay</label>
             <select id="dueMonth">
-              <option>Ocak</option><option>Şubat</option><option>Mart</option><option>Nisan</option>
-              <option>Mayıs</option><option>Haziran</option><option selected>Temmuz</option><option>Ağustos</option>
-              <option>Eylül</option><option>Ekim</option><option>Kasım</option><option>Aralık</option>
+              <option value="Ocak">Ocak</option><option value="Şubat">Şubat</option><option value="Mart">Mart</option><option value="Nisan">Nisan</option>
+              <option value="Mayıs">Mayıs</option><option value="Haziran">Haziran</option><option value="Temmuz" selected>Temmuz</option><option value="Ağustos">Ağustos</option>
+              <option value="Eylül">Eylül</option><option value="Ekim">Ekim</option><option value="Kasım">Kasım</option><option value="Aralık">Aralık</option>
             </select>
           </div>
           <div class="field">
@@ -499,12 +514,12 @@
             <input type="number" id="dueYear" value="2026">
           </div>
           <div class="field">
-            <label>Tarih</label>
-            <input type="date" id="dueDate">
-          </div>
-          <div class="field">
-            <label>Saat</label>
-            <input type="time" id="dueTime">
+            <label>Ödeme Durumu Filtresi</label>
+            <select id="dueStatusFilter">
+              <option value="">Herkesi Göster</option>
+              <option value="Ödendi">Sadece Ödeyenler</option>
+              <option value="Ödenmedi">Sadece Ödemeyenler</option>
+            </select>
           </div>
         </div>
         <div class="table-wrap">
@@ -683,9 +698,9 @@
           <div class="field" style="flex:0 0 160px;">
             <label>Dönem Seç (Cari Ay)</label>
             <select id="reportMonth">
-              <option>Ocak</option><option>Şubat</option><option>Mart</option><option>Nisan</option>
-              <option>Mayıs</option><option>Haziran</option><option selected>Temmuz</option><option>Ağustos</option>
-              <option>Eylül</option><option>Ekim</option><option>Kasım</option><option>Aralık</option>
+              <option value="Ocak">Ocak</option><option value="Şubat">Şubat</option><option value="Mart">Mart</option><option value="Nisan">Nisan</option>
+              <option value="Mayıs">Mayıs</option><option value="Haziran">Haziran</option><option value="Temmuz" selected>Temmuz</option><option value="Ağustos">Ağustos</option>
+              <option value="Eylül">Eylül</option><option value="Ekim">Ekim</option><option value="Kasım">Kasım</option><option value="Aralık">Aralık</option>
             </select>
           </div>
           <div class="field" style="flex:0 0 120px;">
@@ -699,27 +714,23 @@
             <button class="btn btn-success" id="reportPdfBtn"><i class="fa-solid fa-file-pdf"></i> PDF İndir</button>
           </div>
         </div>
-        <div style="font-size:.8rem;color:var(--secondary);margin-bottom:12px;">
-          <i class="fa-solid fa-info-circle"></i> Sadece seçilen aya ait aidat durumu gösterilir.
-        </div>
-        <div class="table-wrap" id="reportTableWrap">
+        
+        <div class="table-wrap" id="reportTableWrap" style="padding: 15px; background: #fff; border-radius: 8px;">
+          <h2 id="pdfDynamicTitle" style="text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 1.3rem;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
+          
           <table id="reportTable">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Blok</th>
-                <th>Daire</th>
                 <th>Ad Soyad</th>
-
-                <th>Telefon</th>
+                <th>Blok</th>
+                <th>Daire No</th>
                 <th>Aidat Tutarı</th>
-                <th>Durum</th>
-                <th>Ödeme Tarihi</th>
-                <th>WhatsApp</th>
+                <th>Ödeme Tarih ve Saati</th>
               </tr>
             </thead>
             <tbody id="reportBody">
-              <tr><td colspan="9" class="empty-note">Veri yükleniyor...</td></tr>
+              <tr><td colspan="6" class="empty-note">Veri yükleniyor...</td></tr>
             </tbody>
           </table>
         </div>
@@ -727,7 +738,7 @@
           <span>Toplam Daire: <strong id="reportTotalApt">0</strong></span>
           <span>Ödenen: <strong id="reportPaidCount" style="color:var(--success);">0</strong></span>
           <span>Ödenmeyen: <strong id="reportUnpaidCount" style="color:var(--danger);">0</strong></span>
-          <span>Toplam Aidat: <strong id="reportTotalAmount">₺0</strong></span>
+          <span>Toplam Alacak: <strong id="reportTotalAmount">₺0</strong></span>
         </div>
       </div>
     </div>
@@ -780,7 +791,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Sabit Firebase Yapılandırması
 const firebaseConfig = {
     apiKey: "AIzaSyDqZSuQjsq3vgs0cnx9ZF4EWJk-WkWfJ1U",
     authDomain: "apartmanyonetimi-34c5b.firebaseapp.com",
@@ -807,9 +817,6 @@ let blockFilter = '';
 let expenseFilterStart = '';
 let expenseFilterEnd = '';
 
-// ============================================================
-// YARDIMCI FONKSİYONLAR
-// ============================================================
 function showLoading(text) {
     document.getElementById('loadingText').textContent = text || 'Yükleniyor...';
     document.getElementById('loadingMask').classList.remove('hidden');
@@ -850,11 +857,7 @@ function getWhatsAppButton(phone, name, apartment, block, fee) {
     return '<a href="https://wa.me/' + cleanPhone + '?text=' + msg + '" target="_blank" class="whatsapp-btn" onclick="event.stopPropagation();"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>';
 }
 
-// ============================================================
-// REAL-TIME FIRESTORE DİNLEYİCİLERİ
-// ============================================================
 function initRealtimeListeners() {
-    // 1. Daireler
     onSnapshot(query(collection(db, "apartments"), orderBy("block", "asc"), orderBy("no", "asc")), (snap) => {
         APARTMENTS = [];
         snap.forEach(doc => {
@@ -867,7 +870,8 @@ function initRealtimeListeners() {
                 phone: d.phone,
                 plate: d.plate,
                 feeAmount: d.fee,
-                feeStatus: d.feeStatus
+                feeStatus: d.feeStatus,
+                paymentDate: d.paymentDate || '-'
             });
         });
         renderPublicDashboard();
@@ -877,7 +881,6 @@ function initRealtimeListeners() {
         hideLoading();
     });
 
-    // 2. Giderler
     onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => {
         EXPENSES = [];
         snap.forEach(doc => {
@@ -888,7 +891,6 @@ function initRealtimeListeners() {
         if (session.role === 'admin') renderExpensesTable();
     });
 
-    // 3. Duyurular
     onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc")), (snap) => {
         ANNOUNCEMENTS = [];
         snap.forEach(doc => {
@@ -899,7 +901,6 @@ function initRealtimeListeners() {
         if (session.role === 'admin') renderAnnouncementsAdmin();
     });
 
-    // 4. Talepler
     onSnapshot(query(collection(db, "requests"), orderBy("createdAt", "desc")), (snap) => {
         REQUESTS = [];
         snap.forEach(doc => {
@@ -936,9 +937,6 @@ function checkNewRequests() {
     }
 }
 
-// ============================================================
-// GİRİŞ LOJİĞİ
-// ============================================================
 document.getElementById('adminLoginBtn').onclick = () => {
     var pw = document.getElementById('adminPassword').value;
     if (pw === ADMIN_PASSWORD) {
@@ -958,7 +956,7 @@ document.getElementById('residentLoginBtn').onclick = () => {
     errorDiv.style.display = 'none';
     
     if (!resId || !phone) { 
-        errorDiv.textContent = 'Lütfen daire seçip telefonunuzu eksiksiz yazın.';
+        errorDiv.textContent = 'Lütfen daire seçip telefonunuzu eksikosiz yazın.';
         errorDiv.style.display = 'block';
         return; 
     }
@@ -1014,9 +1012,6 @@ function checkSession() {
     initRealtimeListeners();
 }
 
-// ============================================================
-// HERKESE AÇIK KAMU PANOLARI
-// ============================================================
 function renderPublicDashboard() {
     let totalCollected = 0;
     let totalExpenses = 0;
@@ -1049,9 +1044,6 @@ function renderPublicDashboard() {
     reqList.innerHTML = reqHtml || '<div class="empty-note">Kayıt yok</div>';
 }
 
-// ============================================================
-// SAKİN PANELİ AKSİYONLARI
-// ============================================================
 function renderResidentPanel() {
     const fresh = APARTMENTS.find(a => a.id === session.id);
     if (!fresh) return;
@@ -1092,9 +1084,6 @@ document.getElementById('resSubmitRequestBtn').onclick = async function() {
     }
 };
 
-// ============================================================
-// YÖNETİCİ SEKMELERİ VE TABLOLAR
-// ============================================================
 function renderAdminPanel() {
     renderOverviewTable();
     renderDuesTable();
@@ -1106,34 +1095,82 @@ function renderAdminPanel() {
     renderExpenseReport();
 }
 
+// Tıklanabilir Akordeon Yapılı Genel Bakış Tablosu Motoru
 function renderOverviewTable() {
     var body = document.getElementById('overviewBody');
     var html = '';
     if (APARTMENTS.length === 0) {
-        html = '<tr><td colspan="7" class="empty-note">Kayıt yok</td></tr>';
+        html = '<tr><td colspan="3" class="empty-note">Kayıt yok</td></tr>';
     } else {
-        APARTMENTS.forEach(a => {
+        APARTMENTS.forEach((a, index) => {
             var paid = a.feeStatus === 'Ödendi';
             var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
-            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td>' + a.apartment + '</td><td>' + (a.fullName || '-') + '</td><td>' + (a.phone || '-') + '</td><td>' + (a.plate || '-') + '</td><td><span class="badge ' + (paid?'success':'danger') + '">' + (paid?'Ödendi':'Ödenmedi') + '</span></td><td>' + whatsapp + '</td></tr>';
+            
+            // Ana Satır (Sadece Blok, Daire No ve İsim)
+            html += '<tr class="clickable-row" onclick="toggleOverviewDetails(' + index + ')">' +
+                    '<td>' + getBlockBadge(a.block) + '</td>' +
+                    '<td><b>' + a.apartment + '</b></td>' +
+                    '<td>' + (a.fullName || '-') + '</td>' +
+                    '</tr>';
+            
+            // Gizli Detay Satırı (Tıklanınca Açılır)
+            html += '<tr class="details-row" id="details-' + index + '">' +
+                    '<td colspan="3">' +
+                    '  <div class="details-container">' +
+                    '    <div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div>' +
+                    '    <div class="details-block"><strong>Araç Plakası</strong>' + (a.plate || '-') + '</div>' +
+                    '    <div class="details-block"><strong>Aidat Tutarı</strong>' + money(a.feeAmount) + '</div>' +
+                    '    <div class="details-block"><strong>Aidat Durumu</strong><span class="badge ' + (paid?'success':'danger') + '">' + (paid?'Ödendi':'Ödenmedi') + '</span></div>' +
+                    '    <div class="details-block"><strong>Hızlı İşlem</strong>' + whatsapp + '</div>' +
+                    '  </div>' +
+                    '</td>' +
+                    '</tr>';
         });
     }
     body.innerHTML = html;
 }
 
+// Satır Gizleme/Gösterme Fonksiyonu global alana pencere nesnesi olarak bağlanmalı
+window.toggleOverviewDetails = function(index) {
+    var row = document.getElementById('details-' + index);
+    if(row) {
+        var isHidden = (window.getComputedStyle(row).display === 'none');
+        row.style.display = isHidden ? 'table-row' : 'none';
+    }
+}
+
 function renderDuesTable() {
     var body = document.getElementById('duesBody');
+    if(!body) return;
     var html = '';
-    var filter = document.getElementById('dueBlockFilter').value;
     
-    var filtered = APARTMENTS.filter(a => filter === '' || a.block === filter);
+    var blockFilterValue = document.getElementById('dueBlockFilter').value;
+    var statusFilterValue = document.getElementById('dueStatusFilter').value;
+    
+    var filtered = APARTMENTS.filter(a => {
+        if (blockFilterValue !== '' && a.block !== blockFilterValue) return false;
+        if (statusFilterValue !== '' && a.feeStatus !== statusFilterValue) return false;
+        return true;
+    });
+
     if (filtered.length === 0) {
-        html = '<tr><td colspan="8" class="empty-note">Kayıt yok</td></tr>';
+        html = '<tr><td colspan="8" class="empty-note">Kayıt bulunamadı</td></tr>';
     } else {
         filtered.forEach(a => {
             var paid = a.feeStatus === 'Ödendi';
             var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
-            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td>' + a.apartment + '</td><td>' + (a.fullName || '-') + '</td><td>' + (a.phone || '-') + '</td><td>' + money(a.feeAmount || 0) + '</td><td><span class="badge ' + (paid?'success':'danger') + '">' + (paid?'Ödendi':'Ödenmedi') + '</span></td><td>' + whatsapp + '</td><td><button class="btn btn-sm ' + (paid?'btn-secondary':'btn-success') + ' toggle-due-btn" data-id="' + a.id + '">' + (paid ? '<i class="fa-solid fa-rotate-left"></i> İptal' : '<i class="fa-solid fa-check"></i> Ödendi İşaretle') + '</button></td></tr>';
+            html += '<tr>' +
+                '<td>' + getBlockBadge(a.block) + '</td>' +
+                '<td>' + a.apartment + '</td>' +
+                '<td>' + (a.fullName || '-') + '</td>' +
+                '<td>' + (a.phone || '-') + '</td>' +
+                '<td>' + money(a.feeAmount || 0) + '</td>' +
+                '<td><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi' : 'Ödenmedi') + '</span></td>' +
+                '<td>' + whatsapp + '</td>' +
+                '<td><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '">' + 
+                (paid ? '<i class="fa-solid fa-rotate-left"></i> İptal Et' : '<i class="fa-solid fa-check"></i> Ödendi İşaretle') + 
+                '</button></td>' +
+                '</tr>';
         });
     }
     body.innerHTML = html;
@@ -1145,16 +1182,15 @@ function renderDuesTable() {
             if(!targetApt) return;
             const targetStatus = targetApt.feeStatus === 'Ödendi' ? 'Ödenmedi' : 'Ödendi';
             showLoading('Aidat durumu güncelleniyor...');
+            
+            var now = new Date();
+            var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+
             try {
-                await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus });
-                if(targetStatus === 'Ödendi') {
-                    await addDoc(collection(db, "payments"), {
-                        residentName: targetApt.fullName,
-                        amount: targetApt.feeAmount,
-                        description: targetApt.block + " Daire " + targetApt.apartment + " Aidat Faturası",
-                        date: new Date().toISOString().split('T')[0]
-                    });
-                }
+                await updateDoc(doc(db, "apartments", id), { 
+                    feeStatus: targetStatus,
+                    paymentDate: targetStatus === 'Ödendi' ? dateTimeStr : '-' 
+                });
                 toast('Başarıyla güncellendi', 'success');
             } catch(err) { toast('Hata: ' + err.message, 'danger'); }
             finally { hideLoading(); }
@@ -1162,10 +1198,8 @@ function renderDuesTable() {
     });
 }
 document.getElementById('dueBlockFilter').onchange = renderDuesTable;
+document.getElementById('dueStatusFilter').onchange = renderDuesTable;
 
-// ============================================================
-// GİDERLER MODÜLÜ (EKLEME - DÜZENLEME - SİLME)
-// ============================================================
 document.getElementById('addExpenseBtn').onclick = async function() {
     var id = document.getElementById('expId').value;
     var desc = document.getElementById('expDesc').value.trim();
@@ -1260,9 +1294,6 @@ document.getElementById('expClearFilterBtn').onclick = () => {
     renderExpensesTable();
 };
 
-// ============================================================
-// DAIRE YÖNETİMİ EKLE / DÜZENLE / TOPLU GÜNCELLEME
-// ============================================================
 document.getElementById('addApartmentBtn').onclick = async function() {
     var id = document.getElementById('aptId').value;
     var block = document.getElementById('newApartmentBlock').value;
@@ -1378,9 +1409,6 @@ document.getElementById('clearSearchBtn').onclick = function() {
     searchTerm = ''; blockFilter = ''; renderApartmentsTable();
 };
 
-// ============================================================
-// DUYURULAR MODÜLÜ
-// ============================================================
 document.getElementById('addAnnouncementBtn').onclick = async function() {
     var text = document.getElementById('announcementText').value.trim();
     if (!text) { toast('Lütfen bir metin girin', 'danger'); return; }
@@ -1420,9 +1448,6 @@ function renderAnnouncementsAdmin() {
     });
 }
 
-// ============================================================
-// TALEPLER PANELİ (YÖNETİCİ)
-// ============================================================
 function renderRequestsAdmin() {
     var list = document.getElementById('requestsAdminList');
     var html = '';
@@ -1448,12 +1473,15 @@ function renderRequestsAdmin() {
     });
 }
 
-// ============================================================
-// RAPORLAMA ALANI (PDF VE TABLOLAR)
-// ============================================================
+// İstediğin yeni PDF Tablo Yapısı ve Dönemsel Dinamik Başlık Motoru
 function renderReport() {
     var month = document.getElementById('reportMonth').value;
     var year = document.getElementById('reportYear').value;
+    
+    var titleEl = document.getElementById('pdfDynamicTitle');
+    if(titleEl) {
+        titleEl.textContent = 'Tahiroğulları Rojbin Sitesi ' + month + ' ' + year + ' Ayı Aidat Çizelgesi';
+    }
     
     var body = document.getElementById('reportBody');
     var html = '';
@@ -1462,30 +1490,29 @@ function renderReport() {
     var totalAmount = 0;
     
     if (APARTMENTS.length === 0) {
-        body.innerHTML = '<tr><td colspan="9" class="empty-note">Kayıt yok</td></tr>';
+        body.innerHTML = '<tr><td colspan="6" class="empty-note">Kayıt yok</td></tr>';
         return;
     }
     
     APARTMENTS.forEach((a, i) => {
         var isPaid = a.feeStatus === 'Ödendi';
         var feeAmount = Number(a.feeAmount || 0);
-        var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, feeAmount);
+        var payDate = a.paymentDate || '-';
         
-        if (isPaid) paidCount++;
-        else { unpaidCount++; totalAmount += feeAmount; }
-        
-        var statusBadge = isPaid ? '<span class="badge success">Ödendi</span>' : '<span class="badge danger">Ödenmedi</span>';
+        if (isPaid) {
+            paidCount++;
+        } else {
+            unpaidCount++;
+            totalAmount += feeAmount;
+        }
         
         html += '<tr>' +
             '<td>' + (i + 1) + '</td>' +
+            '<td>' + (a.fullName || '-') + '</td>' +
             '<td>' + a.block + '</td>' +
             '<td>' + a.apartment + '</td>' +
-            '<td>' + (a.fullName || '-') + '</td>' +
-            '<td>' + (a.phone || '-') + '</td>' +
             '<td>' + money(feeAmount) + '</td>' +
-            '<td>' + statusBadge + '</td>' +
-            '<td>' + (isPaid ? 'Cari Dönem' : '-') + '</td>' +
-            '<td>' + whatsapp + '</td>' +
+            '<td>' + (isPaid ? '✅ ' + payDate : '❌ Ödenmedi') + '</td>' +
             '</tr>';
     });
     
@@ -1549,9 +1576,6 @@ document.getElementById('expReportPdfBtn').onclick = () => {
     html2pdf().set(opt).from(element).save();
 };
 
-// ============================================================
-// SEKME NAVİGASYON MOTORU
-// ============================================================
 var tabBtns = document.querySelectorAll('.tab-btn');
 tabBtns.forEach(btn => {
     btn.onclick = function() {
@@ -1564,7 +1588,6 @@ tabBtns.forEach(btn => {
     };
 });
 
-// Sistem Başlatıcısı
 var todayStr = new Date().toISOString().slice(0, 10);
 document.getElementById('expDate').value = todayStr;
 document.getElementById('expFilterStart').value = todayStr;
