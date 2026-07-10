@@ -176,22 +176,25 @@
   tbody tr:hover{background:#f8fafc;}
   .table-wrap{overflow-x:auto;}
 
-  /* Butonların Bir Satıra Nizami Sığması İçin Yeni Flex Grubu */
   .btn-row-inline {
     display: flex;
     gap: 8px;
     align-items: flex-end;
-    flex-wrap: nowrap; /* Mobilde taşmasın diye sıkıştırır */
+    flex-wrap: nowrap;
   }
   .btn-row-inline .field-btn {
     flex: 1;
   }
 
-  /* PDF Çıktıları İçin Özel Şıklaştırma (Zebra ve Kenarlıklar) */
+  /* PDF Çıktıları İçin Özel Şıklaştırma (A4 Genişliği İçin Sabitlendi) */
+  .pdf-report-wrap {
+    width: 1000px !important; /* Mobilde daralmayı önlemek için sabit genişlik */
+    max-width: 1000px !important;
+  }
   .pdf-report-wrap table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 10px !important;
   }
   .pdf-report-wrap th, .pdf-report-wrap td {
     border: 1px solid #cbd5e1 !important;
@@ -217,7 +220,6 @@
     border: 1px solid #94a3b8 !important;
   }
 
-  /* Tıklanabilir Genel Bakış ve Aidat Takibi Tablosu Tasarımı */
   .clickable-row { cursor: pointer; transition: background 0.2s; }
   .clickable-row:hover { background: #f1f5f9 !important; }
   .details-row { background: #fafafa !important; display: none; }
@@ -370,7 +372,7 @@
     .login-wrap{flex-direction:column;}
     .resident-info{grid-template-columns:1fr;}
     .expense-filter{flex-direction:column;}
-    .btn-row-inline { flex-wrap: wrap; } /* Ekran çok küçükse butonlar kırılabilir */
+    .btn-row-inline { flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -640,7 +642,7 @@
         <div class="search-box">
           <div class="field">
             <label><i class="fa-solid fa-search"></i> Ara</label>
-            <input type="text" id="apartmentSearch" placeholder="Daire, isim, telefon veya plaka ara...">
+            <input type="text" id="apartmentSearch" placeholder="Daire, isim, telephone veya plaka ara...">
           </div>
           <div class="field" style="flex:0 0 150px;">
             <label>Blok Filtre</label>
@@ -761,25 +763,28 @@
           </div>
         </div>
         
-        <div class="table-wrap pdf-report-wrap" id="reportTableWrap" style="padding: 25px; background: #fff; border-radius: 8px;">
-          <h2 id="pdfDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.6rem; letter-spacing: 0.5px;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
-          
-          <table id="reportTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ad Soyad</th>
-                <th>Blok</th>
-                <th>Daire No</th>
-                <th>Aidat Tutarı</th>
-                <th>Ödeme Tarih ve Saati</th>
-              </tr>
-            </thead>
-            <tbody id="reportBody">
-              <tr><td colspan="6" class="empty-note">Veri yükleniyor...</td></tr>
-            </tbody>
-            <tfoot id="reportFooter"></tfoot>
-          </table>
+        <!-- GENİŞLİK SABİTLENDİ (KAYMA ÖNLENDİ) -->
+        <div style="overflow-x: auto; width: 100%;">
+          <div class="table-wrap pdf-report-wrap" id="reportTableWrap" style="padding: 25px; background: #fff; border-radius: 8px; width: 1000px;">
+            <h2 id="pdfDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.6rem; letter-spacing: 0.5px;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
+            
+            <table id="reportTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ad Soyad</th>
+                  <th>Blok</th>
+                  <th>Daire No</th>
+                  <th>Aidat Tutarı</th>
+                  <th>Ödeme Tarih ve Saati</th>
+                </tr>
+              </thead>
+              <tbody id="reportBody">
+                <tr><td colspan="6" class="empty-note">Veri yükleniyor...</td></tr>
+              </tbody>
+              <tfoot id="reportFooter"></tfoot>
+            </table>
+          </div>
         </div>
         <div style="margin-top:16px;display:flex;justify-content:space-between;font-size:.85rem;color:var(--secondary);flex-wrap:wrap;gap:8px;">
           <span>Toplam Daire: <strong id="reportTotalApt">0</strong></span>
@@ -810,22 +815,25 @@
           </div>
         </div>
         
-        <div class="table-wrap pdf-report-wrap" id="expReportTableWrap" style="padding: 25px; background: #fff; border-radius: 8px;">
-          <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.6rem; letter-spacing: 0.5px;">Tahiroğulları Rojbin Sitesi Gider Çizelgesi</h2>
-          <table id="expReportTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Açıklama</th>
-                <th>Tutar</th>
-                <th>Tarih</th>
-              </tr>
-            </thead>
-            <tbody id="expReportBody">
-              <tr><td colspan="4" class="empty-note">Veri yükleniyor...</td></tr>
-            </tbody>
-            <tfoot id="expReportFooter"></tfoot>
-          </table>
+        <!-- GENİŞLİK SABİTLENDİ (BOŞ SAYFA ÖNLENDİ) -->
+        <div style="overflow-x: auto; width: 100%;">
+          <div class="table-wrap pdf-report-wrap" id="expReportTableWrap" style="padding: 25px; background: #fff; border-radius: 8px; width: 1000px;">
+            <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.6rem; letter-spacing: 0.5px;">Tahiroğulları Rojbin Sitesi Gider Çizelgesi</h2>
+            <table id="expReportTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Açıklama</th>
+                  <th>Tutar</th>
+                  <th>Tarih</th>
+                </tr>
+              </thead>
+              <tbody id="expReportBody">
+                <tr><td colspan="4" class="empty-note">Veri yükleniyor...</td></tr>
+              </tbody>
+              <tfoot id="expReportFooter"></tfoot>
+            </table>
+          </div>
         </div>
         <div style="margin-top:16px;display:flex;justify-content:flex-end;font-weight:600;color:var(--secondary);">
           Toplam Gider: <span id="expReportTotal" style="margin-left:8px;color:var(--primary);">₺0</span>
@@ -1185,7 +1193,6 @@ window.toggleOverviewDetails = function(index) {
     }
 }
 
-// İstediğin Gibi: Aidat Takibi Paneli de Akordeon (Açılır-Kapanır) Yapıldı
 function renderDuesTable() {
     var body = document.getElementById('duesBody');
     if(!body) return;
@@ -1207,14 +1214,12 @@ function renderDuesTable() {
             var paid = a.feeStatus === 'Ödendi';
             var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             
-            // Üst Satır: Sadece Blok, Daire No ve İsim Soyisim
             html += '<tr class="clickable-row" onclick="toggleDueDetails(' + index + ')">' +
                 '<td>' + getBlockBadge(a.block) + '</td>' +
                 '<td><b>' + a.apartment + '</b></td>' +
                 '<td>' + (a.fullName || '-') + '</td>' +
                 '</tr>';
                 
-            // Alt Detay Satırı: Telefon, Tutar, Durum ve Ödeme İptal/Onay Butonları
             html += '<tr class="details-row" id="due-details-' + index + '">' +
                 '<td colspan="3">' +
                 '  <div class="details-container">' +
@@ -1236,7 +1241,7 @@ function renderDuesTable() {
 
     body.querySelectorAll('.toggle-due-btn').forEach(btn => {
         btn.onclick = async (e) => {
-            e.stopPropagation(); // Satır tıklama eventini engeller
+            e.stopPropagation();
             const id = e.currentTarget.dataset.id;
             const targetApt = APARTMENTS.find(a => a.id === id);
             if(!targetApt) return;
@@ -1610,7 +1615,6 @@ function renderReport() {
 
 document.getElementById('reportFilterBtn').onclick = renderReport;
 
-// Sabit PDF Motoru - Beyaz/Boş Sayfa Çıkmasını Engeller
 document.getElementById('reportPdfBtn').onclick = () => {
     var element = document.getElementById('reportTableWrap');
     var opt = {
@@ -1665,7 +1669,6 @@ function renderExpenseReport() {
 
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// Sabit Gider PDF Motoru - Giderlerin Boş Sayfa Çıkmasını Engeller
 document.getElementById('expReportPdfBtn').onclick = () => {
     var element = document.getElementById('expReportTableWrap');
     var opt = {
