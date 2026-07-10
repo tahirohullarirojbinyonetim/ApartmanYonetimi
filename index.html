@@ -115,6 +115,9 @@
   .list-item:last-child { border-bottom: none; }
   .list-item .meta { font-size: .8rem; color: var(--secondary); font-weight: 500; }
 
+  .admin-box-item { background: #f9fafb; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 14px; }
+  .admin-box-item .item-title { font-weight: 700; color: var(--primary); font-size: 0.95rem; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+
   .badge { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 30px; font-size: .75rem; font-weight: 700; }
   .badge.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
   .badge.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
@@ -306,6 +309,11 @@
     </div>
 
     <div class="card">
+      <h2><i class="fa-solid fa-reply-all" style="color:var(--accent);"></i> Yönetim Kurulundan Gelen Cevaplar</h2>
+      <div id="resMyRequestsRepliesList"><div class="empty-note">Yönetimden dönen bir yanıt bulunmuyor.</div></div>
+    </div>
+
+    <div class="card">
       <h2><i class="fa-solid fa-pen-to-square"></i> Yönetim Kuruluna Mesaj İlet</h2>
       <div class="field">
         <label>Açıklama ve Detaylar</label>
@@ -464,14 +472,14 @@
         <button class="btn btn-primary" id="addAnnouncementBtn"><i class="fa-solid fa-bullhorn"></i> İlanı Panoya As</button>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-list"></i> Aktif Duyurular</h2>
+        <h2><i class="fa-solid fa-list"></i> Aktif Duyurular (Silme Yetkili)</h2>
         <div id="announcementsAdminList"><div class="empty-note">Yükleniyor...</div></div>
       </div>
     </div>
 
     <div id="tabRequests" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-comments"></i> Sakinlerden Gelen Arıza / İstek Mesajları</h2>
+        <h2><i class="fa-solid fa-comments"></i> Sakinlerden Gelen İstekler ve Cevaplama Paneli</h2>
         <div id="requestsAdminList"><div class="empty-note">Kayıt yok</div></div>
       </div>
     </div>
@@ -565,7 +573,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ADMIN_PASSWORD = "admin123";
 
-let session = { role: null, apt: null, phone: null };
+let session = { role: null, apt: null, phone: null, block: null, fullName: null };
 let APARTMENTS = [];
 let EXPENSES = [];
 let ANNOUNCEMENTS = [];
@@ -636,11 +644,12 @@ function initRealtimeListeners() {
         REQUESTS = [];
         snap.forEach(doc => {
             const d = doc.data();
-            REQUESTS.push({ id: doc.id, apartment: d.apartmentContext, message: d.message, timestamp: d.createdAt ? d.createdAt.substring(0, 16).replace('T', ' ') : '', residentName: d.residentName });
+            REQUESTS.push({ id: doc.id, apartment: d.apartmentContext, message: d.message, timestamp: d.createdAt ? d.createdAt.substring(0, 16).replace('T', ' ') : '', residentName: d.residentName, adminReply: d.adminReply || '' });
         });
         renderPublicDashboard();
         checkNewRequests();
         if (session.role === 'admin') renderRequestsAdmin();
+        if (session.role === 'resident') renderResidentRepliesList();
     });
 }
 
@@ -655,7 +664,7 @@ function processApartments(snap) {
     renderPublicDashboard();
     populateResidentSelect();
     if (session.role === 'admin') renderAdminPanel();
-    if (session.role === 'resident') renderResidentPanel();
+    if (session.role === 'resident') { renderResidentPanel(); renderResidentRepliesList(); }
     hideLoading();
 }
 
@@ -701,10 +710,10 @@ document.getElementById('residentLoginBtn').onclick = () => {
     var phone = document.getElementById('residentPhone').value.trim().replace(/\s/g, '');
     var errorDiv = document.getElementById('residentError');
     errorDiv.style.display = 'none';
-    if (!resId || !phone) { errorDiv.textContent = 'Lütfen alanları eksikosiz doldurun.'; errorDiv.style.display = 'block'; return; }
+    if (!resId || !phone) { errorDiv.textContent = 'Lütfen alanları eksiksiz doldurun.'; errorDiv.style.display = 'block'; return; }
     var found = APARTMENTS.find(a => a.id === resId && a.phone.replace(/\s+/g, '') === phone);
     if(found) {
-        session = { role: 'resident', apt: found.apartment, phone: phone, id: found.id };
+        session = { role: 'resident', apt: found.apartment, phone: phone, id: found.id, block: found.block, fullName: found.fullName };
         localStorage.setItem('session_role', 'resident');
         localStorage.setItem('session_res_id', found.id);
         enterResidentView();
@@ -714,7 +723,7 @@ document.getElementById('residentLoginBtn').onclick = () => {
 document.getElementById('logoutBtn').onclick = () => { session = { role: null, apt: null, phone: null }; localStorage.clear(); location.reload(); };
 function enterAdminView() { document.getElementById('loginView').classList.add('hidden'); document.getElementById('residentView').classList.add('hidden'); document.getElementById('adminView').classList.remove('hidden'); document.getElementById('logoutBtn').classList.remove('hidden'); document.getElementById('userLabel').textContent = 'Oturum: Sistem Yöneticisi'; renderAdminPanel(); }
 function enterResidentView() { document.getElementById('loginView').classList.add('hidden'); document.getElementById('adminView').classList.add('hidden'); document.getElementById('residentView').classList.remove('hidden'); document.getElementById('logoutBtn').classList.remove('hidden'); document.getElementById('userLabel').textContent = 'Daire: ' + session.apt; renderResidentPanel(); }
-function checkSession() { showLoading('Oturum Kontrol Ediliyor...'); const role = localStorage.getItem('session_role'); if (role === 'admin') { enterAdminView(); } else if (role === 'resident') { enterResidentView(); } initRealtimeListeners(); }
+function checkSession() { showLoading('Oturum Kontrol Ediliyor...'); const role = localStorage.getItem('session_role'); if (role === 'admin') { enterAdminView(); } else if (role === 'resident') { const resId = localStorage.getItem('session_res_id'); if (resId) { session = { role: 'resident', id: resId, apt: '', phone: '' }; enterResidentView(); } } initRealtimeListeners(); }
 
 function renderPublicDashboard() {
     let totalCollected = 0; let totalExpenses = 0;
@@ -733,6 +742,7 @@ function renderPublicDashboard() {
 
 function renderResidentPanel() {
     const fresh = APARTMENTS.find(a => a.id === session.id); if (!fresh) return;
+    session.block = fresh.block; session.apt = fresh.apartment; session.fullName = fresh.fullName;
     document.getElementById('resApt').textContent = fresh.apartment;
     document.getElementById('resBlock').textContent = fresh.block;
     document.getElementById('resName').textContent = fresh.fullName || '-';
@@ -744,8 +754,29 @@ function renderResidentPanel() {
 document.getElementById('resSubmitRequestBtn').onclick = async function() {
     var text = document.getElementById('resRequestText').value.trim(); if (!text) { toast('Boş bildirim gönderilemez.', 'danger'); return; }
     const fresh = APARTMENTS.find(a => a.id === session.id); showLoading('İletiliyor...');
-    try { await addDoc(collection(db, "requests"), { apartmentContext: fresh ? fresh.block + " No:" + fresh.apartment : "Bilinmiyor", residentName: fresh ? fresh.fullName : "Sakin", message: text, createdAt: new Date().toISOString() }); document.getElementById('resRequestText').value = ''; toast('Yönetime başarıyla iletildi.', 'success'); } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
+    try { await addDoc(collection(db, "requests"), { apartmentContext: fresh ? fresh.block + " No:" + fresh.apartment : "Bilinmiyor", residentName: fresh ? fresh.fullName : "Sakin", message: text, createdAt: new Date().toISOString(), adminReply: '' }); document.getElementById('resRequestText').value = ''; toast('Yönetime başarıyla iletildi.', 'success'); } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
+
+function renderResidentRepliesList() {
+    var listContainer = document.getElementById('resMyRequestsRepliesList'); if(!listContainer) return;
+    var myContext = session.block + " No:" + session.apt;
+    var filteredRequests = REQUESTS.filter(r => r.apartment === myContext);
+    var html = '';
+    if(filteredRequests.length === 0) { listContainer.innerHTML = '<div class="empty-note">Geri bildirim bulunmuyor.</div>'; return; }
+    filteredRequests.forEach(r => {
+        html += '<div style="padding:14px; border-bottom:1px dashed #cbd5e1; margin-bottom:8px;">';
+        html += '<div><strong>Benim Mesajım:</strong> ' + r.message + ' <span style="font-size:0.75rem; color:var(--secondary);">(' + r.timestamp + ')</span></div>';
+        if(r.adminReply) {
+            html += '<div style="margin-top:8px; padding:10px; background:#eff6ff; border-left:4px solid var(--primary); border-radius:4px; font-size:0.85rem;">';
+            html += '<strong>Yönetim Kurulu Yanıtı:</strong> ' + r.adminReply;
+            html += '</div>';
+        } else {
+            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> Yönetim kurulunun incelemesi bekleniyor...</div>';
+        }
+        html += '</div>';
+    });
+    listContainer.innerHTML = html;
+}
 
 function renderAdminPanel() { renderOverviewTable(); renderDuesTable(); renderExpensesTable(); renderApartmentsTable(); renderAnnouncementsAdmin(); renderRequestsAdmin(); renderReport(); renderExpenseReport(); }
 
@@ -778,12 +809,9 @@ function renderDuesTable() {
         btn.onclick = async (e) => {
             e.stopPropagation(); const id = e.currentTarget.dataset.id; const targetApt = APARTMENTS.find(a => a.id === id); if(!targetApt) return;
             const targetStatus = targetApt.feeStatus === 'Ödendi' ? 'Ödenmedi' : 'Ödendi'; showLoading('Makbuz işleniyor...');
-            
-            // SAAT ENTEGRASYONU: Ödeme durumunu güncellerken tam saati de ekliyoruz
             var now = new Date(); 
             var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
             var finalDate = targetStatus === 'Ödendi' ? dateTimeStr : '-';
-            
             try { await updateDoc(doc(db, "daireler", id), { feeStatus: targetStatus, paymentDate: finalDate }); } 
             catch(ex) { await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus, paymentDate: finalDate }); }
             toast('Defter kaydı güncellendi.', 'success'); hideLoading();
@@ -837,8 +865,6 @@ function renderExpensesTable() {
         };
     });
 }
-document.getElementById('expFilterBtn').onclick = () => { expenseFilterStart = document.getElementById('expFilterStart').value; expenseFilterEnd = document.getElementById('expFilterEnd').value; renderExpensesTable(); };
-document.getElementById('expClearFilterBtn').onclick = () => { document.getElementById('expFilterStart').value = ''; document.getElementById('expFilterEnd').value = ''; expenseFilterStart = ''; expenseFilterEnd = ''; renderExpensesTable(); };
 
 document.getElementById('addApartmentBtn').onclick = async function() {
     var id = document.getElementById('aptId').value; var block = document.getElementById('newApartmentBlock').value; var apartment = parseInt(document.getElementById('newApartmentNo').value); var fullName = document.getElementById('newApartmentName').value.trim(); var phone = document.getElementById('newApartmentPhone').value.trim(); var plate = document.getElementById('newApartmentPlate').value.trim(); var feeAmount = parseFloat(document.getElementById('newApartmentFee').value);
@@ -852,18 +878,6 @@ document.getElementById('addApartmentBtn').onclick = async function() {
 };
 function resetApartmentForm() { document.getElementById('aptId').value = ''; document.getElementById('newApartmentNo').value = ''; document.getElementById('newApartmentName').value = ''; document.getElementById('newApartmentPhone').value = ''; document.getElementById('newApartmentPlate').value = ''; document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Sistemi Güncelle'; }
 
-document.getElementById('bulkFeeUpdateBtn').onclick = async function() {
-    const bulkAmount = parseFloat(document.getElementById('bulkFeeAmount').value); if(!bulkAmount || bulkAmount <= 0) return toast("Geçerli bir bedel yazınız.", "danger");
-    if(confirm("Tüm yapının aidat tarifesi değiştirilsin mi?")) {
-        showLoading('Güncelleniyor...');
-        try {
-            let snap; try { snap = await getDocs(collection(db, "daireler")); } catch(e) { snap = await getDocs(collection(db, "apartments")); }
-            const promises = []; snap.forEach(d => promises.push(updateDoc(d.ref, { fee: bulkAmount }))); await Promise.all(promises);
-            document.getElementById('bulkFeeAmount').value = ''; toast('Tarifeler güncellendi.', 'success');
-        } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
-    }
-};
-
 function renderApartmentsTable() {
     var body = document.getElementById('apartmentsBody'); var html = '';
     var filtered = APARTMENTS.filter(a => { const s = searchTerm.toLowerCase(); if(blockFilter && a.block !== blockFilter) return false; return String(a.apartment).includes(s) || (a.fullName && a.fullName.toLowerCase().includes(s)) || a.phone.includes(s) || (a.plate && a.plate.toLowerCase().includes(s)); });
@@ -874,24 +888,72 @@ function renderApartmentsTable() {
         });
     }
     body.innerHTML = html;
-    body.querySelectorAll('.edit-apt-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const id = e.currentTarget.dataset.id; const a = APARTMENTS.find(item => item.id === id); if(!a) return;
-            document.getElementById('aptId').value = a.id; document.getElementById('newApartmentBlock').value = a.block; document.getElementById('newApartmentNo').value = a.apartment; document.getElementById('newApartmentName').value = a.fullName; document.getElementById('newApartmentPhone').value = a.phone; document.getElementById('newApartmentPlate').value = a.plate || ''; document.getElementById('newApartmentFee').value = a.feeAmount;
-            document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Kartı Revize Et';
-        };
-    });
 }
-document.getElementById('apartmentSearch').oninput = function() { searchTerm = this.value.trim(); renderApartmentsTable(); };
-document.getElementById('blockFilter').onchange = function() { blockFilter = this.value; renderApartmentsTable(); };
-document.getElementById('clearSearchBtn').onclick = function() { document.getElementById('apartmentSearch').value = ''; document.getElementById('blockFilter').value = ''; searchTerm = ''; blockFilter = ''; renderApartmentsTable(); };
 
 document.getElementById('addAnnouncementBtn').onclick = async function() {
     var text = document.getElementById('announcementText').value.trim(); if (!text) { toast('Metin boş bırakılamaz.', 'danger'); return; } showLoading('Gönderiliyor...');
     try { await addDoc(collection(db, "announcements"), { content: text, createdAt: new Date().toISOString() }); document.getElementById('announcementText').value = ''; toast('Duyuru panoya eklendi.', 'success'); } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
-function renderAnnouncementsAdmin() { var list = document.getElementById('announcementsAdminList'); var html = ''; if (ANNOUNCEMENTS.length === 0) { html = '<div class="empty-note">Kayıt yok</div>'; } else { ANNOUNCEMENTS.forEach(a => { html += '<div class="list-item"><div>' + a.text + '<div class="meta">' + a.timestamp + '</div></div></div>'; }); } list.innerHTML = html; }
-function renderRequestsAdmin() { var list = document.getElementById('requestsAdminList'); var html = ''; if (REQUESTS.length === 0) { html = '<div class="empty-note">Kayıt yok</div>'; } else { REQUESTS.forEach(r => { html += '<div class="list-item"><div><b>' + r.apartment + ' (' + r.residentName + '):</b> ' + r.message + '<div class="meta">' + r.timestamp + '</div></div></div>'; }); } list.innerHTML = html; }
+
+// YÖNETİCİ PANOLARINDA DUYURU VE TALEP SİLME/CEVAPLAMA DÜZENLEMELERİ
+function renderAnnouncementsAdmin() {
+    var list = document.getElementById('announcementsAdminList'); var html = '';
+    if (ANNOUNCEMENTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayıt yok</div>'; return; }
+    ANNOUNCEMENTS.forEach(a => {
+        html += '<div class="admin-box-item">';
+        html += '<div class="item-title"><span><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> İlan</span> <button class="btn btn-sm btn-danger del-ann-btn" data-id="' + a.id + '"><i class="fa-solid fa-trash"></i> Panodan İndir</button></div>';
+        html += '<div style="font-size:0.9rem; margin-bottom:8px;">' + a.text + '</div>';
+        html += '<div class="meta">' + a.timestamp + '</div>';
+        html += '</div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('.del-ann-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            if(confirm('Bu duyuru panodan kalıcı olarak kaldırılsın mı?')) {
+                showLoading('Duyuru indiriliyor...');
+                try { await deleteDoc(doc(db, "announcements", e.currentTarget.dataset.id)); toast('Duyuru silindi.', 'success'); } 
+                catch(x) { toast('Hata', 'danger'); } finally { hideLoading(); }
+            }
+        };
+    });
+}
+
+function renderRequestsAdmin() {
+    var list = document.getElementById('requestsAdminList'); var html = '';
+    if (REQUESTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayıt yok</div>'; return; }
+    REQUESTS.forEach((r, idx) => {
+        html += '<div class="admin-box-item">';
+        html += '<div class="item-title"><span>Daire: ' + r.apartment + ' (' + r.residentName + ')</span> <button class="btn btn-sm btn-danger del-req-btn" data-id="' + r.id + '"><i class="fa-solid fa-trash"></i> Talebi Sil</button></div>';
+        html += '<div style="font-size:0.9rem; background:#fff; padding:10px; border-radius:6px; border:1px solid #e5e7eb; margin-bottom:10px;">' + r.message + '</div>';
+        if(r.adminReply) {
+            html += '<div style="font-size:0.85rem; color:var(--success); font-weight:600; margin-bottom:10px;"><i class="fa-solid fa-circle-check"></i> Gönderilen Yanıtınız: ' + r.adminReply + '</div>';
+        }
+        html += '<div style="display:flex; gap:8px; margin-top:8px;"><input type="text" id="replyInput-' + r.id + '" placeholder="Daire sahibine iletilecek cevabı yazın..." value="' + r.adminReply + '" style="flex:1; padding:8px 12px; font-size:0.85rem;">';
+        html += '<button class="btn btn-primary btn-sm reply-req-btn" data-id="' + r.id + '"><i class="fa-solid fa-reply"></i> Cevapla</button></div>';
+        html += '<div class="meta" style="margin-top:10px;">' + r.timestamp + '</div>';
+        html += '</div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('.del-req-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            if(confirm('Kat sakininden gelen bu mesaj arşivden kalıcı olarak silinsin mi?')) {
+                showLoading('Kayıt siliniyor...');
+                try { await deleteDoc(doc(db, "requests", e.currentTarget.dataset.id)); toast('Talep kaldırıldı.', 'success'); } 
+                catch(x) { toast('Hata', 'danger'); } finally { hideLoading(); }
+            }
+        };
+    });
+    list.querySelectorAll('.reply-req-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            const id = e.currentTarget.dataset.id;
+            var replyText = document.getElementById('replyInput-' + id).value.trim();
+            if(!replyText) { toast('Lütfen geçerli bir cevap metni giriniz.', 'danger'); return; }
+            showLoading('Yanıt daireye ulaştırılıyor...');
+            try { await updateDoc(doc(db, "requests", id), { adminReply: replyText }); toast('Cevabınız kat sakinine başarıyla ulaştırıldı.', 'success'); } 
+            catch(x) { toast('İşlem başarısız.', 'danger'); } finally { hideLoading(); }
+        };
+    });
+}
 
 function renderReport() {
     var month = document.getElementById('reportMonth').value; var year = document.getElementById('reportYear').value;
@@ -902,7 +964,6 @@ function renderReport() {
     APARTMENTS.forEach((a, i) => {
         var isPaid = a.feeStatus === 'Ödendi'; var fee = Number(a.feeAmount || 0);
         if (isPaid) { paidCount++; totalPaid += fee; } else { unpaidCount++; totalUnpaid += fee; }
-        // SAAT ENTEGRASYONU: Ödeme zamanını saatli olarak PDF ve rapor listesine basıyoruz
         var statusCell = isPaid ? 'Ödendi (' + a.paymentDate + ')' : 'Ödenmedi';
         html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + statusCell + '</td></tr>';
     });
@@ -926,23 +987,25 @@ function renderExpenseReport() {
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// MOBİLDE %100 ÇALIŞAN GÜVENLİ YENİ SEKMEDE ÖNİZLEME/YAZDIRMA MOTORU
+// MOBİLDE A4 BOYUTUNA TAM SIĞDIRMA YAPIP TAŞMAYI ÖNLEYEN AKILLI SİSTEM
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
+    
+    // windowWidth: 1024 kurumsal genişlik emri vererek mobil dar ekran hatasını tamamen egale ediyoruz
     var opt = {
       margin:       [10, 10, 10, 10],
       filename:     'tahirogullari_rapor.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1024 },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    showLoading('PDF Rapor Belgesi Üretiliyor...');
+    showLoading('A4 Boyutuna Sığdırılıyor...');
     html2pdf().set(opt).from(element).outputPdf('blob').then((pdfBlob) => {
         hideLoading();
         var blobUrl = URL.createObjectURL(pdfBlob);
         window.open(blobUrl, '_blank');
-        toast('Rapor Yeni Sekmede Açıldı!', 'success');
+        toast('Rapor Tam Boyut Olarak Yeni Sekmede Açıldı!', 'success');
     }).catch((err) => {
         hideLoading();
         toast('Hata Oluştu: ' + err.message, 'danger');
