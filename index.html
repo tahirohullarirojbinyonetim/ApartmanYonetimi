@@ -447,12 +447,6 @@
           <div class="field"><label>Aylık Sabit Aidat (₺)</label><input type="number" id="newApartmentFee" value="500"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="addApartmentBtn"><i class="fa-solid fa-floppy-disk"></i> Sistemi Güncelle</button></div>
         </div>
-        <hr style="margin:24px 0; border:0; border-top:1px solid #e2e8f0;">
-        <h3><i class="fa-solid fa-sliders" style="color: var(--accent);"></i> Kitlesel Aidat Fiyat Tarifesi Ayarı</h3>
-        <div class="row" style="align-items: flex-end;">
-          <div class="field" style="max-width: 260px;"><label>Yeni Ortak Tarife Bedeli (₺)</label><input type="number" id="bulkFeeAmount" placeholder="600"></div>
-          <div class="field"><button class="btn btn-danger" id="bulkFeeUpdateBtn"><i class="fa-solid fa-sync"></i> Tüm Yapıyı Yeni Tarifeye Geçir</button></div>
-        </div>
       </div>
       <div class="card">
         <h2><i class="fa-solid fa-list"></i> Sistemde Kayıtlı Mülk Listesi</h2>
@@ -865,6 +859,8 @@ function renderExpensesTable() {
         };
     });
 }
+document.getElementById('expFilterBtn').onclick = () => { expenseFilterStart = document.getElementById('expFilterStart').value; expenseFilterEnd = document.getElementById('expFilterEnd').value; renderExpensesTable(); };
+document.getElementById('expClearFilterBtn').onclick = () => { document.getElementById('expFilterStart').value = ''; document.getElementById('expFilterEnd').value = ''; expenseFilterStart = ''; expenseFilterEnd = ''; renderExpensesTable(); };
 
 document.getElementById('addApartmentBtn').onclick = async function() {
     var id = document.getElementById('aptId').value; var block = document.getElementById('newApartmentBlock').value; var apartment = parseInt(document.getElementById('newApartmentNo').value); var fullName = document.getElementById('newApartmentName').value.trim(); var phone = document.getElementById('newApartmentPhone').value.trim(); var plate = document.getElementById('newApartmentPlate').value.trim(); var feeAmount = parseFloat(document.getElementById('newApartmentFee').value);
@@ -888,14 +884,23 @@ function renderApartmentsTable() {
         });
     }
     body.innerHTML = html;
+    body.querySelectorAll('.edit-apt-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id; const a = APARTMENTS.find(item => item.id === id); if(!a) return;
+            document.getElementById('aptId').value = a.id; document.getElementById('newApartmentBlock').value = a.block; document.getElementById('newApartmentNo').value = a.apartment; document.getElementById('newApartmentName').value = a.fullName; document.getElementById('newApartmentPhone').value = a.phone; document.getElementById('newApartmentPlate').value = a.plate || ''; document.getElementById('newApartmentFee').value = a.feeAmount;
+            document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Kartı Revize Et';
+        };
+    });
 }
+document.getElementById('apartmentSearch').oninput = function() { searchTerm = this.value.trim(); renderApartmentsTable(); };
+document.getElementById('blockFilter').onchange = function() { blockFilter = this.value; renderApartmentsTable(); };
+document.getElementById('clearSearchBtn').onclick = function() { document.getElementById('apartmentSearch').value = ''; document.getElementById('blockFilter').value = ''; searchTerm = ''; blockFilter = ''; renderApartmentsTable(); };
 
 document.getElementById('addAnnouncementBtn').onclick = async function() {
     var text = document.getElementById('announcementText').value.trim(); if (!text) { toast('Metin boş bırakılamaz.', 'danger'); return; } showLoading('Gönderiliyor...');
     try { await addDoc(collection(db, "announcements"), { content: text, createdAt: new Date().toISOString() }); document.getElementById('announcementText').value = ''; toast('Duyuru panoya eklendi.', 'success'); } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
 
-// YÖNETİCİ PANOLARINDA DUYURU VE TALEP SİLME/CEVAPLAMA DÜZENLEMELERİ
 function renderAnnouncementsAdmin() {
     var list = document.getElementById('announcementsAdminList'); var html = '';
     if (ANNOUNCEMENTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayıt yok</div>'; return; }
@@ -987,26 +992,34 @@ function renderExpenseReport() {
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// MOBİLDE A4 BOYUTUNA TAM SIĞDIRMA YAPIP TAŞMAYI ÖNLEYEN AKILLI SİSTEM
+// MOBİL SIKIŞMA SORUNUNU GİZLİ MASAÜSTÜ GENİŞLİĞİYLE %100 ÇÖZEN YENİ MOTOR
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
     
-    // windowWidth: 1024 kurumsal genişlik emri vererek mobil dar ekran hatasını tamamen egale ediyoruz
+    // O anki orijinal stil değerini yedekle
+    var originalWidth = element.style.width;
+    
+    // Elementi A4 kağıdını tam dolduracak ideal bir masaüstü genişliğine (794px) kilitliyoruz
+    element.style.width = '794px'; 
+    
     var opt = {
       margin:       [10, 10, 10, 10],
       filename:     'tahirogullari_rapor.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1024 },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    showLoading('A4 Boyutuna Sığdırılıyor...');
+    showLoading('A4 Kağıt Düzenine Oturtuluyor...');
     html2pdf().set(opt).from(element).outputPdf('blob').then((pdfBlob) => {
+        // PDF üretildiği an çaktırmadan eski haline (mobil görünüme) geri döndür
+        element.style.width = originalWidth; 
         hideLoading();
         var blobUrl = URL.createObjectURL(pdfBlob);
         window.open(blobUrl, '_blank');
-        toast('Rapor Tam Boyut Olarak Yeni Sekmede Açıldı!', 'success');
+        toast('Rapor Tam Sayfa Olarak Yeni Sekmede Açıldı!', 'success');
     }).catch((err) => {
+        element.style.width = originalWidth;
         hideLoading();
         toast('Hata Oluştu: ' + err.message, 'danger');
     });
