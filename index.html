@@ -8,34 +8,34 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   :root {
-    --primary: #0f172a;
-    --primary-light: #1e293b;
-    --accent: #2563eb;
-    --success: #10b981;
-    --danger: #ef4444;
-    --secondary: #64748b;
-    --bg: #f8fafc;
+    --primary: #1e3a8a; /* Sıcak Apartman Güven Mavisi */
+    --primary-light: #2563eb;
+    --accent: #d97706; /* Apartman Detay Altın Sarısı */
+    --success: #059669;
+    --danger: #dc2626;
+    --secondary: #4b5563;
+    --bg: #f3f4f6; /* Yumuşak Arka Plan */
     --card-bg: #ffffff;
-    --radius: 12px;
-    --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --radius: 16px; /* Daha oval, sıcak köşeler */
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
   }
   * { box-sizing: border-box; transition: all 0.2s ease; }
   body {
     margin: 0;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg);
-    color: #1e293b;
+    color: #1f2937;
     -webkit-font-smoothing: antialiased;
   }
   header.topbar {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, #172554 100%);
     color: #fff;
-    padding: 16px 24px;
+    padding: 20px 24px;
     box-shadow: var(--shadow);
     position: sticky;
     top: 0;
     z-index: 50;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 3px solid var(--accent); /* Apartman altın çizgisi */
   }
   header.topbar .top-row {
     display: flex;
@@ -45,39 +45,51 @@
     gap: 12px;
   }
   header.topbar h1 {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 700;
+    letter-spacing: 0.5px;
   }
-  header.topbar .slogan { font-size: .8rem; opacity: .75; margin-top: 4px; }
-  header.topbar .designer-credit { font-size: .65rem; opacity: .5; }
+  header.topbar .slogan { font-size: .85rem; opacity: .85; margin-top: 4px; font-weight: 500; }
+  header.topbar .designer-credit { font-size: .7rem; opacity: .6; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 20px; }
   header.topbar .user-box { display: flex; align-items: center; gap: 12px; font-size: .9rem; }
   header.topbar button {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: var(--accent);
+    border: none;
     color: #fff;
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
   }
-  header.topbar button:hover { background: rgba(255,255,255,0.2); }
+  header.topbar button:hover { background: #b45309; }
   main { max-width: 1240px; margin: 0 auto; padding: 24px; }
   .hidden { display: none !important; }
 
   .card {
     background: var(--card-bg);
     border-radius: var(--radius);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e5e7eb;
     box-shadow: var(--shadow);
     padding: 24px;
     margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
   }
-  .card h2 { margin: 0 0 20px; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; }
-  .card h3 { margin: 0 0 14px; font-size: 1rem; color: var(--primary-light); font-weight: 600; }
+  /* Apartman estetiği için kartların tepesine hafif renkli şerit */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+  }
+
+  .card h2 { margin: 0 0 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; }
+  .card h3 { margin: 0 0 14px; font-size: 1.05rem; color: var(--primary); font-weight: 600; }
 
   .grid { display: grid; gap: 20px; }
   .grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -85,65 +97,68 @@
 
   .stat-card {
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 24px;
     color: #fff;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     gap: 8px;
     position: relative;
-    overflow: hidden;
   }
-  .stat-card.collected { background: #0f172a; border-left: 5px solid var(--success); }
-  .stat-card.expenses { background: #0f172a; border-left: 5px solid var(--danger); }
-  .stat-card.balance { background: #0f172a; border-left: 5px solid var(--accent); }
-  .stat-card .label { font-size: .85rem; opacity: .7; font-weight: 500; text-transform: uppercase; }
-  .stat-card .value { font-size: 1.75rem; font-weight: 700; }
+  .stat-card.collected { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
+  .stat-card.expenses { background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%); }
+  .stat-card.balance { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); }
+  .stat-card .label { font-size: .85rem; opacity: .85; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 1.8rem; font-weight: 800; }
+  .stat-card i { position: absolute; right: 20px; bottom: 20px; font-size: 2.5rem; opacity: 0.15; }
 
-  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f3f4f6; gap: 12px; }
   .list-item:last-child { border-bottom: none; }
-  .list-item .meta { font-size: .8rem; color: var(--secondary); }
+  .list-item .meta { font-size: .8rem; color: var(--secondary); font-weight: 500; }
 
-  .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 6px; font-size: .75rem; font-weight: 600; }
-  .badge.success { background: #d1fae5; color: #065f46; }
-  .badge.danger { background: #fee2e2; color: #991b1b; }
-  .badge.neutral { background: #f1f5f9; color: #334155; }
+  .badge { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 30px; font-size: .75rem; font-weight: 700; }
+  .badge.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+  .badge.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge.neutral { background: #f3f4f6; color: #4b5563; }
 
-  input, select, textarea, button.btn { font-family: inherit; font-size: .9rem; padding: 10px 14px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; width: 100%; background: #fff; }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-  label { font-size: .8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px; text-transform: uppercase; }
-  .field { margin-bottom: 14px; }
+  input, select, textarea, button.btn { font-family: inherit; font-size: .9rem; padding: 12px 16px; border-radius: 10px; border: 1px solid #d1d5db; outline: none; width: 100%; background: #fff; color: #1f2937; }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
+  label { font-size: .8rem; font-weight: 700; color: #4b5563; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .field { margin-bottom: 16px; }
   .row { display: flex; gap: 16px; flex-wrap: wrap; }
   .row > .field { flex: 1; min-width: 180px; }
 
-  button.btn { cursor: pointer; border: none; font-weight: 600; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  button.btn { cursor: pointer; border: none; font-weight: 700; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #172554; }
   .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #047857; }
   .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #991b1b; }
   .btn-secondary { background: var(--secondary); color: #fff; }
-  .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #334155; }
-  .btn-outline:hover { background: #f8fafc; }
-  .btn-sm { padding: 6px 12px; font-size: .8rem; }
+  .btn-outline { background: transparent; border: 1px solid #d1d5db; color: #4b5563; }
+  .btn-outline:hover { background: #f9fafb; }
+  .btn-sm { padding: 8px 14px; font-size: .8rem; border-radius: 6px; }
 
-  table { width: 100%; border-collapse: collapse; font-size: .875rem; }
-  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-  th { color: #475569; font-weight: 600; background: #f8fafc; font-size: .8rem; text-transform: uppercase; }
-  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  th { color: var(--primary); font-weight: 700; background: #f8fafc; font-size: .8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; }
 
   .btn-row-inline { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; width: 100%; }
   .btn-row-inline .field-btn { flex: 1; min-width: 120px; white-space: nowrap; }
 
   .clickable-row { cursor: pointer; }
-  .clickable-row:hover { background: #f8fafc !important; }
-  .details-row { background: #f8fafc !important; display: none; }
-  .details-row td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; }
+  .clickable-row:hover { background: #f9fafb !important; }
+  .details-row { background: #f9fafb !important; display: none; }
+  .details-row td { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; }
   .details-container { display: flex; flex-wrap: wrap; gap: 16px; }
-  .details-block { background: #fff; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; flex: 1; min-width: 180px; }
-  .details-block strong { color: var(--secondary); display: block; margin-bottom: 6px; font-size: 0.725rem; text-transform: uppercase; }
+  .details-block { background: #fff; padding: 14px 18px; border-radius: 10px; border: 1px solid #e5e7eb; flex: 1; min-width: 180px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+  .details-block strong { color: var(--secondary); display: block; margin-bottom: 6px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; background: #e2e8f0; padding: 4px; border-radius: 8px; }
-  .tab-btn { padding: 8px 14px; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: .85rem; font-weight: 500; color: #475569; display: flex; align-items: center; gap: 8px; width: auto; }
-  .tab-btn.active { background: #fff; color: var(--primary); font-weight: 600; box-shadow: var(--shadow); }
+  .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; background: #e5e7eb; padding: 6px; border-radius: 12px; }
+  .tab-btn { padding: 10px 16px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-size: .85rem; font-weight: 600; color: #4b5563; display: flex; align-items: center; gap: 8px; width: auto; }
+  .tab-btn.active { background: #fff; color: var(--primary); font-weight: 700; box-shadow: var(--shadow); }
   .tab-btn .notification-dot { display: none; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-left: 4px; }
   .tab-btn .notification-dot.active { display: inline-block; }
 
@@ -152,27 +167,28 @@
 
   .login-wrap { display: flex; gap: 24px; max-width: 850px; margin: 0 auto 24px; flex-wrap: wrap; }
   .login-wrap .card { flex: 1; min-width: 280px; margin-bottom: 0; }
-  .login-wrap .icon-circle { width: 48px; height: 48px; border-radius: 8px; background: #f1f5f9; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 14px; }
+  .login-wrap .icon-circle { width: 54px; height: 54px; border-radius: 12px; background: #eff6ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px; border: 1px solid #bfdbfe; }
 
-  #loadingMask { position: fixed; inset: 0; background: rgba(15,23,42,0.7); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 999; color: #fff; backdrop-filter: blur(4px); }
-  .spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); border-top-color: #fff; animation: spin 0.6s linear infinite; }
+  #loadingMask { position: fixed; inset: 0; background: rgba(30, 58, 138, 0.8); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 999; color: #fff; backdrop-filter: blur(5px); }
+  .spinner { width: 44px; height: 44px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); animation: spin 0.6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
-  .toast { background: #1e293b; color: #fff; padding: 14px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); font-size: .85rem; display: flex; align-items: center; gap: 12px; min-width: 260px; }
-  .toast.success { border-left: 4px solid var(--success); }
-  .toast.danger { border-left: 4px solid var(--danger); }
+  .toast { background: #1f2937; color: #fff; padding: 14px 20px; border-radius: 10px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); font-size: .85rem; display: flex; align-items: center; gap: 12px; min-width: 280px; }
+  .toast.success { border-left: 5px solid var(--success); }
+  .toast.danger { border-left: 5px solid var(--danger); }
 
-  .empty-note { color: var(--secondary); font-size: .85rem; padding: 16px 0; text-align: center; font-style: italic; }
-  .expense-filter { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+  .empty-note { color: var(--secondary); font-size: .85rem; padding: 20px 0; text-align: center; font-style: italic; }
+  .expense-filter { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding: 20px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; }
   .expense-filter .field { flex: 1; min-width: 160px; margin-bottom: 0; }
-  .block-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .7rem; font-weight: 700; }
-  .block-badge.a { background: #eff6ff; color: #1e40af; }
-  .block-badge.b { background: #fdf2f8; color: #9d174d; }
+  .block-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: .7rem; font-weight: 800; letter-spacing: 0.5px; }
+  .block-badge.a { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+  .block-badge.b { background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; }
 
-  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: .75rem; text-decoration: none; font-weight: 500; }
+  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: .75rem; text-decoration: none; font-weight: 600; box-shadow: 0 2px 4px rgba(34,197,94,0.2); }
 
   @media (max-width: 640px) {
+    main { padding: 12px; }
     .expense-filter { flex-direction: column; align-items: stretch; }
     .btn-row-inline { flex-direction: column; align-items: stretch; }
     .btn-row-inline .field-btn { width: 100%; }
@@ -191,11 +207,11 @@
 <header class="topbar">
   <div class="top-row">
     <div>
-      <h1><i class="fa-solid fa-building-shield" style="color: #3b82f6;"></i> Tahiroğulları Rojbin Sitesi</h1>
-      <div class="slogan">Resmi Yönetim ve Şeffaf Takip Sistemi</div>
+      <h1><i class="fa-solid fa-hotel" style="color: var(--accent);"></i> Tahiroğulları Rojbin Sitesi</h1>
+      <div class="slogan">Komşuluk Hukukuyla Şeffaf ve Güvenli Bina Otomasyonu</div>
     </div>
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <span class="designer-credit">Tasarım: Esafil SERT</span>
+      <span class="designer-credit">Yazılım Editörü: Esafil SERT</span>
       <div class="user-box" id="userBox">
         <span id="userLabel" style="font-weight: 600; opacity: 0.9;"></span>
         <button id="logoutBtn" class="hidden"><i class="fa-solid fa-right-from-bracket"></i> Güvenli Çıkış</button>
@@ -209,18 +225,18 @@
   <section id="loginView">
     <div class="login-wrap">
       <div class="card">
-        <div class="icon-circle"><i class="fa-solid fa-user-shield"></i></div>
-        <h3>Yönetici Paneli</h3>
+        <div class="icon-circle"><i class="fa-solid fa-user-gear"></i></div>
+        <h3>Site Yönetim Girişi</h3>
         <div class="field">
           <label>Erişim Şifresi</label>
           <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="new-password">
         </div>
-        <button class="btn btn-primary" id="adminLoginBtn" style="width:100%;"><i class="fa-solid fa-key"></i> Kimliği Doğrula</button>
+        <button class="btn btn-primary" id="adminLoginBtn" style="width:100%;"><i class="fa-solid fa-shield-halved"></i> Yönetim Panelini Aç</button>
       </div>
 
       <div class="card">
-        <div class="icon-circle"><i class="fa-solid fa-people-roof"></i></div>
-        <h3>Kat Sakini Girişi</h3>
+        <div class="icon-circle"><i class="fa-solid fa-house-chimney-user"></i></div>
+        <h3>Kat Sakini Sorgulama</h3>
         <div class="field">
           <label>Blok / Daire Seçimi</label>
           <select id="residentSelect"><option value="">Veriler çekiliyor...</option></select>
@@ -229,39 +245,39 @@
           <label>Sistemde Kayıtlı Telefon</label>
           <input type="tel" id="residentPhone" placeholder="05xxxxxxxx">
         </div>
-        <div style="background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 500;">
-          ⚠️ Uyarı: Sitenizin ve raporların düzgün çalışması için lütfen tarayıcınızın otomatik Türkçe çeviri özelliğini kapatın!
+        <div style="background: #fffbeb; color: #b45309; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; border: 1px solid #fde68a;">
+          ⚠️ ÖNEMLİ: Raporların ve listelerin hatasız görüntülenmesi için tarayıcınızın otomatik Türkçe çeviri (Translate) özelliğini kapatınız!
         </div>
-        <button class="btn btn-success" id="residentLoginBtn" style="width:100%;"><i class="fa-solid fa-door-open"></i> Hesaba Giriş Yap</button>
+        <button class="btn btn-success" id="residentLoginBtn" style="width:100%;"><i class="fa-solid fa-key"></i> Daire Ödeme Bilgilerini Gör</button>
         <div id="residentError" style="color:var(--danger);font-size:.8rem;margin-top:10px;display:none; font-weight:500;"></div>
       </div>
     </div>
 
     <div class="grid grid-3" style="margin-top: 24px;">
       <div class="stat-card collected">
-        <i class="fa-solid fa-sack-dollar"></i>
-        <span class="label">Kasa Girişi (Aidat)</span>
+        <i class="fa-solid fa-hand-holding-dollar"></i>
+        <span class="label">Toplam Toplanan Aidat</span>
         <span class="value" id="pubCollected">₺0</span>
       </div>
       <div class="stat-card expenses">
-        <i class="fa-solid fa-file-invoice-dollar"></i>
-        <span class="label">Kasa Çıkışı (Gider)</span>
+        <i class="fa-solid fa-money-bill-transfer"></i>
+        <span class="label">Toplam Yapılan Gider</span>
         <span class="value" id="pubExpenses">₺0</span>
       </div>
       <div class="stat-card balance">
-        <i class="fa-solid fa-scale-balanced"></i>
-        <span class="label">Mevcut Net Bakiye</span>
+        <i class="fa-solid fa-vault"></i>
+        <span class="label">Kasa Net Bakiye</span>
         <span class="value" id="pubBalance">₺0</span>
       </div>
     </div>
 
     <div class="grid grid-2" style="margin-top:24px;">
       <div class="card">
-        <h2><i class="fa-solid fa-receipt" style="color:var(--danger);"></i> Güncel Gider Faturaları</h2>
+        <h2><i class="fa-solid fa-file-receipt" style="color:var(--danger);"></i> Son Siteden Çıkan Giderler</h2>
         <div id="pubExpenseList"><div class="empty-note">Kayıt yok</div></div>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> Yönetim Duyuruları</h2>
+        <h2><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> Blok Panosu Duyuruları</h2>
         <div id="pubAnnouncementList"><div class="empty-note">Kayıt yok</div></div>
       </div>
     </div>
@@ -269,7 +285,7 @@
 
   <section id="residentView" class="hidden">
     <div class="card">
-      <h2><i class="fa-solid fa-id-card"></i> Hesap Detayları - Daire <span id="resApt"></span></h2>
+      <h2><i class="fa-solid fa-id-card"></i> Daire Kayıt Kartı - No <span id="resApt"></span></h2>
       <div class="resident-info">
         <div class="info-item">
           <label>Blok Konumu</label>
@@ -291,30 +307,30 @@
     </div>
 
     <div class="card">
-      <h2><i class="fa-solid fa-pen-to-square"></i> Yönetime Talep Bildir</h2>
+      <h2><i class="fa-solid fa-pen-to-square"></i> Yönetim Kuruluna Mesaj İlet</h2>
       <div class="field">
         <label>Açıklama ve Detaylar</label>
-        <textarea id="resRequestText" rows="4" placeholder="İletmek istediğiniz konuyu detaylıca yazınız..."></textarea>
+        <textarea id="resRequestText" rows="4" placeholder="İletmek istediğiniz arıza, talep veya öneriyi detaylıca yazınız..."></textarea>
       </div>
-      <button class="btn btn-primary" id="resSubmitRequestBtn"><i class="fa-solid fa-paper-plane"></i> Bildirimi Gönder</button>
+      <button class="btn btn-primary" id="resSubmitRequestBtn"><i class="fa-solid fa-paper-plane"></i> Talebi Gönder</button>
     </div>
   </section>
 
   <section id="adminView" class="hidden">
     <div class="tabs">
-      <button class="tab-btn active" data-tab="tabOverview"><i class="fa-solid fa-table-list"></i> Genel Durum</button>
-      <button class="tab-btn" data-tab="tabDues"><i class="fa-solid fa-money-check-dollar"></i> Aidat Takip</button>
-      <button class="tab-btn" data-tab="tabExpenses"><i class="fa-solid fa-file-invoice-dollar"></i> Gider Yönetimi</button>
-      <button class="tab-btn" data-tab="tabApartments"><i class="fa-solid fa-building"></i> Daire Kartları</button>
-      <button class="tab-btn" data-tab="tabAnnouncements"><i class="fa-solid fa-bullhorn"></i> Duyuru Yayınla</button>
-      <button class="tab-btn" data-tab="tabRequests" id="requestsTabBtn"><i class="fa-solid fa-comments"></i> Talepler <span class="notification-dot" id="requestNotificationDot"></span></button>
-      <button class="tab-btn" data-tab="tabReport"><i class="fa-solid fa-file-pdf"></i> Aidat Raporu</button>
-      <button class="tab-btn" data-tab="tabExpenseReport"><i class="fa-solid fa-file-pdf"></i> Gider Raporu</button>
+      <button class="tab-btn active" data-tab="tabOverview"><i class="fa-solid fa-users"></i> Sakinler Listesi</button>
+      <button class="tab-btn" data-tab="tabDues"><i class="fa-solid fa-calculator"></i> Aidat Girişi</button>
+      <button class="tab-btn" data-tab="tabExpenses"><i class="fa-solid fa-wrench"></i> Gider Ekle</button>
+      <button class="tab-btn" data-tab="tabApartments"><i class="fa-solid fa-folder-open"></i> Daire Ayarları</button>
+      <button class="tab-btn" data-tab="tabAnnouncements"><i class="fa-solid fa-bullhorn"></i> Panoya As</button>
+      <button class="tab-btn" data-tab="tabRequests" id="requestsTabBtn"><i class="fa-solid fa-envelope-open-text"></i> Gelen İstekler <span class="notification-dot" id="requestNotificationDot"></span></button>
+      <button class="tab-btn" data-tab="tabReport"><i class="fa-solid fa-file-pdf"></i> Aidat Çizelgesi PDF</button>
+      <button class="tab-btn" data-tab="tabExpenseReport"><i class="fa-solid fa-receipt"></i> Gider Raporu PDF</button>
     </div>
 
     <div id="tabOverview" class="tab-panel active">
       <div class="card">
-        <h2><i class="fa-solid fa-table-list"></i> Yapı Sakinleri Listesi (Detaylar için satıra dokunun)</h2>
+        <h2><i class="fa-solid fa-table-list"></i> Komple Bina Sakinleri Listesi (Detaylar için satıra dokunun)</h2>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Blok</th><th>Daire No</th><th>Ad Soyad</th></tr></thead>
@@ -326,7 +342,7 @@
 
     <div id="tabDues" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-money-check-dollar"></i> Dönemsel Aidat Kontrolü (Detaylar için satıra dokunun)</h2>
+        <h2><i class="fa-solid fa-money-check-dollar"></i> Aylık Aidat Defteri Takibi</h2>
         <div class="row">
           <div class="field">
             <label>Blok Seçimi</label>
@@ -360,12 +376,12 @@
 
     <div id="tabExpenses" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-plus"></i> Mali Gider Faturası İşle</h2>
+        <h2><i class="fa-solid fa-plus"></i> Yeni Apartman Masraf Faturası İşle</h2>
         <input type="hidden" id="expId">
         <div class="row">
           <div class="field">
             <label>Harcama Kalemi Açıklaması</label>
-            <input type="text" id="expDesc" placeholder="Örn: Ortak alan elektrik faturası">
+            <input type="text" id="expDesc" placeholder="Örn: Asansör bakım bedeli">
           </div>
           <div class="field">
             <label>Harcama Tutarı (₺)</label>
@@ -376,8 +392,8 @@
             <input type="date" id="expDate">
           </div>
         </div>
-        <button class="btn btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Kaydı Tamamla</button>
-        <button class="btn btn-secondary hidden" id="cancelExpenseBtn" style="margin-left: 8px;">Değişikliği İptal Et</button>
+        <button class="btn btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Faturayı Kasadan Düş</button>
+        <button class="btn btn-secondary hidden" id="cancelExpenseBtn" style="margin-left: 8px;">Vazgeç</button>
       </div>
       <div class="card">
         <h2><i class="fa-solid fa-list"></i> Dönem Harcamaları Envanteri</h2>
@@ -386,9 +402,9 @@
           <div class="field"><label>Bitiş Tarihi</label><input type="date" id="expFilterEnd"></div>
           <div class="field style-btn-container" style="flex: 2; min-width: 260px; display: flex; align-items: flex-end;">
             <div class="btn-row-inline">
-              <button class="btn btn-primary field-btn" id="expFilterBtn"><i class="fa-solid fa-filter"></i> Filtrele</button>
+              <button class="btn btn-primary field-btn" id="expFilterBtn"><i class="fa-solid fa-filter"></i> Süzgeçten Geçir</button>
               <button class="btn btn-secondary field-btn" id="expClearFilterBtn"><i class="fa-solid fa-times"></i> Sıfırla</button>
-              <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-file-pdf"></i> PDF İndir</button>
+              <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-file-pdf"></i> PDF Raporu Aç</button>
             </div>
           </div>
         </div>
@@ -398,7 +414,7 @@
             <tbody id="expensesBody"><tr><td colspan="4" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
-        <div style="margin-top:16px;display:flex;justify-content:flex-end;font-weight:600;font-size:1rem;">
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;font-weight:700;font-size:1.05rem;">
           Filtrelenmiş Toplam Gider: <span id="expTotalFilter" style="margin-left:8px;color:var(--danger);">₺0</span>
         </div>
       </div>
@@ -410,7 +426,7 @@
         <div class="search-box" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
           <div class="field" style="flex:1;min-width:200px;"><label>Veritabanında Ara</label><input type="text" id="apartmentSearch" placeholder="İsim, daire, plaka..."></div>
           <div class="field" style="flex:0 0 160px;"><label>Blok Süzgeci</label><select id="blockFilter"><option value="">Tümü</option><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-outline" id="clearSearchBtn"><i class="fa-solid fa-times"></i> Filtreyi Kaldır</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-outline" id="clearSearchBtn"><i class="fa-solid fa-times"></i> Temizle</button></div>
         </div>
         <div class="row">
           <input type="hidden" id="aptId">
@@ -425,7 +441,7 @@
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="addApartmentBtn"><i class="fa-solid fa-floppy-disk"></i> Sistemi Güncelle</button></div>
         </div>
         <hr style="margin:24px 0; border:0; border-top:1px solid #e2e8f0;">
-        <h3><i class="fa-solid fa-sliders" style="color: #ca8a04;"></i> Kitlesel Aidat Fiyat Tarifesi Ayarı</h3>
+        <h3><i class="fa-solid fa-sliders" style="color: var(--accent);"></i> Kitlesel Aidat Fiyat Tarifesi Ayarı</h3>
         <div class="row" style="align-items: flex-end;">
           <div class="field" style="max-width: 260px;"><label>Yeni Ortak Tarife Bedeli (₺)</label><input type="number" id="bulkFeeAmount" placeholder="600"></div>
           <div class="field"><button class="btn btn-danger" id="bulkFeeUpdateBtn"><i class="fa-solid fa-sync"></i> Tüm Yapıyı Yeni Tarifeye Geçir</button></div>
@@ -444,44 +460,45 @@
 
     <div id="tabAnnouncements" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-bullhorn"></i> Resmi Duyuru İlan Et</h2>
+        <h2><i class="fa-solid fa-bullhorn"></i> Blok Giriş Panosuna Duyuru Yaz</h2>
         <div class="field"><label>Duyuru Bildiri İçeriği</label><textarea id="announcementText" rows="3" placeholder="Sakinlerin panosunda görünecek duyuru metni..."></textarea></div>
         <button class="btn btn-primary" id="addAnnouncementBtn"><i class="fa-solid fa-bullhorn"></i> İlanı Panoya As</button>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-list"></i> Duyuru Listesi</h2>
+        <h2><i class="fa-solid fa-list"></i> Aktif Duyurular</h2>
         <div id="announcementsAdminList"><div class="empty-note">Yükleniyor...</div></div>
       </div>
     </div>
 
     <div id="tabRequests" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-comments"></i> Gelen Sakin Geri Bildirimleri</h2>
+        <h2><i class="fa-solid fa-comments"></i> Sakinlerden Gelen Arıza / İstek Mesajları</h2>
         <div id="requestsAdminList"><div class="empty-note">Kayıt yok</div></div>
       </div>
     </div>
 
+    <!-- AIDAT RAPORU GÖRÜNÜMÜ -->
     <div id="tabReport" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-file-invoice"></i> Aidat Çizelge Raporu</h2>
+        <h2><i class="fa-solid fa-file-invoice"></i> Aylık Aidat Çizelge Raporu</h2>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
           <div class="field" style="flex:0 0 160px;"><label>Rapor Dönemi</label><select id="reportMonth"><option value="Ocak">Ocak</option><option value="Şubat">Şubat</option><option value="Mart">Mart</option><option value="Nisan">Nisan</option><option value="Mayıs">Mayıs</option><option value="Haziran">Haziran</option><option value="Temmuz" selected>Temmuz</option><option value="Ağustos">Ağustos</option><option value="Eylül">Eylül</option><option value="Ekim">Ekim</option><option value="Kasım">Kasım</option><option value="Aralık">Aralık</option></select></div>
           <div class="field" style="flex:0 0 120px;"><label>Yıl</label><input type="number" id="reportYear" value="2026"></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="reportFilterBtn"><i class="fa-solid fa-filter"></i> Çizelgeyi Çıkar</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF Raporu İndir</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="reportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF Raporu Yeni Sekmede Aç</button></div>
         </div>
         
         <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="reportTableContainer">
-          <h2 id="pdfDynamicTitle" style="text-align: center; color: #0f172a; margin-bottom: 25px; font-weight: 700; font-size: 1.5rem;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
+          <h2 id="pdfDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.4rem; border-bottom: 2px solid #d97706; padding-bottom: 10px;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
           <table id="reportTable" style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr style="background-color: #0f172a !important; color: white !important;">
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">#</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Ad Soyad</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Blok</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Daire No</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Tutar</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Ödeme Tarihi</th>
+              <tr style="background-color: #1e3a8a !important; color: white !important;">
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">#</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Ad Soyad</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Blok</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Daire No</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Ödeme Durumu</th>
               </tr>
             </thead>
             <tbody id="reportBody"><tr><td colspan="6" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
@@ -497,25 +514,26 @@
       </div>
     </div>
 
+    <!-- GIDER RAPORU GÖRÜNÜMÜ -->
     <div id="tabExpenseReport" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-file-signature"></i> Dönemsel Gider Hesap Raporu</h2>
+        <h2><i class="fa-solid fa-file-signature"></i> Dönemsel Apartman Gider Hesap Raporu</h2>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
           <div class="field" style="flex:0 0 180px;"><label>Başlangıç Tarihi</label><input type="date" id="expReportStart"></div>
           <div class="field" style="flex:0 0 180px;"><label>Bitiş Tarihi</label><input type="date" id="expReportEnd"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="expReportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF Gider Raporu İndir</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF Gider Raporu Aç</button></div>
         </div>
         
         <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="expenseReportTableContainer">
-          <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #0f172a; margin-bottom: 25px; font-weight: 700; font-size: 1.5rem;">Tahiroğulları Rojbin Sitesi Gider Çizelgesi</h2>
+          <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.4rem; border-bottom: 2px solid #d97706; padding-bottom: 10px;">Tahiroğulları Rojbin Sitesi Gider Raporu</h2>
           <table id="expReportTable" style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr style="background-color: #0f172a !important; color: white !important;">
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">#</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Açıklama</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Tutar</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Kayıt Tarihi</th>
+              <tr style="background-color: #1e3a8a !important; color: white !important;">
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">#</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Açıklama</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Kayıt Tarihi</th>
               </tr>
             </thead>
             <tbody id="expReportBody"><tr><td colspan="4" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
@@ -528,6 +546,7 @@
 
 </main>
 
+<!-- MOBİLDE EN GÜVENLİ PDF MOTORU -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script type="module">
@@ -753,12 +772,24 @@ function renderDuesTable() {
         filtered.forEach((a, index) => {
             var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             html += '<tr class="clickable-row" onclick="toggleDueDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block">openApt</td></tr>';
+            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Tarife</strong>' + money(a.feeAmount || 0) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatma</strong>' + whatsapp + '</div><div class="details-block"><strong>Aksiyon</strong><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '" style="width:100%;">' + (paid ? 'Ödemeyi İptal Et' : 'Ödendi Olarak İşle') + '</button></div></div></td></tr>';
         });
     }
     body.innerHTML = html;
+    body.querySelectorAll('.toggle-due-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            e.stopPropagation(); const id = e.currentTarget.dataset.id; const targetApt = APARTMENTS.find(a => a.id === id); if(!targetApt) return;
+            const targetStatus = targetApt.feeStatus === 'Ödendi' ? 'Ödenmedi' : 'Ödendi'; showLoading('Makbuz işleniyor...');
+            var now = new Date(); var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+            try { await updateDoc(doc(db, "daireler", id), { feeStatus: targetStatus, paymentDate: dateTimeStr }); } 
+            catch(ex) { await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus, paymentDate: dateTimeStr }); }
+            toast('Defter kaydı güncellendi.', 'success'); hideLoading();
+        };
+    });
 }
 window.toggleDueDetails = function(index) { var row = document.getElementById('due-details-' + index); if(row) row.style.display = (window.getComputedStyle(row).display === 'none') ? 'table-row' : 'none'; }
+document.getElementById('dueBlockFilter').onchange = renderDuesTable;
+document.getElementById('dueStatusFilter').onchange = renderDuesTable;
 
 document.getElementById('addExpenseBtn').onclick = async function() {
     var id = document.getElementById('expId').value; var desc = document.getElementById('expDesc').value.trim(); var amount = parseFloat(document.getElementById('expAmount').value); var date = document.getElementById('expDate').value;
@@ -774,7 +805,7 @@ document.getElementById('addExpenseBtn').onclick = async function() {
         resetExpenseForm();
     } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
-function resetExpenseForm() { document.getElementById('expId').value = ''; document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = ''; document.getElementById('cancelExpenseBtn').classList.add('hidden'); document.getElementById('addExpenseBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Kaydı Tamamla'; }
+function resetExpenseForm() { document.getElementById('expId').value = ''; document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = ''; document.getElementById('cancelExpenseBtn').classList.add('hidden'); document.getElementById('addExpenseBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Faturayı Kasadan Düş'; }
 
 function renderExpensesTable() {
     var body = document.getElementById('expensesBody'); var html = ''; let total = 0;
@@ -786,7 +817,25 @@ function renderExpensesTable() {
         });
     }
     body.innerHTML = html; document.getElementById('expTotalFilter').textContent = money(total);
+    body.querySelectorAll('.edit-exp-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id; const exp = EXPENSES.find(item => item.id === id); if(!exp) return;
+            document.getElementById('expId').value = exp.id; document.getElementById('expDesc').value = exp.description; document.getElementById('expAmount').value = exp.amount; document.getElementById('expDate').value = exp.date;
+            document.getElementById('cancelExpenseBtn').classList.remove('hidden'); document.getElementById('addExpenseBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Revize Et';
+        };
+    });
+    body.querySelectorAll('.del-exp-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            if(confirm('Bu gider faturası tamamen silinsin mi?')) {
+                const id = e.currentTarget.dataset.id; showLoading('Kayıt siliniyor...');
+                try { await deleteDoc(doc(db, "giderler", id)); } catch(x) { await deleteDoc(doc(db, "expenses", id)); }
+                toast('Gider faturası iptal edildi.', 'success'); hideLoading();
+            }
+        };
+    });
 }
+document.getElementById('expFilterBtn').onclick = () => { expenseFilterStart = document.getElementById('expFilterStart').value; expenseFilterEnd = document.getElementById('expFilterEnd').value; renderExpensesTable(); };
+document.getElementById('expClearFilterBtn').onclick = () => { document.getElementById('expFilterStart').value = ''; document.getElementById('expFilterEnd').value = ''; expenseFilterStart = ''; expenseFilterEnd = ''; renderExpensesTable(); };
 
 document.getElementById('addApartmentBtn').onclick = async function() {
     var id = document.getElementById('aptId').value; var block = document.getElementById('newApartmentBlock').value; var apartment = parseInt(document.getElementById('newApartmentNo').value); var fullName = document.getElementById('newApartmentName').value.trim(); var phone = document.getElementById('newApartmentPhone').value.trim(); var plate = document.getElementById('newApartmentPlate').value.trim(); var feeAmount = parseFloat(document.getElementById('newApartmentFee').value);
@@ -800,6 +849,18 @@ document.getElementById('addApartmentBtn').onclick = async function() {
 };
 function resetApartmentForm() { document.getElementById('aptId').value = ''; document.getElementById('newApartmentNo').value = ''; document.getElementById('newApartmentName').value = ''; document.getElementById('newApartmentPhone').value = ''; document.getElementById('newApartmentPlate').value = ''; document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Sistemi Güncelle'; }
 
+document.getElementById('bulkFeeUpdateBtn').onclick = async function() {
+    const bulkAmount = parseFloat(document.getElementById('bulkFeeAmount').value); if(!bulkAmount || bulkAmount <= 0) return toast("Geçerli bir bedel yazınız.", "danger");
+    if(confirm("Tüm yapının aidat tarifesi değiştirilsin mi?")) {
+        showLoading('Güncelleniyor...');
+        try {
+            let snap; try { snap = await getDocs(collection(db, "daireler")); } catch(e) { snap = await getDocs(collection(db, "apartments")); }
+            const promises = []; snap.forEach(d => promises.push(updateDoc(d.ref, { fee: bulkAmount }))); await Promise.all(promises);
+            document.getElementById('bulkFeeAmount').value = ''; toast('Tarifeler güncellendi.', 'success');
+        } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
+    }
+};
+
 function renderApartmentsTable() {
     var body = document.getElementById('apartmentsBody'); var html = '';
     var filtered = APARTMENTS.filter(a => { const s = searchTerm.toLowerCase(); if(blockFilter && a.block !== blockFilter) return false; return String(a.apartment).includes(s) || (a.fullName && a.fullName.toLowerCase().includes(s)) || a.phone.includes(s) || (a.plate && a.plate.toLowerCase().includes(s)); });
@@ -810,7 +871,17 @@ function renderApartmentsTable() {
         });
     }
     body.innerHTML = html;
+    body.querySelectorAll('.edit-apt-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id; const a = APARTMENTS.find(item => item.id === id); if(!a) return;
+            document.getElementById('aptId').value = a.id; document.getElementById('newApartmentBlock').value = a.block; document.getElementById('newApartmentNo').value = a.apartment; document.getElementById('newApartmentName').value = a.fullName; document.getElementById('newApartmentPhone').value = a.phone; document.getElementById('newApartmentPlate').value = a.plate || ''; document.getElementById('newApartmentFee').value = a.feeAmount;
+            document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Kartı Revize Et';
+        };
+    });
 }
+document.getElementById('apartmentSearch').oninput = function() { searchTerm = this.value.trim(); renderApartmentsTable(); };
+document.getElementById('blockFilter').onchange = function() { blockFilter = this.value; renderApartmentsTable(); };
+document.getElementById('clearSearchBtn').onclick = function() { document.getElementById('apartmentSearch').value = ''; document.getElementById('blockFilter').value = ''; searchTerm = ''; blockFilter = ''; renderApartmentsTable(); };
 
 document.getElementById('addAnnouncementBtn').onclick = async function() {
     var text = document.getElementById('announcementText').value.trim(); if (!text) { toast('Metin boş bırakılamaz.', 'danger'); return; } showLoading('Gönderiliyor...');
@@ -828,10 +899,10 @@ function renderReport() {
     APARTMENTS.forEach((a, i) => {
         var isPaid = a.feeStatus === 'Ödendi'; var fee = Number(a.feeAmount || 0);
         if (isPaid) { paidCount++; totalPaid += fee; } else { unpaidCount++; totalUnpaid += fee; }
-        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f8fafc') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (isPaid ? 'Ödendi' : 'Ödenmedi') + '</td></tr>';
+        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + (isPaid ? 'Ödendi' : 'Ödenmedi') + '</td></tr>';
     });
     body.innerHTML = html;
-    if(footer) { footer.innerHTML = '<tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold;">TOPLAM ÖDENEN:</td><td colspan="2" style="color:var(--success); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold;">' + money(totalPaid) + '</td></tr><tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold;">TOPLAM ALACAK:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold;">' + money(totalUnpaid) + '</td></tr>'; }
+    if(footer) { footer.innerHTML = '<tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">TOPLAM ÖDENEN:</td><td colspan="2" style="color:var(--success); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(totalPaid) + '</td></tr><tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">TOPLAM KALAN ALACAK:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(totalUnpaid) + '</td></tr>'; }
     document.getElementById('reportTotalApt').textContent = APARTMENTS.length;
     document.getElementById('reportPaidCount').textContent = paidCount;
     document.getElementById('reportUnpaidCount').textContent = unpaidCount;
@@ -844,40 +915,40 @@ function renderExpenseReport() {
     var body = document.getElementById('expReportBody'); var footer = document.getElementById('expReportFooter'); var html = ''; let total = 0;
     var filtered = EXPENSES.filter(e => { if (start && e.date < start) return false; if (end && e.date > end) return false; return true; });
     if (filtered.length === 0) { body.innerHTML = '<tr><td colspan="4" class="empty-note">Kayıt yok</td></tr>'; if (footer) footer.innerHTML = ''; return; }
-    filtered.forEach((e, i) => { total += Number(e.amount || 0); html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f8fafc') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.description + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(e.amount) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.date + '</td></tr>'; });
+    filtered.forEach((e, i) => { total += Number(e.amount || 0); html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.description + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(e.amount) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.date + '</td></tr>'; });
     body.innerHTML = html;
-    if(footer) footer.innerHTML = '<tr><td colspan="2" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold;">GENEL TOPLAM MASRAF:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold;">' + money(total) + '</td></tr>';
+    if(footer) footer.innerHTML = '<tr><td colspan="2" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">GENEL TOPLAM MASRAF:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(total) + '</td></tr>';
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// MOBİLDE VE TÜRKÇE KARAKTERLERDE ASLA BOŞ ÇIKMAYAN AKILLI HTML2PDF FONKSİYONU
-function generateHTML2PDF(elementId, fileName) {
+// MOBİLDE İNDİRME ENGELİNİ %100 AŞAN YENİ ÖNİZLEME MOTORU (.pdf)
+function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
     var opt = {
       margin:       [10, 10, 10, 10],
-      filename:     fileName + '.pdf',
+      filename:     'rapor.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    showLoading('PDF Belgesi Hazırlanıyor...');
-    html2pdf().set(opt).from(element).save().then(() => {
+    showLoading('Rapor Dosyası Hazırlanıyor...');
+    
+    // Arka planda pdf'i oluşturup indirmek yerine binary (blob) verisini alıp yeni sekmede fırlatıyoruz
+    html2pdf().set(opt).from(element).outputPdf('blob').then((pdfBlob) => {
         hideLoading();
-        toast('PDF Başarıyla İndirildi', 'success');
+        var blobUrl = URL.createObjectURL(pdfBlob);
+        window.open(blobUrl, '_blank');
+        toast('Rapor Yeni Sekmede Açıldı!', 'success');
     }).catch((err) => {
         hideLoading();
-        toast('PDF Hatası: ' + err.message, 'danger');
+        toast('Hata Oluştu: ' + err.message, 'danger');
     });
 }
 
-document.getElementById('printReportBtn').onclick = () => {
-    var month = document.getElementById('reportMonth').value;
-    var year = document.getElementById('reportYear').value;
-    generateHTML2PDF('reportTableContainer', 'aidat_raporu_' + month + '_' + year);
-};
-document.getElementById('printExpenseReportBtn').onclick = () => generateHTML2PDF('expenseReportTableContainer', 'gider_raporu_detay');
-document.getElementById('expGenPrintBtn').onclick = () => generateHTML2PDF('expenseReportTableContainer', 'harcama_envanteri');
+document.getElementById('printReportBtn').onclick = () => openPDFInNewTab('reportTableContainer');
+document.getElementById('printExpenseReportBtn').onclick = () => openPDFInNewTab('expenseReportTableContainer');
+document.getElementById('expGenPrintBtn').onclick = () => openPDFInNewTab('expenseReportTableContainer');
 
 var tabBtns = document.querySelectorAll('.tab-btn');
 tabBtns.forEach(btn => {
