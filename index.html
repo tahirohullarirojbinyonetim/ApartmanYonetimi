@@ -8,15 +8,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   :root {
-    --primary: #1e3a8a; /* Sıcak Apartman Güven Mavisi */
+    --primary: #1e3a8a; 
     --primary-light: #2563eb;
-    --accent: #d97706; /* Apartman Detay Altın Sarısı */
+    --accent: #d97706; 
     --success: #059669;
     --danger: #dc2626;
     --secondary: #4b5563;
-    --bg: #f3f4f6; /* Yumuşak Arka Plan */
+    --bg: #f3f4f6; 
     --card-bg: #ffffff;
-    --radius: 16px; /* Daha oval, sıcak köşeler */
+    --radius: 16px; 
     --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
   }
   * { box-sizing: border-box; transition: all 0.2s ease; }
@@ -35,7 +35,7 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    border-bottom: 3px solid var(--accent); /* Apartman altın çizgisi */
+    border-bottom: 3px solid var(--accent); 
   }
   header.topbar .top-row {
     display: flex;
@@ -79,7 +79,6 @@
     position: relative;
     overflow: hidden;
   }
-  /* Apartman estetiği için kartların tepesine hafif renkli şerit */
   .card::before {
     content: '';
     position: absolute;
@@ -404,7 +403,7 @@
             <div class="btn-row-inline">
               <button class="btn btn-primary field-btn" id="expFilterBtn"><i class="fa-solid fa-filter"></i> Süzgeçten Geçir</button>
               <button class="btn btn-secondary field-btn" id="expClearFilterBtn"><i class="fa-solid fa-times"></i> Sıfırla</button>
-              <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-file-pdf"></i> PDF Raporu Aç</button>
+              <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-file-pdf"></i> PDF Gider Raporu Aç</button>
             </div>
           </div>
         </div>
@@ -498,7 +497,7 @@
                 <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Blok</th>
                 <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Daire No</th>
                 <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Ödeme Durumu</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Ödeme Zamanı (Saatli)</th>
               </tr>
             </thead>
             <tbody id="reportBody"><tr><td colspan="6" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
@@ -546,7 +545,6 @@
 
 </main>
 
-<!-- MOBİLDE EN GÜVENLİ PDF MOTORU -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script type="module">
@@ -703,7 +701,7 @@ document.getElementById('residentLoginBtn').onclick = () => {
     var phone = document.getElementById('residentPhone').value.trim().replace(/\s/g, '');
     var errorDiv = document.getElementById('residentError');
     errorDiv.style.display = 'none';
-    if (!resId || !phone) { errorDiv.textContent = 'Lütfen alanları eksiksiz doldurun.'; errorDiv.style.display = 'block'; return; }
+    if (!resId || !phone) { errorDiv.textContent = 'Lütfen alanları eksikosiz doldurun.'; errorDiv.style.display = 'block'; return; }
     var found = APARTMENTS.find(a => a.id === resId && a.phone.replace(/\s+/g, '') === phone);
     if(found) {
         session = { role: 'resident', apt: found.apartment, phone: phone, id: found.id };
@@ -740,7 +738,7 @@ function renderResidentPanel() {
     document.getElementById('resName').textContent = fresh.fullName || '-';
     document.getElementById('resPhone').textContent = fresh.phone || '-';
     var paid = fresh.feeStatus === 'Ödendi'; var badge = document.getElementById('resDueBadge');
-    badge.textContent = paid ? 'Hesap Temiz' : 'Borç Bulunuyor'; badge.className = 'badge ' + (paid ? 'success' : 'danger');
+    badge.textContent = paid ? 'Hesap Temiz (' + fresh.paymentDate + ')' : 'Borç Bulunuyor'; badge.className = 'badge ' + (paid ? 'success' : 'danger');
 }
 
 document.getElementById('resSubmitRequestBtn').onclick = async function() {
@@ -757,7 +755,7 @@ function renderOverviewTable() {
         APARTMENTS.forEach((a, index) => {
             var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             html += '<tr class="clickable-row" onclick="toggleOverviewDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Plaka</strong>' + (a.plate || '-') + '</div><div class="details-block"><strong>Aidat</strong>' + money(a.feeAmount) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid?'success':'danger') + '">' + (paid?'Ödendi':'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatıcı</strong>' + whatsapp + '</div></div></td></tr>';
+            html += '<tr class="details-row" id="details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Plaka</strong>' + (a.plate || '-') + '</div><div class="details-block"><strong>Aidat</strong>' + money(a.feeAmount) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid?'success':'danger') + '">' + (paid ? 'Ödendi ('+a.paymentDate+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatıcı</strong>' + whatsapp + '</div></div></td></tr>';
         });
     }
     body.innerHTML = html;
@@ -772,7 +770,7 @@ function renderDuesTable() {
         filtered.forEach((a, index) => {
             var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             html += '<tr class="clickable-row" onclick="toggleDueDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Tarife</strong>' + money(a.feeAmount || 0) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatma</strong>' + whatsapp + '</div><div class="details-block"><strong>Aksiyon</strong><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '" style="width:100%;">' + (paid ? 'Ödemeyi İptal Et' : 'Ödendi Olarak İşle') + '</button></div></div></td></tr>';
+            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Tarife</strong>' + money(a.feeAmount || 0) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi ('+a.paymentDate+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatma</strong>' + whatsapp + '</div><div class="details-block"><strong>Aksiyon</strong><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '" style="width:100%;">' + (paid ? 'Ödemeyi İptal Et' : 'Ödendi Olarak İşle') + '</button></div></div></td></tr>';
         });
     }
     body.innerHTML = html;
@@ -780,9 +778,14 @@ function renderDuesTable() {
         btn.onclick = async (e) => {
             e.stopPropagation(); const id = e.currentTarget.dataset.id; const targetApt = APARTMENTS.find(a => a.id === id); if(!targetApt) return;
             const targetStatus = targetApt.feeStatus === 'Ödendi' ? 'Ödenmedi' : 'Ödendi'; showLoading('Makbuz işleniyor...');
-            var now = new Date(); var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-            try { await updateDoc(doc(db, "daireler", id), { feeStatus: targetStatus, paymentDate: dateTimeStr }); } 
-            catch(ex) { await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus, paymentDate: dateTimeStr }); }
+            
+            // SAAT ENTEGRASYONU: Ödeme durumunu güncellerken tam saati de ekliyoruz
+            var now = new Date(); 
+            var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+            var finalDate = targetStatus === 'Ödendi' ? dateTimeStr : '-';
+            
+            try { await updateDoc(doc(db, "daireler", id), { feeStatus: targetStatus, paymentDate: finalDate }); } 
+            catch(ex) { await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus, paymentDate: finalDate }); }
             toast('Defter kaydı güncellendi.', 'success'); hideLoading();
         };
     });
@@ -867,7 +870,7 @@ function renderApartmentsTable() {
     if (filtered.length === 0) { html = '<tr><td colspan="9" class="empty-note">Kayıt bulunamadı</td></tr>'; } else {
         filtered.forEach(a => {
             var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
-            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + a.phone + '</td><td>' + (a.plate || '-') + '</td><td>' + money(a.feeAmount) + '</td><td><span class="badge '+(paid?'success':'danger')+'">'+(paid?'Ödendi':'Ödenmedi')+'</span></td><td>' + whatsapp + '</td><td><button class="btn btn-primary btn-sm edit-apt-btn" data-id="'+a.id+'"><i class="fa-solid fa-pen"></i></button></td></tr>';
+            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + a.phone + '</td><td>' + (a.plate || '-') + '</td><td>' + money(a.feeAmount) + '</td><td><span class="badge '+(paid?'success':'danger')+'">'+(paid ? 'Ödendi' : 'Ödenmedi')+'</span></td><td>' + whatsapp + '</td><td><button class="btn btn-primary btn-sm edit-apt-btn" data-id="'+a.id+'"><i class="fa-solid fa-pen"></i></button></td></tr>';
         });
     }
     body.innerHTML = html;
@@ -899,7 +902,9 @@ function renderReport() {
     APARTMENTS.forEach((a, i) => {
         var isPaid = a.feeStatus === 'Ödendi'; var fee = Number(a.feeAmount || 0);
         if (isPaid) { paidCount++; totalPaid += fee; } else { unpaidCount++; totalUnpaid += fee; }
-        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + (isPaid ? 'Ödendi' : 'Ödenmedi') + '</td></tr>';
+        // SAAT ENTEGRASYONU: Ödeme zamanını saatli olarak PDF ve rapor listesine basıyoruz
+        var statusCell = isPaid ? 'Ödendi (' + a.paymentDate + ')' : 'Ödenmedi';
+        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + statusCell + '</td></tr>';
     });
     body.innerHTML = html;
     if(footer) { footer.innerHTML = '<tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">TOPLAM ÖDENEN:</td><td colspan="2" style="color:var(--success); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(totalPaid) + '</td></tr><tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">TOPLAM KALAN ALACAK:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(totalUnpaid) + '</td></tr>'; }
@@ -921,20 +926,18 @@ function renderExpenseReport() {
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// MOBİLDE İNDİRME ENGELİNİ %100 AŞAN YENİ ÖNİZLEME MOTORU (.pdf)
+// MOBİLDE %100 ÇALIŞAN GÜVENLİ YENİ SEKMEDE ÖNİZLEME/YAZDIRMA MOTORU
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
     var opt = {
       margin:       [10, 10, 10, 10],
-      filename:     'rapor.pdf',
+      filename:     'tahirogullari_rapor.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    showLoading('Rapor Dosyası Hazırlanıyor...');
-    
-    // Arka planda pdf'i oluşturup indirmek yerine binary (blob) verisini alıp yeni sekmede fırlatıyoruz
+    showLoading('PDF Rapor Belgesi Üretiliyor...');
     html2pdf().set(opt).from(element).outputPdf('blob').then((pdfBlob) => {
         hideLoading();
         var blobUrl = URL.createObjectURL(pdfBlob);
