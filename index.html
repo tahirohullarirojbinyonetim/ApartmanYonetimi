@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tahiroğulları Rojbin Sitesi - Yönetim Paneli</title>
+<title>Tahiroğulları Rojbin Sitesi - Yönetim Sistemi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-  :root{
+  :root {
     --primary: #0f172a;
     --primary-light: #1e293b;
     --accent: #2563eb;
@@ -18,245 +18,160 @@
     --radius: 12px;
     --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
   }
-  *{box-sizing:border-box; transition: all 0.2s ease;}
-  body{
-    margin:0;
-    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
-    background:var(--bg);
-    color:#1e293b;
+  * { box-sizing: border-box; transition: all 0.2s ease; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: #1e293b;
     -webkit-font-smoothing: antialiased;
   }
-  header.topbar{
+  header.topbar {
     background: var(--primary);
-    color:#fff;
-    padding:16px 24px;
-    box-shadow:var(--shadow);
-    position:sticky;
-    top:0;
-    z-index:50;
+    color: #fff;
+    padding: 16px 24px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 50;
     border-bottom: 1px solid rgba(255,255,255,0.1);
   }
-  header.topbar .top-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:12px;
+  header.topbar .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  header.topbar h1{
-    font-size:1.25rem;
-    margin:0;
-    display:flex;
-    align-items:center;
-    gap:10px;
+  header.topbar h1 {
+    font-size: 1.25rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 700;
-    letter-spacing: -0.5px;
   }
-  header.topbar .slogan{
-    font-size:.8rem;
-    opacity:.75;
-    margin-top:4px;
-    font-weight:400;
-  }
-  header.topbar .designer-credit{
-    font-size:.65rem;
-    opacity:.5;
-    font-weight:300;
-  }
-  header.topbar .user-box{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-size:.9rem;
-  }
-  header.topbar button{
-    background:rgba(255,255,255,0.1);
-    border:1px solid rgba(255,255,255,0.15);
-    color:#fff;
-    padding:8px 16px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:.85rem;
+  header.topbar .slogan { font-size: .8rem; opacity: .75; margin-top: 4px; }
+  header.topbar .designer-credit { font-size: .65rem; opacity: .5; }
+  header.topbar .user-box { display: flex; align-items: center; gap: 12px; font-size: .9rem; }
+  header.topbar button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
     font-weight: 500;
   }
-  header.topbar button:hover{background:rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3);}
-  main{max-width:1240px;margin:0 auto;padding:24px;}
-  .hidden{display:none !important;}
+  header.topbar button:hover { background: rgba(255,255,255,0.2); }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px; }
+  .hidden { display: none !important; }
 
-  .card{
-    background:var(--card-bg);
-    border-radius:var(--radius);
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
     border: 1px solid #e2e8f0;
-    box-shadow:var(--shadow);
-    padding:24px;
-    margin-bottom:24px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 24px;
   }
-  .card h2{margin:0 0 20px;font-size:1.1rem;display:flex;align-items:center;gap:10px;color:var(--primary);font-weight:600;}
-  .card h3{margin:0 0 14px;font-size:1rem;color:var(--primary-light);font-weight:600;}
+  .card h2 { margin: 0 0 20px; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; }
+  .card h3 { margin: 0 0 14px; font-size: 1rem; color: var(--primary-light); font-weight: 600; }
 
-  .grid{display:grid;gap:20px;}
-  .grid-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
-  .grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
+  .grid { display: grid; gap: 20px; }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 
-  .stat-card{
-    border-radius:var(--radius);
-    padding:20px;
-    color:#fff;
-    box-shadow:var(--shadow);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+  .stat-card {
+    border-radius: var(--radius);
+    padding: 20px;
+    color: #fff;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     position: relative;
     overflow: hidden;
   }
-  .stat-card.collected{background:#0f172a; border-left: 5px solid var(--success);}
-  .stat-card.expenses{background:#0f172a; border-left: 5px solid var(--danger);}
-  .stat-card.balance{background:#0f172a; border-left: 5px solid var(--accent);}
-  
-  .stat-card .label{font-size:.85rem; opacity:.7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;}
-  .stat-card .value{font-size:1.75rem;font-weight:700; letter-spacing: -0.5px;}
-  .stat-card i{position: absolute; right: 20px; bottom: 20px; font-size: 2.5rem; opacity: 0.08;}
+  .stat-card.collected { background: #0f172a; border-left: 5px solid var(--success); }
+  .stat-card.expenses { background: #0f172a; border-left: 5px solid var(--danger); }
+  .stat-card.balance { background: #0f172a; border-left: 5px solid var(--accent); }
+  .stat-card .label { font-size: .85rem; opacity: .7; font-weight: 500; text-transform: uppercase; }
+  .stat-card .value { font-size: 1.75rem; font-weight: 700; }
 
-  .list-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px 0;
-    border-bottom:1px solid #f1f5f9;
-    gap:12px;
-  }
-  .list-item:last-child{border-bottom:none;}
-  .list-item .meta{font-size:.8rem;color:var(--secondary); font-weight: 500;}
+  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+  .list-item:last-child { border-bottom: none; }
+  .list-item .meta { font-size: .8rem; color: var(--secondary); }
 
-  .badge{
-    display:inline-flex;
-    align-items: center;
-    padding:4px 12px;
-    border-radius:6px;
-    font-size:.75rem;
-    font-weight:600;
-  }
-  .badge.success{background:#d1fae5;color:#065f46;}
-  .badge.danger{background:#fee2e2;color:#991b1b;}
-  .badge.neutral{background:#f1f5f9;color:#334155;}
+  .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+  .badge.success { background: #d1fae5; color: #065f46; }
+  .badge.danger { background: #fee2e2; color: #991b1b; }
+  .badge.neutral { background: #f1f5f9; color: #334155; }
 
-  input,select,textarea,button.btn{
-    font-family:inherit;
-    font-size:.9rem;
-    padding:10px 14px;
-    border-radius:6px;
-    border:1px solid #cbd5e1;
-    outline:none;
-    width:100%;
-    background: #fff;
-  }
-  input:focus,select:focus,textarea:focus{border-color:var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1);}
-  label{font-size:.8rem;font-weight:600;color:#475569;display:block;margin-bottom:6px; text-transform: uppercase; letter-spacing: 0.3px;}
-  .field{margin-bottom:16px;}
-  .row{display:flex;gap:16px;flex-wrap:wrap;}
-  .row > .field{flex:1;min-width:180px;}
+  input, select, textarea, button.btn { font-family: inherit; font-size: .9rem; padding: 10px 14px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; width: 100%; background: #fff; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  label { font-size: .8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px; text-transform: uppercase; }
+  .field { margin-bottom: 14px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .row > .field { flex: 1; min-width: 180px; }
 
-  button.btn{
-    cursor:pointer;
-    border:none;
-    font-weight:600;
-    width:auto;
-    display:inline-flex;
-    align-items:center;
-    justify-content: center;
-    gap:8px;
-    letter-spacing: -0.2px;
-  }
-  button.btn:hover{opacity:.95; transform: translateY(-1px);}
-  .btn-primary{background:var(--primary);color:#fff;}
-  .btn-primary:hover{background:var(--primary-light);}
-  .btn-success{background:var(--success);color:#fff;}
-  .btn-danger{background:var(--danger);color:#fff;}
-  .btn-secondary{background:var(--secondary);color:#fff;}
-  .btn-outline{background:transparent;border:1px solid #cbd5e1;color:#334155;}
-  .btn-outline:hover{background: #f8fafc;}
-  .btn-sm{padding:6px 12px;font-size:.8rem; border-radius: 4px;}
+  button.btn { cursor: pointer; border: none; font-weight: 600; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-secondary { background: var(--secondary); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #334155; }
+  .btn-outline:hover { background: #f8fafc; }
+  .btn-sm { padding: 6px 12px; font-size: .8rem; }
 
-  table{width:100%;border-collapse:collapse;font-size:.875rem;}
-  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #e2e8f0;}
-  th{color:#475569;font-weight:600;background:#f8fafc;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
-  tbody tr:hover{background:#f8fafc;}
-  .table-wrap{overflow-x:auto; border-radius: 8px; border: 1px solid #e2e8f0;}
+  table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  th { color: #475569; font-weight: 600; background: #f8fafc; font-size: .8rem; text-transform: uppercase; }
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
 
-  .btn-row-inline {
-    display: flex;
-    gap: 8px;
-    align-items: flex-end;
-    flex-wrap: nowrap;
-  }
-  .btn-row-inline .field-btn {
-    flex: 1;
-    white-space: nowrap;
-  }
+  .btn-row-inline { display: flex; gap: 8px; align-items: flex-end; flex-wrap: nowrap; }
+  .btn-row-inline .field-btn { flex: 1; white-space: nowrap; }
 
   .clickable-row { cursor: pointer; }
   .clickable-row:hover { background: #f8fafc !important; }
   .details-row { background: #f8fafc !important; display: none; }
   .details-row td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; }
   .details-container { display: flex; flex-wrap: wrap; gap: 16px; }
-  .details-block { background: #fff; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; flex: 1; min-width: 180px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-  .details-block strong { color: var(--secondary); display: block; margin-bottom: 6px; font-size: 0.725rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .details-block { background: #fff; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; flex: 1; min-width: 180px; }
+  .details-block strong { color: var(--secondary); display: block; margin-bottom: 6px; font-size: 0.725rem; text-transform: uppercase; }
 
-  .tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap; background: #e2e8f0; padding: 4px; border-radius: 8px;}
-  .tab-btn{
-    padding:8px 14px;border-radius:6px;border:none;background:transparent;
-    cursor:pointer;font-size:.85rem;font-weight:500;color:#475569;
-    display:flex;align-items:center;gap:8px; width: auto;
-  }
-  .tab-btn.active{background:#fff;color:var(--primary);font-weight: 600; box-shadow: var(--shadow);}
-  .tab-btn .notification-dot{
-    display:none; width:8px; height:8px; background:var(--danger); border-radius:50%; margin-left:4px;
-  }
-  .tab-btn .notification-dot.active{display:inline-block;}
+  .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; background: #e2e8f0; padding: 4px; border-radius: 8px; }
+  .tab-btn { padding: 8px 14px; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: .85rem; font-weight: 500; color: #475569; display: flex; align-items: center; gap: 8px; width: auto; }
+  .tab-btn.active { background: #fff; color: var(--primary); font-weight: 600; box-shadow: var(--shadow); }
+  .tab-btn .notification-dot { display: none; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-left: 4px; }
+  .tab-btn .notification-dot.active { display: inline-block; }
 
-  .tab-panel{display:none;}
-  .tab-panel.active{display:block;}
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
-  .login-wrap{display:flex;gap:24px;max-width:850px;margin:0 auto 24px;flex-wrap:wrap;}
-  .login-wrap .card{flex:1;min-width:280px;margin-bottom:0;}
-  .login-wrap .icon-circle{
-    width:48px;height:48px;border-radius:8px;background:#f1f5f9;color:var(--primary);
-    display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:14px;
-  }
+  .login-wrap { display: flex; gap: 24px; max-width: 850px; margin: 0 auto 24px; flex-wrap: wrap; }
+  .login-wrap .card { flex: 1; min-width: 280px; margin-bottom: 0; }
+  .login-wrap .icon-circle { width: 48px; height: 48px; border-radius: 8px; background: #f1f5f9; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 14px; }
 
-  #loadingMask{
-    position:fixed;inset:0;background:rgba(15,23,42,0.7);
-    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999;color:#fff;
-    backdrop-filter: blur(4px);
-  }
-  .spinner{
-    width:40px;height:40px;border-radius:50%;
-    border:4px solid rgba(255,255,255,0.2);border-top-color:#fff;
-    animation:spin 0.6s linear infinite;
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
+  #loadingMask { position: fixed; inset: 0; background: rgba(15,23,42,0.7); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 999; color: #fff; backdrop-filter: blur(4px); }
+  .spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); border-top-color: #fff; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:12px;}
-  .toast{
-    background:#1e293b;color:#fff;padding:14px 20px;border-radius:8px;box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-    font-size:.85rem;display:flex;align-items:center;gap:12px;min-width:260px;
-  }
-  .toast.success{border-left: 4px solid var(--success);}
-  .toast.danger{border-left: 4px solid var(--danger);}
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
+  .toast { background: #1e293b; color: #fff; padding: 14px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); font-size: .85rem; display: flex; align-items: center; gap: 12px; min-width: 260px; }
+  .toast.success { border-left: 4px solid var(--success); }
+  .toast.danger { border-left: 4px solid var(--danger); }
 
-  .empty-note{color:var(--secondary);font-size:.85rem;padding:16px 0;text-align:center;font-style: italic;}
-  .expense-filter{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:20px;background:#f8fafc;border-radius:8px;border: 1px solid #e2e8f0;}
-  .expense-filter .field{flex:1;min-width:160px;margin-bottom:0;}
-  .block-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;}
-  .block-badge.a{background:#eff6ff;color:#1e40af;}
-  .block-badge.b{background:#fdf2f8;color:#9d174d;}
+  .empty-note { color: var(--secondary); font-size: .85rem; padding: 16px 0; text-align: center; font-style: italic; }
+  .expense-filter { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+  .expense-filter .field { flex: 1; min-width: 160px; margin-bottom: 0; }
+  .block-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .7rem; font-weight: 700; }
+  .block-badge.a { background: #eff6ff; color: #1e40af; }
+  .block-badge.b { background: #fdf2f8; color: #9d174d; }
 
-  .whatsapp-btn{
-    display:inline-flex;align-items:center;gap:6px;background:#22c55e;color:#fff;
-    padding:6px 12px;border-radius:4px;font-size:.75rem;text-decoration:none;font-weight: 500;
-  }
+  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: .75rem; text-decoration: none; font-weight: 500; }
 
-  /* YENİ GELİŞMİŞ PDF TASARIMI VE YAZICI MODU (BOŞ SAYFAYI KESİN ÇÖZER) */
+  /* Gelişmiş Baskı Katmanı (Yazıcı Modu) */
   @media print {
     body * { visibility: hidden; }
     #printSection, #printSection * { visibility: visible; }
@@ -265,6 +180,7 @@
     #printSection th, #printSection td { border: 1px solid #000 !important; padding: 8px !important; text-align: left; color: #000 !important; background: transparent !important; }
     #printSection th { background-color: #f2f2f2 !important; font-weight: bold; }
     #printSection h2 { text-align: center; margin-bottom: 20px; font-size: 18px; color: #000; }
+    #printSection tfoot tr { font-weight: bold; background-color: #eaeaea !important; }
   }
 </style>
 </head>
@@ -394,8 +310,8 @@
       <button class="tab-btn" data-tab="tabApartments"><i class="fa-solid fa-building"></i> Daire Kartları</button>
       <button class="tab-btn" data-tab="tabAnnouncements"><i class="fa-solid fa-bullhorn"></i> Duyuru Yayınla</button>
       <button class="tab-btn" data-tab="tabRequests" id="requestsTabBtn"><i class="fa-solid fa-comments"></i> Talepler <span class="notification-dot" id="requestNotificationDot"></span></button>
-      <button class="tab-btn" data-tab="tabReport"><i class="fa-solid fa-file-pdf"></i> Aidat Çizelge Raporu</button>
-      <button class="tab-btn" data-tab="tabExpenseReport"><i class="fa-solid fa-file-pdf"></i> Gider Çizelge Raporu</button>
+      <button class="tab-btn" data-tab="tabReport"><i class="fa-solid fa-file-pdf"></i> Aidat Raporu</button>
+      <button class="tab-btn" data-tab="tabExpenseReport"><i class="fa-solid fa-file-pdf"></i> Gider Raporu</button>
     </div>
 
     <div id="tabOverview" class="tab-panel active">
@@ -474,7 +390,7 @@
             <div class="btn-row-inline" style="width: 100%;">
               <button class="btn btn-primary field-btn" id="expFilterBtn"><i class="fa-solid fa-filter"></i> Süzgeçten Geçir</button>
               <button class="btn btn-secondary field-btn" id="expClearFilterBtn"><i class="fa-solid fa-times"></i> Sıfırla</button>
-              <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-print"></i> PDF Çıktısı Al</button>
+              <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-print"></i> Yazdır / PDF</button>
             </div>
           </div>
         </div>
@@ -535,7 +451,7 @@
         <button class="btn btn-primary" id="addAnnouncementBtn"><i class="fa-solid fa-bullhorn"></i> İlanı Panoya As</button>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-list"></i> Yayındaki İlanlar</h2>
+        <h2><i class="fa-solid fa-list"></i> Duyuru Listesi</h2>
         <div id="announcementsAdminList"><div class="empty-note">Yükleniyor...</div></div>
       </div>
     </div>
@@ -547,7 +463,6 @@
       </div>
     </div>
 
-    <!-- AIDAT RAPORU GÖRÜNÜMÜ -->
     <div id="tabReport" class="tab-panel">
       <div class="card">
         <h2><i class="fa-solid fa-file-invoice"></i> Aidat Çizelge Raporu</h2>
@@ -555,13 +470,22 @@
           <div class="field" style="flex:0 0 160px;"><label>Rapor Dönemi</label><select id="reportMonth"><option value="Ocak">Ocak</option><option value="Şubat">Şubat</option><option value="Mart">Mart</option><option value="Nisan">Nisan</option><option value="Mayıs">Mayıs</option><option value="Haziran">Haziran</option><option value="Temmuz" selected>Temmuz</option><option value="Ağustos">Ağustos</option><option value="Eylül">Eylül</option><option value="Ekim">Ekim</option><option value="Kasım">Kasım</option><option value="Aralık">Aralık</option></select></div>
           <div class="field" style="flex:0 0 120px;"><label>Yıl</label><input type="number" id="reportYear" value="2026"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="reportFilterBtn"><i class="fa-solid fa-filter"></i> Çizelgeyi Çıkar</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-print"></i> Güvenli PDF / Yazdır</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-print"></i> Güvenli Yazdır / PDF</button></div>
         </div>
         
-        <div class="table-wrap" style="padding: 24px; background: #fff;" id="reportTableContainer">
-          <h2 id="pdfDynamicTitle" style="text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 700;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
-          <table id="reportTable">
-            <thead><tr><th>#</th><th>Ad Soyad</th><th>Blok</th><th>Daire No</th><th>Tutar</th><th>Ödeme Tarihi</th></tr></thead>
+        <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="reportTableContainer">
+          <h2 id="pdfDynamicTitle" style="text-align: center; color: #0f172a; margin-bottom: 25px; font-weight: 700; font-size: 1.5rem;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
+          <table id="reportTable" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #0f172a !important; color: white !important;">
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">#</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Ad Soyad</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Blok</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Daire No</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Tutar</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Ödeme Tarihi</th>
+              </tr>
+            </thead>
             <tbody id="reportBody"><tr><td colspan="6" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
             <tfoot id="reportFooter"></tfoot>
           </table>
@@ -569,7 +493,6 @@
       </div>
     </div>
 
-    <!-- GIDER RAPORU GÖRÜNÜMÜ -->
     <div id="tabExpenseReport" class="tab-panel">
       <div class="card">
         <h2><i class="fa-solid fa-file-signature"></i> Dönemsel Gider Hesap Raporu</h2>
@@ -577,13 +500,20 @@
           <div class="field" style="flex:0 0 180px;"><label>Başlangıç Tarihi</label><input type="date" id="expReportStart"></div>
           <div class="field" style="flex:0 0 180px;"><label>Bitiş Tarihi</label><input type="date" id="expReportEnd"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="expReportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-print"></i> Güvenli PDF / Yazdır</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-print"></i> Güvenli Yazdır / PDF</button></div>
         </div>
         
-        <div class="table-wrap" style="padding: 24px; background: #fff;" id="expenseReportTableContainer">
-          <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 700;">Tahiroğulları Rojbin Sitesi Gider Çizelgesi</h2>
-          <table id="expReportTable">
-            <thead><tr><th>#</th><th>Açıklama</th><th>Tutar</th><th>Kayıt Tarihi</th></tr></thead>
+        <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="expenseReportTableContainer">
+          <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #0f172a; margin-bottom: 25px; font-weight: 700; font-size: 1.5rem;">Tahiroğulları Rojbin Sitesi Gider Çizelgesi</h2>
+          <table id="expReportTable" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #0f172a !important; color: white !important;">
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">#</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Açıklama</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Tutar</th>
+                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #0f172a !important;">Kayıt Tarihi</th>
+              </tr>
+            </thead>
             <tbody id="expReportBody"><tr><td colspan="4" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
             <tfoot id="expReportFooter"></tfoot>
           </table>
@@ -662,13 +592,22 @@ function getWhatsAppButton(phone, name, apartment, block, fee) {
     return '<a href="https://wa.me/' + cleanPhone + '?text=' + msg + '" target="_blank" class="whatsapp-btn" onclick="event.stopPropagation();"><i class="fa-brands fa-whatsapp"></i> Gönder</a>';
 }
 
+// SENİN FIRESTORE ŞEMANA (daireler, giderler, açıklamalar) GÖRE EŞİTLENEN DİNLEME MOTORU
 function initRealtimeListeners() {
-    onSnapshot(query(collection(db, "apartments"), orderBy("block", "asc"), orderBy("no", "asc")), (snap) => {
+    onSnapshot(query(collection(db, "daireler")), (snap) => {
         APARTMENTS = [];
         snap.forEach(doc => {
             const d = doc.data();
             APARTMENTS.push({
-                id: doc.id, apartment: d.no, block: d.block, fullName: d.name, phone: d.phone, plate: d.plate, feeAmount: d.fee, feeStatus: d.feeStatus, paymentDate: d.paymentDate || '-'
+                id: doc.id, 
+                apartment: d.no || d.daireNo, 
+                block: d.block || d.blok || 'A Blok', 
+                fullName: d.name || d.isim || d.adSoyad, 
+                phone: d.phone || d.telefon, 
+                plate: d.plate || d.plaka || '-', 
+                feeAmount: d.fee || d.aidat || 500, 
+                feeStatus: d.feeStatus || d.durum || 'Ödenmedi', 
+                paymentDate: d.paymentDate || d.odemeTarihi || '-'
             });
         });
         renderPublicDashboard();
@@ -678,11 +617,16 @@ function initRealtimeListeners() {
         hideLoading();
     });
 
-    onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => {
+    onSnapshot(query(collection(db, "giderler")), (snap) => {
         EXPENSES = [];
         snap.forEach(doc => {
             const d = doc.data();
-            EXPENSES.push({ id: doc.id, description: d.desc, amount: d.amount, date: d.date });
+            EXPENSES.push({ 
+                id: doc.id, 
+                description: d.acıklama || d.açıklama || d.desc, 
+                amount: d.miktar || d.amount || d.tutar, 
+                date: d.tarih || d.date 
+            });
         });
         renderPublicDashboard();
         if (session.role === 'admin') renderExpensesTable();
@@ -956,7 +900,7 @@ function renderDuesTable() {
             var now = new Date();
             var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
             try {
-                await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus, paymentDate: targetStatus === 'Ödendi' ? dateTimeStr : '-' });
+                await updateDoc(doc(db, "daireler", id), { feeStatus: targetStatus, paymentDate: targetStatus === 'Ödendi' ? dateTimeStr : '-' });
                 toast('Defter kaydı güncellendi.', 'success');
             } catch(err) { toast('Hata: ' + err.message, 'danger'); }
             finally { hideLoading(); }
@@ -972,6 +916,7 @@ window.toggleDueDetails = function(index) {
 document.getElementById('dueBlockFilter').onchange = renderDuesTable;
 document.getElementById('dueStatusFilter').onchange = renderDuesTable;
 
+// SENİN FIRESTORE ALANLARINA GÖRE YAZMA MOTORU (acıklama, miktar, tarih)
 document.getElementById('addExpenseBtn').onclick = async function() {
     var id = document.getElementById('expId').value;
     var desc = document.getElementById('expDesc').value.trim();
@@ -982,10 +927,10 @@ document.getElementById('addExpenseBtn').onclick = async function() {
     showLoading('Fatura işleniyor...');
     try {
         if(id) {
-            await updateDoc(doc(db, "expenses", id), { desc, amount, date });
+            await updateDoc(doc(db, "giderler", id), { acıklama: desc, miktar: amount, tarih: date });
             toast('Gider faturası güncellendi.', 'success');
         } else {
-            await addDoc(collection(db, "expenses"), { desc, amount, date });
+            await addDoc(collection(db, "giderler"), { acıklama: desc, miktar: amount, tarih: date });
             toast('Gider kasaya işlendi.', 'success');
         }
         resetExpenseForm();
@@ -1041,7 +986,7 @@ function renderExpensesTable() {
                 const id = e.currentTarget.dataset.id;
                 showLoading('Kayıt siliniyor...');
                 try {
-                    await deleteDoc(doc(db, "expenses", id));
+                    await deleteDoc(doc(db, "giderler", id));
                     toast('Fatura kaydı silindi.', 'success');
                 } catch (err) { toast('Hata: ' + err.message, 'danger'); }
                 finally { hideLoading(); }
@@ -1075,10 +1020,10 @@ document.getElementById('addApartmentBtn').onclick = async function() {
     try {
         const payload = { block, no: apartment, name: fullName, phone, plate, fee: feeAmount };
         if(id) {
-            await updateDoc(doc(db, "apartments", id), payload);
+            await updateDoc(doc(db, "daireler", id), payload);
             toast('Mülk kartı güncellendi.', 'success');
         } else {
-            await addDoc(collection(db, "apartments"), { ...payload, feeStatus: 'Ödenmedi' });
+            await addDoc(collection(db, "daireler"), { ...payload, feeStatus: 'Ödenmedi' });
             toast('Yeni mülk kartı açıldı.', 'success');
         }
         resetApartmentForm();
@@ -1101,9 +1046,9 @@ document.getElementById('bulkFeeUpdateBtn').onclick = async function() {
     if(confirm("Tüm yapının aidat tarifesi " + money(bulkAmount) + " olarak değiştirilsin mi?")) {
         showLoading('Kolektif güncelleme yapılıyor...');
         try {
-            const snap = await getDocs(collection(db, "apartments"));
+            const snap = await getDocs(collection(db, "daireler"));
             const promises = [];
-            snap.forEach(d => promises.push(updateDoc(doc(db, "apartments", d.id), { fee: bulkAmount })));
+            snap.forEach(d => promises.push(updateDoc(doc(db, "daireler", d.id), { fee: bulkAmount })));
             await Promise.all(promises);
             document.getElementById('bulkFeeAmount').value = '';
             toast('Tarifeler güncellendi.', 'success');
@@ -1192,18 +1137,6 @@ function renderRequestsAdmin() {
         });
     }
     list.innerHTML = html;
-
-    list.querySelectorAll('.del-req-btn').forEach(btn => {
-        btn.onclick = async (e) => {
-            const id = e.currentTarget.dataset.id;
-            showLoading('Arşivleniyor...');
-            try {
-                await deleteDoc(doc(db, "requests", id));
-                toast('Talep dosyası kapatıldı.', 'success');
-            } catch (err) { toast('Hata: ' + err.message, 'danger'); }
-            finally { hideLoading(); }
-        };
-    });
 }
 
 function renderReport() {
@@ -1226,14 +1159,19 @@ function renderReport() {
         var fee = Number(a.feeAmount || 0);
         if (isPaid) { paidCount++; totalPaid += fee; } else { unpaidCount++; totalUnpaid += fee; }
         
-        html += '<tr><td>' + (i + 1) + '</td><td>' + (a.fullName || '-') + '</td><td>' + a.block + '</td><td>' + a.apartment + '</td><td>' + money(fee) + '</td><td>' + (isPaid ? 'Ödendi ('+a.paymentDate+')' : 'Ödenmedi') + '</td></tr>';
+        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f8fafc') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (isPaid ? '✅ ' + a.paymentDate : '❌ Ödenmedi') + '</td></tr>';
     });
     body.innerHTML = html;
     
     if(footer) {
-        footer.innerHTML = '<tr style="font-weight:bold; background:#f1f5f9;"><td colspan="4" style="text-align:right;">Toplam Toplanan:</td><td colspan="2" style="color:var(--success);">' + money(totalPaid) + '</td></tr>' +
-                           '<tr style="font-weight:bold; background:#f1f5f9;"><td colspan="4" style="text-align:right;">Kalan Alacak:</td><td colspan="2" style="color:var(--danger);">' + money(totalUnpaid) + '</td></tr>';
+        footer.innerHTML = '<tr style="font-weight:bold; background:#e2e8f0;"><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px;">TOPLAM ÖDENEN:</td><td colspan="2" style="color:var(--success); border: 1px solid #cbd5e1; padding: 12px;">' + money(totalPaid) + '</td></tr>' +
+                           '<tr style="font-weight:bold; background:#e2e8f0;"><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px;">TOPLAM ÖDENMEYEN (ALACAK):</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px;">' + money(totalUnpaid) + '</td></tr>';
     }
+    
+    document.getElementById('reportTotalApt').textContent = APARTMENTS.length;
+    document.getElementById('reportPaidCount').textContent = paidCount;
+    document.getElementById('reportUnpaidCount').textContent = unpaidCount;
+    document.getElementById('reportTotalAmount').textContent = money(totalPaid + totalUnpaid);
 }
 document.getElementById('reportFilterBtn').onclick = renderReport;
 
@@ -1258,14 +1196,13 @@ function renderExpenseReport() {
     
     filtered.forEach((e, i) => {
         total += Number(e.amount || 0);
-        html += '<tr><td>' + (i + 1) + '</td><td>' + e.description + '</td><td>' + money(e.amount) + '</td><td>' + e.date + '</td></tr>';
+        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f8fafc') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.description + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(e.amount) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.date + '</td></tr>';
     });
     body.innerHTML = html;
-    if(footer) footer.innerHTML = '<tr style="font-weight:bold; background:#f1f5f9;"><td colspan="2" style="text-align:right;">Genel Toplam Masraf:</td><td colspan="2" style="color:var(--danger);">' + money(total) + '</td></tr>';
+    if(footer) footer.innerHTML = '<tr style="font-weight:bold; background:#e2e8f0;"><td colspan="2" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px;">GENEL TOPLAM MASRAF:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px;">' + money(total) + '</td></tr>';
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// GÜVENLİ YAZDIRMA FONKSİYONU - TELEFONDA VE TABLETTE BOŞ SAYFA VERMEYİ KESİN ENGELLER
 function safePrint(elementId) {
     var printContent = document.getElementById(elementId).innerHTML;
     var printSection = document.getElementById('printSection');
