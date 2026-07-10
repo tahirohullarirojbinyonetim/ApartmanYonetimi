@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tahiroğulları Rojbin Sitesi - Yönetim Paneli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--background); color: var(--text); line-height: 1.5; }
+        .hidden { display: none !important; }
+        
+        /* Mask & Toast */
+        #loading-mask { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; font-weight: 600; color: var(--primary); }
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--surface); border-left: 4px solid var(--primary); padding: 12px 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 6px; display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s ease; }
+        .toast.success { border-left-color: var(--success); }
+        .toast.danger { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--primary-light); }
+
+        /* Header & Layout */
+        header { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.25rem; font-weight: 700; }
+        .container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+        /* Card ve Form Elemanları */
+        .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; }
+        
+        .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        input, select, textarea { padding: 0.625rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; width: 100%; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-light); }
+        
+        /* Butonlar */
+        .btn { padding: 0.625rem 1.25rem; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-light); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.85rem; }
+        .btn-whatsapp { background: #25d366; color: white; text-decoration: none; border-radius: 6px; padding: 0.375rem 0.75rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.25rem; }
+
+        /* Rozetler (Badges) */
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .badge-a { background: #dbeafe; color: #1e40af; }
+        .badge-b { background: #fef3c7; color: #92400e; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+
+        /* Tablolar */
+        .table-responsive { overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        th, td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; color: var(--text-muted); font-weight: 600; }
+        tr:hover { background: #f8fafc; }
+
+        /* Sekme Sistemi (Tabs) */
+        .tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+        .tab-btn { padding: 0.75rem 1.25rem; border: none; background: none; cursor: pointer; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; position: relative; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .notification-dot::after { content: ''; position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; }
+
+        /* İstatistik Kutuları */
+        .stat-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.25rem; }
+        .stat-info h3 { font-size: 1.5rem; font-weight: 700; }
+        .stat-info p { color: var(--text-muted); font-size: 0.875rem; }
+
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="loading-mask"><i class="fas fa-spinner fa-spin fa-2x"></i>&nbsp; Veriler Yükleniyor...</div>
+    
+    <div id="toast-container" class="toast-container"></div>
+
+    <header>
+        <h1><i class="fas fa-building"></i> Tahiroğulları Rojbin Sitesi</h1>
+        <div id="user-info" class="hidden">
+            <span id="current-user-title" style="font-weight: bold; color: white; margin-right: 15px;"></span>
+            <button id="btn-logout" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</button>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div id="login-view">
+            <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 2rem;">
+                <div class="card">
+                    <h2 style="margin-bottom: 15px;"><i class="fas fa-lock text-primary"></i> Yönetim Girişi</h2>
+                    <div class="form-group">
+                        <label>E-posta Adresi</label>
+                        <input type="email" id="login-email" placeholder="yonetici@site.com" value="esafilsert1922@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" id="login-password" placeholder="******" value="admin123">
+                    </div>
+                    <button id="btn-admin-login" class="btn btn-primary w-100 mt-2"><i class="fas fa-sign-in-alt"></i> Yönetici Olarak Giriş Yap</button>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-home text-success"></i> Sakin Girişi</h2>
+                    <p class="text-muted small mb-3">Şifresiz giriş için dairenizi seçip telefon numaranızı doğrulayın.</p>
+                    <div class="form-group">
+                        <label>Blok Seçin</label>
+                        <select id="resident-block">
+                            <option value="A Blok">A Blok</option>
+                            <option value="B Blok">B Blok</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Daire No</label>
+                        <input type="number" id="resident-no" placeholder="Örn: 5">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefon Numaranız</label>
+                        <input type="text" id="resident-phone" placeholder="05xx">
+                    </div>
+                    <button id="btn-resident-login" class="btn btn-success w-100 mt-2"><i class="fas fa-sign-in-alt"></i> Panelime Giriş Yap</button>
+                </div>
+            </div>
+
+            <h3 class="mb-3"><i class="fas fa-chart-pie"></i> Sitenin Genel Finansal Durumu</h3>
+            <div class="grid-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#d1fae5; color:#065f46;"><i class="fas fa-arrow-down"></i></div>
+                    <div class="stat-info"><h3 id="pub-total-income">0,00 ₺</h3><p>Toplam Toplanan Aidat</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#fee2e2; color:#991b1b;"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-info"><h3 id="pub-total-expense">0,00 ₺</h3><p>Toplam Giderler</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#dbeafe; color:#1e40af;"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-info"><h3 id="pub-net-balance">0,00 ₺</h3><p>Kasa Net Bakiye</p></div>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-bullhorn text-warning"></i> Son 5 Duyuru</h4>
+                    <div id="pub-announcements" class="table-responsive" style="display:flex; flex-direction:column; gap:8px;">Sitede yayınlanmış duyuru bulunmuyor.</div>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-receipt text-danger"></i> Son 5 Gider Kaydı</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Açıklama</th><th>Tutar</th></tr></thead>
+                            <tbody id="pub-expenses-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-envelope text-primary"></i> Son 5 Sakin Talebi</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Daire</th><th>Talep / Mesaj</th></tr></thead>
+                            <tbody id="pub-requests-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="admin-view" class="hidden">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('tab-ozet')"><i class="fas fa-tachometer-alt"></i> Genel Bakış</button>
+                <button class="tab-btn" onclick="switchTab('tab-aidat')"><i class="fas fa-lira-sign"></i> Aidat Takibi</button>
+                <button class="tab-btn" onclick="switchTab('tab-giderler')"><i class="fas fa-minus-circle"></i> Giderler</button>
+                <button class="tab-btn" onclick="switchTab('tab-daireler')"><i class="fas fa-door-open"></i> Daireler</button>
+                <button class="tab-btn" onclick="switchTab('tab-duyurular')"><i class="fas fa-bullhorn"></i> Duyurular</button>
+                <button class="tab-btn" id="nav-tab-talepler" onclick="switchTab('tab-talepler')"><i class="fas fa-envelope"></i> Talepler</button>
+                <button class="tab-btn" onclick="switchTab('tab-rapor-aidat')"><i class="fas fa-file-invoice"></i> Aidat Raporu</button>
+                <button class="tab-btn" onclick="switchTab('tab-rapor-gider')"><i class="fas fa-file-medical-alt"></i> Gider Raporu</button>
+            </div>
+
+            <div id="tab-ozet" class="tab-content">
+                <div class="card">
+                    <h3>Daire Sakinleri Genel Durum Tablosu</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Blok</th><th>Daire</th><th>Ad Soyad</th><th>Telefon</th><th>Plaka</th><th>Aidat Durumu</th><th>İşlem</th></tr>
+                            </thead>
+                            <tbody id="admin-overview-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-aidat" class="tab-content hidden">
+                <div class="card">
+                    <h3>Aylık Aidat Tahsilat Ekranı</h3>
+                    <div class="grid-3" style="margin-top:1rem;">
+                        <div class="form-group">
+                            <label>Blok Filtresi</label>
+                            <select id="fee-filter-block" onchange="renderFeeTracking()"><option value="Hepsi">Tüm Bloklar</option><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Blok</th><th>Daire No</th><th>Ad Soyad</th><th>Aidat Tutarı</th><th>Durum</th><th>İşlem</th></tr>
+                            </thead>
+                            <tbody id="admin-fee-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-giderler" class="tab-content hidden">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 id="expense-form-title"><i class="fas fa-plus"></i> Yeni Gider Ekle / Düzenle</h3>
+                        <input type="hidden" id="exp-id">
+                        <div class="form-group"><label>Gider Açıklaması</label><input type="text" id="exp-desc" placeholder="Örn: Asansör bakım bedeli"></div>
+                        <div class="form-group"><label>Tutar (₺)</label><input type="number" id="exp-amount" placeholder="0.00"></div>
+                        <div class="form-group"><label>Tarih</label><input type="date" id="exp-date"></div>
+                        <button id="btn-save-expense" class="btn btn-danger w-100"><i class="fas fa-check"></i> Gideri Kaydet</button>
+                        <button id="btn-cancel-expense" class="btn btn-primary w-100 mt-2 hidden" onclick="resetExpenseForm()">İptal Et</button>
+                    </div>
+                    <div class="card">
+                        <h3>Gider Listesi ve Filtreleme</h3>
+                        <div class="grid-2" style="margin-top:1rem; grid-template-columns:1fr 1fr;">
+                            <div class="form-group"><label>Başgangıç</label><input type="date" id="exp-filter-start" onchange="renderExpenses()"></div>
+                            <div class="form-group"><label>Bitiş</label><input type="date" id="exp-filter-end" onchange="renderExpenses()"></div>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Açıklama</th><th>Tarih</th><th>Tutar</th><th>İşlemler</th></tr></thead>
+                                <tbody id="admin-expenses-table"></tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top:15px;" class="text-end fw-bold fs-5" style="color:var(--danger)">Toplam Gider: <span id="admin-exp-total-text">0,00 ₺</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-daireler" class="tab-content hidden">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 id="apartment-form-title"><i class="fas fa-plus"></i> Yeni Daire Ekle / Düzenle</h3>
+                        <input type="hidden" id="apt-id">
+                        <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
+                            <div class="form-group"><label>Blok</label><select id="apt-block"><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
+                            <div class="form-group"><label>Daire No</label><input type="number" id="apt-no"></div>
+                        </div>
+                        <div class="form-group"><label>Adı Soyadı</label><input type="text" id="apt-name"></div>
+                        <div class="form-group"><label>Telefon</label><input type="text" id="apt-phone" placeholder="05xxxxxxxx"></div>
+                        <div class="form-group"><label>Araç Plakası</label><input type="text" id="apt-plate" placeholder="33XX999"></div>
+                        <div class="form-group"><label>Aylık Sabit Aidat Tutarı (₺)</label><input type="number" id="apt-fee" value="500"></div>
+                        <button id="btn-save-apartment" class="btn btn-primary w-100"><i class="fas fa-save"></i> Daireyi Veritabanına Kaydet</button>
+                        <button id="btn-cancel-apartment" class="btn btn-danger w-100 mt-2 hidden" onclick="resetApartmentForm()">İptal</button>
+                        
+                        <hr style="margin:20px 0; border:0; border-top:1px solid var(--border);">
+                        
+                        <h3><i class="fas fa-coins text-warning"></i> Toplu Aidat Güncelleme</h3>
+                        <p class="text-muted small">Sitedeki tüm dairelerin aylık sabit aidat tutarını tek seferde değiştirin.</p>
+                        <div class="form-group mt-2">
+                            <label>Yeni Ortak Aidat Tutarı (₺)</label>
+                            <input type="number" id="bulk-fee-amount" placeholder="Örn: 600">
+                        </div>
+                        <button id="btn-bulk-fee-update" class="btn btn-warning w-100"><i class="fas fa-sync"></i> Tüm Dairelerin Aidatını Güncelle</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Mevcut Daireler</h3>
+                        <div class="grid-2" style="margin-top:1rem; grid-template-columns: 1fr 1fr;">
+                            <div class="form-group"><input type="text" id="apt-search" placeholder="İsim, telefon veya plaka ile ara..." oninput="renderApartments()"></div>
+                            <div class="form-group"><select id="apt-filter-block" onchange="renderApartments()"><option value="Hepsi">Tüm Bloklar</option><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Blok/No</th><th>Ad Soyad</th><th>Telefon</th><th>Aidat</th><th>İşlem</th></tr></thead>
+                                <tbody id="admin-apartments-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-duyurular" class="tab-content hidden">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3><i class="fas fa-bullhorn"></i> Yeni Duyuru Yayınla</h3>
+                        <div class="form-group"><label>Duyuru Başlığı</label><input type="text" id="ann-title"></div>
+                        <div class="form-group"><label>Duyuru Metni</label><textarea id="ann-content" rows="4"></textarea></div>
+                        <button id="btn-save-announcement" class="btn btn-warning w-100"><i class="fas fa-paper-plane"></i> Duyuruyu Panoya As</button>
+                    </div>
+                    <div class="card">
+                        <h3>Yayındaki Duyurular</h3>
+                        <div id="admin-announcements-list" style="margin-top:1rem; display:flex; flex-direction:column; gap:10px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-talepler" class="tab-content hidden">
+                <div class="card">
+                    <h3>Sakinlerden Gelen İstek ve Şikayetler</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Tarih</th><th>Daire</th><th>Gönderen</th><th>Mesaj</th><th>İşlem</th></tr></thead>
+                            <tbody id="admin-requests-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-rapor-aidat" class="tab-content hidden">
+                <div class="card">
+                    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><i class="fas fa-file-invoice"></i> Detaylı Aidat Rapor Ekranı</h3>
+                        <button class="btn btn-success" onclick="exportPDF('print-aidat-report', 'Aidat_Raporu')"><i class="fas fa-file-pdf"></i> PDF Olarak İndir</button>
+                    </div>
+                    <div id="print-aidat-report" class="p-3 bg-white" style="padding: 15px; background: white;">
+                        <h4 style="text-align: center; margin-bottom: 15px;">Tahiroğulları Rojbin Sitesi Aidat Takip Listesi</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>No</th><th>Blok</th><th>Daire</th><th>Ad Soyad</th><th>Telefon</th><th>Tutar</th><th>Durum</th><th>Hatırlatıcı</th></tr></thead>
+                                <tbody id="report-aidat-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-rapor-gider" class="tab-content hidden">
+                <div class="card">
+                    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><i class="fas fa-file-medical-alt"></i> Detaylı Gider Rapor Ekranı</h3>
+                        <button class="btn btn-success" onclick="exportPDF('print-gider-report', 'Gider_Raporu')"><i class="fas fa-file-pdf"></i> PDF Olarak İndir</button>
+                    </div>
+                    <div id="print-gider-report" class="p-3 bg-white" style="padding: 15px; background: white;">
+                        <h4 style="text-align: center; margin-bottom: 15px;">Tahiroğulları Rojbin Sitesi Gider Rapor Listesi</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Açıklama</th><th>Tarih</th><th>Tutar</th></tr></thead>
+                                <tbody id="report-gider-body"></tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top:15px;" class="text-end fw-bold fs-5 text-danger">Mevcut Dönem Toplam Harcama: <span id="report-gider-total">0,00 ₺</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="resident-view" class="hidden">
+            <div class="grid-3">
+                <div class="card">
+                    <h3><i class="fas fa-user-circle"></i> Üye Bilgilerim</h3>
+                    <hr style="margin: 10px 0; border:0; border-top:1px solid var(--border);">
+                    <p><b>Blok:</b> <span id="res-view-block"></span></p>
+                    <p><b>Daire No:</b> <span id="res-view-no"></span></p>
+                    <p><b>Adı Soyadı:</b> <span id="res-view-name"></span></p>
+                    <p><b>Telefon:</b> <span id="res-view-phone"></span></p>
+                    <div style="margin-top:15px;">
+                        <a id="res-wa-direct" href="#" target="_blank" class="btn btn-primary btn-sm w-100" style="background:#25d366; border:none;"><i class="fab fa-whatsapp"></i> Yöneticiye WhatsApp'tan Yaz</a>
+                    </div>
+                </div>
+                <div class="card" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <h4>Mevcut Aidat Borç Durumu</h4>
+                    <div id="res-view-status" class="mt-2"></div>
+                    <div id="res-view-amount" class="fs-3 fw-bold mt-2 text-primary" style="font-size:2rem; font-weight:700;">0,00 ₺</div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-paper-plane"></i> Yönetime Talep Gönder</h3>
+                    <div class="form-group mt-2">
+                        <textarea id="res-request-text" rows="3" placeholder="Yöneticiye iletmek istediğiniz mesaj, arıza veya şikayeti yazın..."></textarea>
+                    </div>
+                    <button id="btn-send-request" class="btn btn-primary w-100"><i class="fas fa-paper-plane"></i> Talebi İlet</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-bullhorn text-warning"></i> Güncel Site Duyuru Panosu</h3>
+                <div id="res-announcements-list" style="margin-top:1rem; display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Sabit Firebase Yapılandırması
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqZSuQjsq3vgs0cnx9ZF4EWJk-WkWfJ1U",
+            authDomain: "apartmanyonetimi-34c5b.firebaseapp.com",
+            projectId: "apartmanyonetimi-34c5b",
+            storageBucket: "apartmanyonetimi-34c5b.firebasestorage.app",
+            messagingSenderId: "60356494355",
+            appId: "1:60356494355:web:ca88119460a566edd2be6",
+            measurementId: "G-561MPPZJET"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global Bellek
+        let APARTMENTS = [];
+        let EXPENSES = [];
+        let ANNOUNCEMENTS = [];
+        let REQUESTS = [];
+        let loggedInResident = null;
+
+        const mask = document.getElementById('loading-mask');
+        function showMask() { mask.style.display = 'flex'; }
+        function hideMask() { mask.style.display = 'none'; }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger'}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 4000);
+        }
+
+        function formatTL(val) {
+            return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val || 0);
+        }
+
+        // --- REALTIME DİNLENEN FONSİYONLAR ---
+        function initRealtimeListeners() {
+            // 1. Daireler
+            onSnapshot(query(collection(db, "apartments"), orderBy("block", "asc"), orderBy("no", "asc")), (snap) => {
+                APARTMENTS = [];
+                snap.forEach(doc => APARTMENTS.push({ id: doc.id, ...doc.data() }));
+                calculateAndRenderPublicStats();
+                renderAdminOverview();
+                renderFeeTracking();
+                renderApartments();
+                renderReports();
+                if(loggedInResident) updateResidentDashboard();
+                hideMask();
+            });
+
+            // 2. Giderler
+            onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => {
+                EXPENSES = [];
+                snap.forEach(doc => EXPENSES.push({ id: doc.id, ...doc.data() }));
+                calculateAndRenderPublicStats();
+                renderExpenses();
+                renderReports();
+            });
+
+            // 3. Duyurular
+            onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc")), (snap) => {
+                ANNOUNCEMENTS = [];
+                snap.forEach(doc => ANNOUNCEMENTS.push({ id: doc.id, ...doc.data() }));
+                renderAnnouncements();
+            });
+
+            // 4. Talepler
+            onSnapshot(query(collection(db, "requests"), orderBy("createdAt", "desc")), (snap) => {
+                REQUESTS = [];
+                snap.forEach(doc => REQUESTS.push({ id: doc.id, ...doc.data() }));
+                renderRequests();
+            });
+        }
+
+        // --- GİRİŞ VE SİMÜLE AUTH LOJİĞİ ---
+        document.getElementById('btn-admin-login').onclick = () => {
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value;
+            
+            if(!email || !pass) return showToast("Lütfen alanları doldurun.", "danger");
+            
+            if(email === "esafilsert1922@gmail.com" && pass === "admin123") {
+                showToast("Yönetici girişi başarılı.");
+                loggedInResident = null;
+                localStorage.setItem('session_role', 'admin');
+                checkSession();
+            } else {
+                showToast("Yönetici bilgileri hatalı!", "danger");
+            }
+        };
+
+        document.getElementById('btn-resident-login').onclick = () => {
+            const block = document.getElementById('resident-block').value;
+            const no = parseInt(document.getElementById('resident-no').value);
+            const phone = document.getElementById('resident-phone').value.trim();
+
+            if(!no || !phone) return showToast("Lütfen bilgileri eksiksiz doldurun.", "danger");
+
+            const found = APARTMENTS.find(a => a.block === block && a.no === no && a.phone.replace(/\s+/g, '') === phone.replace(/\s+/g, ''));
+            if(found) {
+                loggedInResident = found;
+                localStorage.setItem('session_role', 'resident');
+                localStorage.setItem('session_res_id', found.id);
+                showToast(`Hoş geldiniz, Sn. ${found.name}`);
+                checkSession();
+            } else {
+                showToast("Eşleşen daire kaydı bulunamadı!", "danger");
+            }
+        };
+
+        function checkSession() {
+            showMask();
+            const role = localStorage.getItem('session_role');
+            if (role === 'admin') {
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('resident-view').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('current-user-title').innerText = "Yönetici";
+                initRealtimeListeners();
+            } else if (role === 'resident') {
+                const resId = localStorage.getItem('session_res_id');
+                onSnapshot(collection(db, "apartments"), (snap) => {
+                    snap.forEach(doc => {
+                        if(doc.id === resId) loggedInResident = { id: doc.id, ...doc.data() };
+                    });
+                    if(loggedInResident) {
+                        document.getElementById('login-view').classList.add('hidden');
+                        document.getElementById('admin-view').classList.add('hidden');
+                        document.getElementById('resident-view').classList.remove('hidden');
+                        document.getElementById('user-info').classList.remove('hidden');
+                        document.getElementById('current-user-title').innerText = loggedInResident.name;
+                        updateResidentDashboard();
+                    }
+                    initRealtimeListeners();
+                });
+            } else {
+                document.getElementById('login-view').classList.remove('hidden');
+                document.getElementById('admin-view').classList.add('hidden');
+                document.getElementById('resident-view').classList.add('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+                initRealtimeListeners();
+            }
+        }
+
+        document.getElementById('btn-logout').onclick = () => {
+            localStorage.clear();
+            location.reload();
+        };
+
+        // --- İSTATİSTİK MOTORU ---
+        function calculateAndRenderPublicStats() {
+            let inc = 0; let exp = 0;
+            APARTMENTS.forEach(a => { if(a.feeStatus === 'Ödendi') inc += parseFloat(a.fee || 0); });
+            EXPENSES.forEach(e => { exp += parseFloat(e.amount || 0); });
+            const net = inc - exp;
+
+            document.getElementById('pub-total-income').innerText = formatTL(inc);
+            document.getElementById('pub-total-expense').innerText = formatTL(exp);
+            document.getElementById('pub-net-balance').innerText = formatTL(net);
+        }
+
+        // --- RENDER MOTORLARI ---
+        function renderAdminOverview() {
+            const tbody = document.getElementById('admin-overview-table');
+            tbody.innerHTML = '';
+            APARTMENTS.forEach(a => {
+                const waMessage = encodeURIComponent(`Merhaba Sn. ${a.name}, Tahiroğulları Rojbin Sitesi ${a.block} Daire ${a.no} adresine ait ödenmemiş ${formatTL(a.fee)} aidat borcunuz bulunmaktadır.`);
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="badge ${a.block === 'A Blok' ? 'badge-a' : 'badge-b'}">${a.block}</span></td>
+                        <td><b>${a.no}</b></td>
+                        <td>${a.name}</td>
+                        <td>${a.phone}</td>
+                        <td><span class="badge" style="background:#e2e8f0; color:#334155">${a.plate || '-'}</span></td>
+                        <td><span class="badge ${a.feeStatus === 'Ödendi' ? 'badge-success' : 'badge-danger'}">${a.feeStatus || 'Ödenmedi'}</span></td>
+                        <td><a href="https://wa.me/90${a.phone}?text=${waMessage}" target="_blank" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> Hatırlat</a></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderFeeTracking() {
+            const tbody = document.getElementById('admin-fee-table');
+            const filter = document.getElementById('fee-filter-block').value;
+            tbody.innerHTML = '';
+            APARTMENTS.filter(a => filter === 'Hepsi' || a.block === filter).forEach(a => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="badge ${a.block === 'A Blok' ? 'badge-a' : 'badge-b'}">${a.block}</span></td>
+                        <td><b>${a.no}</b></td>
+                        <td>${a.name}</td>
+                        <td class="fw-bold">${formatTL(a.fee)}</td>
+                        <td><span class="badge ${a.feeStatus === 'Ödendi' ? 'badge-success' : 'badge-danger'}">${a.feeStatus || 'Ödenmedi'}</span></td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="window.markAsPaid('${a.id}', '${a.name}', ${a.fee}, '${a.block} Daire ${a.no}')" ${a.feeStatus === 'Ödendi' ? 'disabled' : ''}><i class="fas fa-check"></i> Ödendi Yap</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.markAsPaid = async (id, residentName, amount, desc) => {
+            try {
+                showMask();
+                await updateDoc(doc(db, "apartments", id), { feeStatus: "Ödendi" });
+                await addDoc(collection(db, "payments"), { residentName, amount, description: `${desc} Aidat Faturası`, date: new Date().toISOString().split('T')[0] });
+                showToast("Ödeme kaydedildi.");
+            } catch(e) { showToast("Hata: " + e.message, "danger"); hideMask(); }
+        };
+
+        // --- GİDER YÖNETİMİ ---
+        document.getElementById('btn-save-expense').onclick = async () => {
+            const id = document.getElementById('exp-id').value;
+            const desc = document.getElementById('exp-desc').value.trim();
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            const date = document.getElementById('exp-date').value;
+
+            if(!desc || !amount || !date) return showToast("Lütfen tüm alanları doldurun.", "danger");
+
+            try {
+                showMask();
+                if(id) {
+                    await updateDoc(doc(db, "expenses", id), { desc, amount, date });
+                    showToast("Gider başarıyla güncellendi.");
+                } else {
+                    await addDoc(collection(db, "expenses"), { desc, amount, date });
+                    showToast("Gider kasaya işlendi.");
+                }
+                resetExpenseForm();
+            } catch(e) { showToast("Hata: " + e.message, "danger"); hideMask(); }
+        };
+
+        window.editExpense = (id) => {
+            const e = EXPENSES.find(item => item.id === id);
+            if(!e) return;
+            document.getElementById('exp-id').value = e.id;
+            document.getElementById('exp-desc').value = e.desc;
+            document.getElementById('exp-amount').value = e.amount;
+            document.getElementById('exp-date').value = e.date;
+            document.getElementById('expense-form-title').innerHTML = '<i class="fas fa-edit"></i> Gideri Düzenle';
+            document.getElementById('btn-cancel-expense').classList.remove('hidden');
+        };
+
+        window.resetExpenseForm = () => {
+            document.getElementById('exp-id').value = '';
+            document.getElementById('exp-desc').value = '';
+            document.getElementById('exp-amount').value = '';
+            document.getElementById('exp-date').value = '';
+            document.getElementById('expense-form-title').innerHTML = '<i class="fas fa-plus"></i> Yeni Gider Ekle / Düzenle';
+            document.getElementById('btn-cancel-expense').classList.add('hidden');
+        };
+
+        function renderExpenses() {
+            const tbody = document.getElementById('admin-expenses-table');
+            const start = document.getElementById('exp-filter-start').value;
+            const end = document.getElementById('exp-filter-end').value;
+            tbody.innerHTML = '';
+            let total = 0;
+
+            const pubList = document.getElementById('pub-expenses-list');
+            if(pubList) pubList.innerHTML = '';
+
+            EXPENSES.filter(e => {
+                if(start && e.date < start) return false;
+                if(end && e.date > end) return false;
+                return true;
+            }).forEach((e, idx) => {
+                total += parseFloat(e.amount || 0);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${e.desc}</td>
+                        <td>${e.date}</td>
+                        <td class="fw-bold text-danger">${formatTL(e.amount)}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="window.editExpense('${e.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="window.deleteExpense('${e.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                if(pubList && idx < 5) {
+                    pubList.innerHTML += `<tr><td>${e.desc}</td><td class="fw-bold text-danger">${formatTL(e.amount)}</td></tr>`;
+                }
+            });
+            document.getElementById('admin-exp-total-text').innerText = formatTL(total);
+        }
+
+        window.deleteExpense = async (id) => {
+            if(confirm("Gider faturasını silmek istiyor musunuz?")) {
+                showMask();
+                await deleteDoc(doc(db, "expenses", id));
+                showToast("Gider silindi.");
+            }
+        };
+
+        // --- DAİRE YÖNETİCİSİ & TOPLU GÜNCELLEME ---
+        document.getElementById('btn-save-apartment').onclick = async () => {
+            const id = document.getElementById('apt-id').value;
+            const block = document.getElementById('apt-block').value;
+            const no = parseInt(document.getElementById('apt-no').value);
+            const name = document.getElementById('apt-name').value.trim();
+            const phone = document.getElementById('apt-phone').value.trim();
+            const plate = document.getElementById('apt-plate').value.trim();
+            const fee = parseFloat(document.getElementById('apt-fee').value);
+
+            if(!no || !name || !phone) return showToast("Bilgileri eksiksiz doldurun.", "danger");
+
+            try {
+                showMask();
+                const payload = { block, no, name, phone, plate, fee };
+                if(id) {
+                    await updateDoc(doc(db, "apartments", id), payload);
+                    showToast("Daire güncellendi.");
+                } else {
+                    await addDoc(collection(db, "apartments"), { ...payload, feeStatus: "Ödenmedi" });
+                    showToast("Daire eklendi.");
+                }
+                resetApartmentForm();
+            } catch(e) { showToast("Hata: " + e.message, "danger"); hideMask(); }
+        };
+
+        document.getElementById('btn-bulk-fee-update').onclick = async () => {
+            const bulkAmount = parseFloat(document.getElementById('bulk-fee-amount').value);
+            if(!bulkAmount || bulkAmount <= 0) return showToast("Lütfen geçerli bir aidat tutarı yazın.", "danger");
+
+            if(confirm(`TÜM DAİRELERİN aylık sabit aidatını ${formatTL(bulkAmount)} yapmayı onaylıyor musunuz?`)) {
+                try {
+                    showMask();
+                    const querySnapshot = await getDocs(collection(db, "apartments"));
+                    const promises = [];
+                    querySnapshot.forEach((documentSnapshot) => {
+                        const docRef = doc(db, "apartments", documentSnapshot.id);
+                        promises.push(updateDoc(docRef, { fee: bulkAmount }));
+                    });
+                    await Promise.all(promises);
+                    showToast("Tüm dairelerin aidat tutarı başarıyla güncellendi.");
+                    document.getElementById('bulk-fee-amount').value = '';
+                } catch(e) { showToast("Toplu güncelleme başarısız: " + e.message, "danger"); }
+                finally { hideMask(); }
+            }
+        };
+
+        window.editApartment = (id) => {
+            const a = APARTMENTS.find(item => item.id === id);
+            if(!a) return;
+            document.getElementById('apt-id').value = a.id;
+            document.getElementById('apt-block').value = a.block;
+            document.getElementById('apt-no').value = a.no;
+            document.getElementById('apt-name').value = a.name;
+            document.getElementById('apt-phone').value = a.phone;
+            document.getElementById('apt-plate').value = a.plate || '';
+            document.getElementById('apt-fee').value = a.fee;
+            document.getElementById('apartment-form-title').innerHTML = '<i class="fas fa-edit"></i> Daireyi Düzenle';
+            document.getElementById('btn-cancel-apartment').classList.remove('hidden');
+        };
+
+        window.resetApartmentForm = () => {
+            document.getElementById('apt-id').value = '';
+            document.getElementById('apt-name').value = '';
+            document.getElementById('apt-phone').value = '';
+            document.getElementById('apt-plate').value = '';
+            document.getElementById('apt-no').value = '';
+            document.getElementById('apartment-form-title').innerHTML = '<i class="fas fa-plus"></i> Yeni Daire Ekle / Düzenle';
+            document.getElementById('btn-cancel-apartment').classList.add('hidden');
+        };
+
+        function renderApartments() {
+            const tbody = document.getElementById('admin-apartments-table');
+            const search = document.getElementById('apt-search').value.toLowerCase();
+            const blockFilter = document.getElementById('apt-filter-block').value;
+            tbody.innerHTML = '';
+
+            APARTMENTS.filter(a => {
+                if(blockFilter !== 'Hepsi' && a.block !== blockFilter) return false;
+                return a.name.toLowerCase().includes(search) || a.phone.includes(search) || (a.plate && a.plate.toLowerCase().includes(search));
+            }).forEach(a => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${a.block}-${a.no}</b></td>
+                        <td>${a.name}</td>
+                        <td>${a.phone}</td>
+                        <td>${formatTL(a.fee)}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="window.editApartment('${a.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="window.deleteApartment('${a.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.deleteApartment = async (id) => {
+            if(confirm("Daire kaydını kalıcı olarak silmek istiyor musunuz?")) {
+                showMask();
+                await deleteDoc(doc(db, "apartments", id));
+                showToast("Daire silindi.");
+            }
+        };
+
+        // --- DUYURULAR VE LİSTELEME ---
+        document.getElementById('btn-save-announcement').onclick = async () => {
+            const title = document.getElementById('ann-title').value.trim();
+            const content = document.getElementById('ann-content').value.trim();
+            if(!title || !content) return showToast("Lütfen alanları doldurun.", "danger");
+            try {
+                showMask();
+                await addDoc(collection(db, "announcements"), { title, content, createdAt: new Date().toISOString() });
+                showToast("Duyuru asıldı.");
+                document.getElementById('ann-title').value = '';
+                document.getElementById('ann-content').value = '';
+            } catch(e) { showToast("Hata: " + e.message, "danger"); hideMask(); }
+        };
+
+        function renderAnnouncements() {
+            const adminList = document.getElementById('admin-announcements-list');
+            const resList = document.getElementById('res-announcements-list');
+            const pubList = document.getElementById('pub-announcements');
+
+            if(adminList) adminList.innerHTML = '';
+            if(resList) resList.innerHTML = '';
+            if(pubList) pubList.innerHTML = '';
+
+            ANNOUNCEMENTS.forEach((a, idx) => {
+                const markup = `<div style="border:1px solid var(--border); padding:10px; border-radius:6px; background:#f8fafc;"><b>${a.title}</b><p class="small text-muted">${a.content}</p></div>`;
+                if(adminList) {
+                    adminList.innerHTML += `
+                        <div style="border:1px solid var(--border); padding:12px; border-radius:6px; background:#f8fafc; display:flex; justify-content:space-between; align-items:center;">
+                            <div><h5>${a.title}</h5><p class="small text-muted">${a.content}</p></div>
+                            <button class="btn btn-danger btn-sm" onclick="window.deleteAnnouncement('${a.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                }
+                if(resList) resList.innerHTML += markup;
+                if(pubList && idx < 5) pubList.innerHTML += markup;
+            });
+        }
+
+        window.deleteAnnouncement = async (id) => {
+            if(confirm("Duyuruyu silmek istiyor musunuz?")) {
+                showMask();
+                await deleteDoc(doc(db, "announcements", id));
+                showToast("Duyuru kaldırıldı.");
+            }
+        };
+
+        // --- SAKİN TALEPLERİ ---
+        function renderRequests() {
+            const tbody = document.getElementById('admin-requests-table');
+            const tabBtn = document.getElementById('nav-tab-talepler');
+            const pubList = document.getElementById('pub-requests-list');
+            
+            tbody.innerHTML = '';
+            if(pubList) pubList.innerHTML = '';
+
+            if(REQUESTS.length > 0) tabBtn.classList.add('notification-dot');
+            else tabBtn.classList.remove('notification-dot');
+
+            REQUESTS.forEach((r, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><small>${r.createdAt ? r.createdAt.substring(0,10) : '-'}</small></td>
+                        <td><span class="badge badge-a">${r.apartmentContext || '-'}</span></td>
+                        <td><b>${r.residentName}</b></td>
+                        <td>${r.message}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="window.deleteRequest('${r.id}')"><i class="fas fa-check"></i> Sil / Çözüldü</button></td>
+                    </tr>
+                `;
+                if(pubList && idx < 5) {
+                    pubList.innerHTML += `<tr><td><b>${r.apartmentContext}</b></td><td class="small text-muted">${r.message}</td></tr>`;
+                }
+            });
+        }
+
+        window.deleteRequest = async (id) => {
+            showMask();
+            await deleteDoc(doc(db, "requests", id));
+            showToast("Talep çözüldü.");
+        };
+
+        // --- SAKİN DASHBOARD ---
+        function updateResidentDashboard() {
+            if(!loggedInResident) return;
+            const fresh = APARTMENTS.find(a => a.id === loggedInResident.id) || loggedInResident;
+
+            document.getElementById('res-view-block').innerText = fresh.block;
+            document.getElementById('res-view-no').innerText = fresh.no;
+            document.getElementById('res-view-name').innerText = fresh.name;
+            document.getElementById('res-view-phone').innerText = fresh.phone;
+            document.getElementById('res-view-amount').innerText = formatTL(fresh.fee);
+            document.getElementById('res-wa-direct').href = `https://wa.me/90${fresh.phone}?text=Merhaba%20Yönetici,`;
+
+            const statusBox = document.getElementById('res-view-status');
+            if(fresh.feeStatus === 'Ödendi') {
+                statusBox.innerHTML = '<span class="badge badge-success" style="font-size:1rem; padding:6px 12px;"><i class="fas fa-check-circle"></i> ÖDENDİ</span>';
+                document.getElementById('res-view-amount').style.color = 'var(--success)';
+            } else {
+                statusBox.innerHTML = '<span class="badge badge-danger" style="font-size:1rem; padding:6px 12px;"><i class="fas fa-times-circle"></i> BORCUNUZ VAR</span>';
+                document.getElementById('res-view-amount').style.color = 'var(--danger)';
+            }
+        }
+
+        document.getElementById('btn-send-request').onclick = async () => {
+            const text = document.getElementById('res-request-text').value.trim();
+            if(!text) return showToast("Lütfen bir mesaj yazın.", "danger");
+            try {
+                showMask();
+                await addDoc(collection(db, "requests"), {
+                    residentName: loggedInResident.name,
+                    apartmentContext: `${loggedInResident.block} No:${loggedInResident.no}`,
+                    message: text,
+                    createdAt: new Date().toISOString()
+                });
+                showToast("Talebiniz iletildi.");
+                document.getElementById('res-request-text').value = '';
+            } catch(e) { showToast("Hata: " + e.message, "danger"); }
+            finally { hideMask(); }
+        };
+
+        // --- PDF RAPOR MOTORLARI ---
+        function renderReports() {
+            const aidatBody = document.getElementById('report-aidat-body');
+            const giderBody = document.getElementById('report-gider-body');
+            
+            if(aidatBody) {
+                aidatBody.innerHTML = '';
+                APARTMENTS.forEach((a, index) => {
+                    aidatBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${a.block}</td>
+                            <td><b>${a.no}</b></td>
+                            <td>${a.name}</td>
+                            <td>${a.phone}</td>
+                            <td class="fw-bold">${formatTL(a.fee)}</td>
+                            <td><span class="badge ${a.feeStatus === 'Ödendi' ? 'badge-success' : 'badge-danger'}">${a.feeStatus || 'Ödenmedi'}</span></td>
+                            <td>+90${a.phone}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            if(giderBody) {
+                giderBody.innerHTML = '';
+                let totalGider = 0;
+                EXPENSES.forEach(e => {
+                    totalGider += parseFloat(e.amount || 0);
+                    giderBody.innerHTML += `<tr><td>${e.desc}</td><td>${e.date}</td><td class="fw-bold text-danger">${formatTL(e.amount)}</td></tr>`;
+                });
+                document.getElementById('report-gider-total').innerText = formatTL(totalGider);
+            }
+        }
+
+        // --- GLOBAL WINDOW SCOPE METOTLAR ---
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            event.currentTarget.classList.add('active');
+        };
+
+        window.exportPDF = (elementId, filename) => {
+            const element = document.getElementById(elementId);
+            const opt = {
+                margin:       10,
+                filename:     `${filename}_${new Date().toISOString().substring(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        };
+
+        // Başlangıç tetikçisi
+        checkSession();
+
+    </script>
+</body>
+</html>
