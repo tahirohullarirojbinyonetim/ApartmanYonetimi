@@ -29,7 +29,7 @@
     -webkit-font-smoothing: antialiased;
   }
   
-  /* Mobil Dokunma Parlamalarını Kapatma */
+  /* Mobil Cihazlardaki Parlama Efektlerini Engelleme */
   button, select, input, textarea, a, tr, td, th {
     -webkit-tap-highlight-color: transparent !important;
     outline: none !important;
@@ -157,7 +157,7 @@
   .row { display: flex; gap: 12px; flex-wrap: wrap; }
   .row > .field { flex: 1; min-width: 150px; }
 
-  /* Premium Buton Tıklama ve Dokunma Efektleri */
+  /* Premium Buton Efektleri */
   button.btn { cursor: pointer; border: none; font-weight: 700; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .btn-primary { background: var(--primary); color: #fff; }
   .btn-primary:hover { background: #172554; }
@@ -273,7 +273,7 @@
   }
   
   /* ============================================================ */
-  /* KUSURSUZ DİKEY A4 PDF BASKI TASARIMI */
+  /* KUSURSUZ DIKEY A4 PDF BASKI VE KLON TASARIMI CSS */
   /* ============================================================ */
   .pdf-print-wrapper {
     background: #ffffff !important;
@@ -282,20 +282,20 @@
     border: 1px solid #cbd5e1;
   }
   
-  /* Raporlama Butonuna Basıldığında Geçici Olarak Giydirilen Sınıf */
+  /* Arka Planda Çalışan PDF Klon Sınıfı */
   .pdf-print-active {
-    padding: 4px 6px !important;
+    padding: 10px 15px !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;
-    width: 100% !important;
-    font-size: 11px !important;
+    color: #000000 !important;
+    width: 210mm !important; /* Dikey A4 Genişliği */
   }
   .pdf-print-active h2 {
-    font-size: 13px !important;
-    margin: 0 0 10px 0 !important;
-    padding-bottom: 4px !important;
+    font-size: 16px !important;
+    margin: 0 0 14px 0 !important;
+    padding-bottom: 6px !important;
     text-align: center !important;
     color: #1e3a8a !important;
     border-bottom: 2px solid #d97706 !important;
@@ -303,22 +303,24 @@
   .pdf-print-active table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 10px !important;
+    font-size: 11px !important;
+    margin-bottom: 12px !important;
   }
   .pdf-print-active th, .pdf-print-active td {
-    padding: 4px 6px !important;
+    padding: 6px 8px !important;
     border: 1px solid #94a3b8 !important;
+    color: #000000 !important;
+    background: transparent !important;
   }
   .pdf-print-active th {
     background-color: #1e3a8a !important;
     color: #ffffff !important;
     font-weight: bold !important;
-    font-size: 9px !important;
   }
   .pdf-print-active tfoot td {
-    padding: 5px 6px !important;
     font-weight: bold !important;
-    font-size: 10px !important;
+    background-color: #f1f5f9 !important;
+    font-size: 11px !important;
   }
 </style>
 </head>
@@ -610,7 +612,7 @@
           <input type="hidden" id="aptId">
           <div class="field" style="flex:0 0 140px;"><label>Blok</label><select id="newApartmentBlock"><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
           <div class="field"><label>Daire No</label><input type="number" id="newApartmentNo" placeholder="0"></div>
-          <div class="field"><label>Mülk Sahibi İsim</label><input type="text" id="newApartmentName" placeholder="Adı Soyadı"></div>
+          <div class="field"><label>Mülk Sakini İsim</label><input type="text" id="newApartmentName" placeholder="Adı Soyadı"></div>
         </div>
         <div class="row">
           <div class="field"><label>GSM Telefon</label><input type="text" id="newApartmentPhone" placeholder="05xxxxxxxx"></div>
@@ -660,7 +662,7 @@
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF İndir</button></div>
         </div>
         
-        <!-- YENİ DIKEY STANDARTLARINA UYGUN PREMIUM PDF KAPSAYICI -->
+        <!-- DIKEY STANDARTLARINA UYGUN PREMIUM PDF KAPSAYICI -->
         <div class="table-wrap pdf-print-wrapper" id="reportTableContainer">
           <h2 id="pdfDynamicTitle">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
           <table id="reportTable" style="width: 100%; border-collapse: collapse;">
@@ -892,7 +894,10 @@ function processExpenses(snap) {
         EXPENSES.push({ id: doc.id, description: d.acıklama || d.açıklama || d.desc || d.description, amount: d.miktar || d.amount || d.tutar, date: d.tarih || d.date });
     });
     renderPublicDashboard();
-    if (session.role === 'admin') renderExpensesTable();
+    if (session.role === 'admin') {
+        renderExpensesTable();
+        renderExpenseReport(); // Veritabanından her yeni veri geldiğinde gider raporunu diri tut.
+    }
 }
 
 function populateResidentSelect() {
@@ -1341,10 +1346,10 @@ function renderReport() {
     var html = ''; 
     
     let paidCount = 0; let unpaidCount = 0; 
-    let totalTariff = 0; // SİTE TOPLAM TARİFE ALACAĞI
-    let totalPaid = 0; // TOPLAM TOPLANAN
-    let totalUnpaid = 0; // TOPLAM TOPLANMAYAN (KALAN BORÇ)
-    let totalExpenses = 0; // TOPLAM GİDER
+    let totalTariff = 0; 
+    let totalPaid = 0; 
+    let totalUnpaid = 0; 
+    let totalExpenses = 0; 
 
     EXPENSES.forEach(e => { totalExpenses += Number(e.amount || 0); });
 
@@ -1369,7 +1374,7 @@ function renderReport() {
 
     let cashBalance = totalPaid - totalExpenses;
 
-    // ALTA EKLENEN PROFESYONEL ÖZET TABLOSU (ÇİZİME SADIK KALINDI)
+    // ALTA EKLENEN PROFESYONEL ÖZET TABLOSU
     if(footer) { 
         footer.innerHTML = `
             <tr>
@@ -1412,31 +1417,55 @@ function renderExpenseReport() {
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// DIKEY A4 PDF BASKI VE INDIRME MOTORU (KUSURSUZ MODEL)
+// ============================================================
+// %100 SIFIR BOŞLUKLU, ASLA BOŞ ÇIKMAYAN DIKEY PDF MOTORU (KLON SİSTEMİ)
+// ============================================================
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
+    if (!element) return;
     
-    // Geçici olarak baskı sınıfı ekleniyor (Üst boşluğu yok eder ve tabloyu dikey kağıda sığdırır)
-    element.classList.add('pdf-print-active');
+    // 1. Önce elementin anlık görüntüsünü kopyala (Klonla)
+    var clone = element.cloneNode(true);
+    
+    // 2. Klonu gövdeye (body) ekle, dikey A4 boyutuna zorla ve görünür kıl
+    clone.classList.add('pdf-print-active');
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.width = '210mm'; // Portrait A4 Genişlik standardı
+    clone.style.zIndex = '-99999';
+    clone.style.backgroundColor = '#ffffff';
+    clone.style.display = 'block';
+    clone.style.visibility = 'visible';
+    
+    document.body.appendChild(clone);
+    
+    var titleMonth = document.getElementById('reportMonth').value;
+    var titleYear = document.getElementById('reportYear').value;
+    var filename = elementId === 'reportTableContainer' ? 'aidat_raporu_' + titleMonth + '_' + titleYear + '.pdf' : 'gider_raporu_' + titleMonth + '_' + titleYear + '.pdf';
     
     var opt = {
-      margin:       [4, 4, 4, 4], // Üstte ve altta boşluk kalmaması için milimetrik marj
-      filename:     'tahirogullari_rapor.pdf',
+      margin:       [4, 4, 4, 4], // Milimetrik sıfıra sıfır kenar boşluğu
+      filename:     filename,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2.2, useCORS: true, letterRendering: true, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } // Kusursuz dikey mod kuralı
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } // KUSURSUZ DIKEY MOD
     };
     
-    showLoading('A4 PDF Raporu Çiziliyor...');
-    html2pdf().set(opt).from(element).save().then(() => {
-        element.classList.remove('pdf-print-active');
-        hideLoading();
-        toast('Rapor Başarıyla Telefona İndirildi!', 'success');
-    }).catch((err) => {
-        element.classList.remove('pdf-print-active');
-        hideLoading();
-        toast('Hata Oluştu: ' + err.message, 'danger');
-    });
+    showLoading('A4 PDF Raporu Hazırlanıyor...');
+    
+    // 3. Klonlanan bağımsız elementi PDF'e dök (Sekme kapalı olsa dahi boş kalmaz!)
+    setTimeout(() => {
+        html2pdf().set(opt).from(clone).save().then(() => {
+            document.body.removeChild(clone); // İndirme bitince klonu temizle
+            hideLoading();
+            toast('Rapor Başarıyla Telefona İndirildi! 📥', 'success');
+        }).catch((err) => {
+            document.body.removeChild(clone);
+            hideLoading();
+            toast('Hata Oluştu: ' + err.message, 'danger');
+        });
+    }, 500); // Tarayıcı motorunun render etmesi için 500ms bekleme süresi
 }
 
 document.getElementById('printReportBtn').onclick = () => openPDFInNewTab('reportTableContainer');
@@ -1454,10 +1483,23 @@ tabBtns.forEach(btn => {
     };
 });
 
+// Sistem Başlangıç Filtrelerini Cari Ayın 1'i ve Son Günü Yapma
 var todayStr = new Date().toISOString().slice(0, 10);
+var now = new Date();
+var y = now.getFullYear();
+var m = String(now.getMonth() + 1).padStart(2, '0');
+var firstDayStr = y + '-' + m + '-01';
+var lastDayVal = new Date(y, now.getMonth() + 1, 0).getDate();
+var lastDayStr = y + '-' + m + '-' + String(lastDayVal).padStart(2, '0');
+
 document.getElementById('expDate').value = todayStr;
-document.getElementById('expFilterStart').value = todayStr; document.getElementById('expFilterEnd').value = todayStr;
-document.getElementById('expReportStart').value = todayStr; document.getElementById('expReportEnd').value = todayStr;
+document.getElementById('expFilterStart').value = firstDayStr;
+document.getElementById('expFilterEnd').value = lastDayStr;
+document.getElementById('expReportStart').value = firstDayStr;
+document.getElementById('expReportEnd').value = lastDayStr;
+
+expenseFilterStart = firstDayStr;
+expenseFilterEnd = lastDayStr;
 
 checkSession();
 </script>
