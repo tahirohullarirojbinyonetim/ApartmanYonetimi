@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="tr" class="notranslate">
 <head>
@@ -27,10 +28,16 @@
     color: #1f2937;
     -webkit-font-smoothing: antialiased;
   }
+  
+  /* Mobil Cihazlardaki Çirkin Dokunma Parlamalarını Engelleme */
+  button, select, input, textarea, a, tr, td, th {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
   header.topbar {
     background: linear-gradient(135deg, var(--primary) 0%, #172554 100%);
     color: #fff;
-    padding: 20px 24px;
+    padding: 16px 24px;
     box-shadow: var(--shadow);
     position: sticky;
     top: 0;
@@ -45,7 +52,7 @@
     gap: 12px;
   }
   header.topbar h1 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     margin: 0;
     display: flex;
     align-items: center;
@@ -53,11 +60,28 @@
     font-weight: 700;
     letter-spacing: 0.5px;
   }
-  header.topbar .slogan { font-size: .85rem; opacity: .85; margin-top: 4px; font-weight: 500; }
-  header.topbar .designer-credit { font-size: .7rem; opacity: .6; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 20px; }
+  header.topbar .slogan { font-size: .8rem; opacity: .85; margin-top: 3px; font-weight: 500; }
+  header.topbar .designer-credit { font-size: .7rem; opacity: .8; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; }
   header.topbar .user-box { display: flex; align-items: center; gap: 12px; font-size: .9rem; }
-  header.topbar button {
+  
+  header.topbar button.admin-trigger-btn {
     background: var(--accent);
+    border: none;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.725rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  header.topbar button.admin-trigger-btn:hover { background: #b45309; transform: scale(1.03); }
+  header.topbar button.admin-trigger-btn:active { background: #92400e !important; transform: scale(0.97); }
+  
+  header.topbar button.logout-btn {
+    background: var(--danger);
     border: none;
     color: #fff;
     padding: 8px 16px;
@@ -65,7 +89,9 @@
     cursor: pointer;
     font-weight: 600;
   }
-  header.topbar button:hover { background: #b45309; }
+  header.topbar button.logout-btn:hover { background: #b91c1c; }
+  header.topbar button.logout-btn:active { background: #991b1b !important; transform: scale(0.97); }
+  
   main { max-width: 1240px; margin: 0 auto; padding: 24px; }
   .hidden { display: none !important; }
 
@@ -87,8 +113,8 @@
     background: linear-gradient(90deg, var(--primary), var(--accent));
   }
 
-  .card h2 { margin: 0 0 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; }
-  .card h3 { margin: 0 0 14px; font-size: 1.05rem; color: var(--primary); font-weight: 600; }
+  .card h2 { margin: 0 0 20px; font-size: 1.15rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; }
+  .card h3 { margin: 0 0 14px; font-size: 1rem; color: var(--primary); font-weight: 600; }
 
   .grid { display: grid; gap: 20px; }
   .grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -96,80 +122,128 @@
 
   .stat-card {
     border-radius: var(--radius);
-    padding: 24px;
+    padding: 20px;
     color: #fff;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     position: relative;
   }
   .stat-card.collected { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
   .stat-card.expenses { background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%); }
   .stat-card.balance { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); }
-  .stat-card .label { font-size: .85rem; opacity: .85; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-card .value { font-size: 1.8rem; font-weight: 800; }
-  .stat-card i { position: absolute; right: 20px; bottom: 20px; font-size: 2.5rem; opacity: 0.15; }
+  .stat-card .label { font-size: .8rem; opacity: .85; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 1.6rem; font-weight: 800; }
+  .stat-card i { position: absolute; right: 16px; bottom: 16px; font-size: 2.2rem; opacity: 0.15; }
 
-  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f3f4f6; gap: 12px; }
+  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 12px; }
   .list-item:last-child { border-bottom: none; }
   .list-item .meta { font-size: .8rem; color: var(--secondary); font-weight: 500; }
 
   .admin-box-item { background: #f9fafb; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 14px; }
   .admin-box-item .item-title { font-weight: 700; color: var(--primary); font-size: 0.95rem; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
 
-  .badge { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 30px; font-size: .75rem; font-weight: 700; }
+  .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 30px; font-size: .75rem; font-weight: 700; }
   .badge.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
   .badge.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
   .badge.neutral { background: #f3f4f6; color: #4b5563; }
 
-  input, select, textarea, button.btn { font-family: inherit; font-size: .9rem; padding: 12px 16px; border-radius: 10px; border: 1px solid #d1d5db; outline: none; width: 100%; background: #fff; color: #1f2937; }
-  input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
-  label { font-size: .8rem; font-weight: 700; color: #4b5563; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .field { margin-bottom: 16px; }
-  .row { display: flex; gap: 16px; flex-wrap: wrap; }
-  .row > .field { flex: 1; min-width: 180px; }
+  input, select, textarea, button.btn { font-family: inherit; font-size: .85rem; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; outline: none; width: 100%; background: #fff; color: #1f2937; }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+  label { font-size: .75rem; font-weight: 700; color: #4b5563; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .field { margin-bottom: 12px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > .field { flex: 1; min-width: 150px; }
 
+  /* Premium Buton Tıklama ve Dokunma Efektleri */
   button.btn { cursor: pointer; border: none; font-weight: 700; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .btn-primary { background: var(--primary); color: #fff; }
   .btn-primary:hover { background: #172554; }
+  .btn-primary:active { background: #0f172a !important; transform: translateY(1px); }
+  
   .btn-success { background: var(--success); color: #fff; }
   .btn-success:hover { background: #047857; }
+  .btn-success:active { background: #064e3b !important; transform: translateY(1px); }
+  
   .btn-danger { background: var(--danger); color: #fff; }
   .btn-danger:hover { background: #991b1b; }
+  .btn-danger:active { background: #7f1d1d !important; transform: translateY(1px); }
+  
   .btn-secondary { background: var(--secondary); color: #fff; }
+  .btn-secondary:active { background: #374151 !important; transform: translateY(1px); }
+  
   .btn-outline { background: transparent; border: 1px solid #d1d5db; color: #4b5563; }
   .btn-outline:hover { background: #f9fafb; }
-  .btn-sm { padding: 8px 14px; font-size: .8rem; border-radius: 6px; }
+  .btn-outline:active { background: #e5e7eb !important; transform: translateY(1px); }
+  
+  .btn-sm { padding: 6px 12px; font-size: .75rem; border-radius: 6px; }
 
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
-  th { color: var(--primary); font-weight: 700; background: #f8fafc; font-size: .8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  th { color: var(--primary); font-weight: 700; background: #f8fafc; font-size: .75rem; text-transform: uppercase; letter-spacing: 0.5px; }
   .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; }
 
   .btn-row-inline { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; width: 100%; }
-  .btn-row-inline .field-btn { flex: 1; min-width: 120px; white-space: nowrap; }
+  .btn-row-inline .field-btn { flex: 1; min-width: 110px; white-space: nowrap; }
 
   .clickable-row { cursor: pointer; }
   .clickable-row:hover { background: #f9fafb !important; }
   .details-row { background: #f9fafb !important; display: none; }
-  .details-row td { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; }
-  .details-container { display: flex; flex-wrap: wrap; gap: 16px; }
-  .details-block { background: #fff; padding: 14px 18px; border-radius: 10px; border: 1px solid #e5e7eb; flex: 1; min-width: 180px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-  .details-block strong { color: var(--secondary); display: block; margin-bottom: 6px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .details-row td { padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }
+  .details-container { display: flex; flex-wrap: wrap; gap: 12px; }
+  .details-block { background: #fff; padding: 12px 16px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 160px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+  .details-block strong { color: var(--secondary); display: block; margin-bottom: 4px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
   .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; background: #e5e7eb; padding: 6px; border-radius: 12px; }
   .tab-btn { padding: 10px 16px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-size: .85rem; font-weight: 600; color: #4b5563; display: flex; align-items: center; gap: 8px; width: auto; }
   .tab-btn.active { background: #fff; color: var(--primary); font-weight: 700; box-shadow: var(--shadow); }
+  .tab-btn:active { transform: scale(0.98); }
   .tab-btn .notification-dot { display: none; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-left: 4px; }
   .tab-btn .notification-dot.active { display: inline-block; }
 
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  .login-wrap { display: flex; gap: 24px; max-width: 850px; margin: 0 auto 24px; flex-wrap: wrap; }
-  .login-wrap .card { flex: 1; min-width: 280px; margin-bottom: 0; }
-  .login-wrap .icon-circle { width: 54px; height: 54px; border-radius: 12px; background: #eff6ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px; border: 1px solid #bfdbfe; }
+  /* Şık ve Modern Şifre Giriş Penceresi */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+  }
+  .modal-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-top: 5px solid var(--accent);
+    position: relative;
+  }
+  .modal-card h3 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-card .close-modal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--secondary);
+    cursor: pointer;
+  }
 
   #loadingMask { position: fixed; inset: 0; background: rgba(30, 58, 138, 0.8); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 999; color: #fff; backdrop-filter: blur(5px); }
   .spinner { width: 44px; height: 44px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); animation: spin 0.6s linear infinite; }
@@ -181,13 +255,14 @@
   .toast.danger { border-left: 5px solid var(--danger); }
 
   .empty-note { color: var(--secondary); font-size: .85rem; padding: 20px 0; text-align: center; font-style: italic; }
-  .expense-filter { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding: 20px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; }
-  .expense-filter .field { flex: 1; min-width: 160px; margin-bottom: 0; }
+  .expense-filter { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 16px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; }
+  .expense-filter .field { flex: 1; min-width: 140px; margin-bottom: 0; }
   .block-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: .7rem; font-weight: 800; letter-spacing: 0.5px; }
   .block-badge.a { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
   .block-badge.b { background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; }
 
-  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: .75rem; text-decoration: none; font-weight: 600; box-shadow: 0 2px 4px rgba(34,197,94,0.2); }
+  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: .75rem; text-decoration: none; font-weight: 600; box-shadow: 0 2px 4px rgba(34,197,94,0.2); }
+  .whatsapp-btn:active { background: #166534 !important; transform: scale(0.97); }
 
   @media (max-width: 640px) {
     main { padding: 12px; }
@@ -206,17 +281,45 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- ŞIK ŞİFRE GİRİŞ POPUP'I -->
+<div id="adminPasswordModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button class="close-modal" id="closeAdminModalBtn">&times;</button>
+    <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent);"></i> Yönetim Girişi</h3>
+    <div class="field">
+      <label>Erişim Şifresi</label>
+      <input type="password" id="adminPassword" placeholder="••••" autocomplete="off" style="text-align: center; font-size: 1.25rem; letter-spacing: 4px;">
+    </div>
+    <button class="btn btn-primary" id="adminLoginBtn" style="width: 100%;"><i class="fa-solid fa-key"></i> Doğrula ve Giriş Yap</button>
+  </div>
+</div>
+
+<!-- ŞIK GÜVENLİ ÖZEL ONAY POPUP'I (CONFIRM MODAL) -->
+<div id="confirmModal" class="modal-overlay hidden">
+  <div class="modal-card" style="border-top: 5px solid var(--danger);">
+    <h3 id="confirmTitle"><i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Onay Gerekiyor</h3>
+    <p id="confirmMessage" style="font-size: 0.9rem; margin-bottom: 20px; color: var(--secondary); line-height: 1.5;"></p>
+    <div style="display:flex; gap:12px; justify-content: flex-end;">
+      <button class="btn btn-outline btn-sm" id="confirmCancelBtn" style="width: auto; padding: 6px 16px;">Vazgeç</button>
+      <button class="btn btn-danger btn-sm" id="confirmOkBtn" style="width: auto; padding: 6px 16px;">Evet, Onayla</button>
+    </div>
+  </div>
+</div>
+
 <header class="topbar">
   <div class="top-row">
     <div>
       <h1><i class="fa-solid fa-hotel" style="color: var(--accent);"></i> Tahiroğulları Rojbin Sitesi</h1>
       <div class="slogan">Komşuluk Hukukuyla Şeffaf ve Güvenli Bina Otomasyonu</div>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <span class="designer-credit">Yazılım Editörü: Esafil SERT</span>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="designer-credit">
+        <span>Yazılım Editörü: Esafil SERT</span>
+        <button id="openAdminModalBtn" class="admin-trigger-btn"><i class="fa-solid fa-lock"></i> Yönetici Girişi</button>
+      </div>
       <div class="user-box" id="userBox">
         <span id="userLabel" style="font-weight: 600; opacity: 0.9;"></span>
-        <button id="logoutBtn" class="hidden"><i class="fa-solid fa-right-from-bracket"></i> Güvenli Çıkış</button>
+        <button id="logoutBtn" class="logout-btn hidden"><i class="fa-solid fa-right-from-bracket"></i> Güvenli Çıkış</button>
       </div>
     </div>
   </div>
@@ -225,37 +328,8 @@
 <main>
 
   <section id="loginView">
-    <div class="login-wrap">
-      <div class="card">
-        <div class="icon-circle"><i class="fa-solid fa-user-gear"></i></div>
-        <h3>Site Yönetim Girişi</h3>
-        <div class="field">
-          <label>Erişim Şifresi</label>
-          <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="new-password">
-        </div>
-        <button class="btn btn-primary" id="adminLoginBtn" style="width:100%;"><i class="fa-solid fa-shield-halved"></i> Yönetim Panelini Aç</button>
-      </div>
-
-      <div class="card">
-        <div class="icon-circle"><i class="fa-solid fa-house-chimney-user"></i></div>
-        <h3>Kat Sakini Sorgulama</h3>
-        <div class="field">
-          <label>Blok / Daire Seçimi</label>
-          <select id="residentSelect"><option value="">Veriler çekiliyor...</option></select>
-        </div>
-        <div class="field">
-          <label>Sistemde Kayıtlı Telefon</label>
-          <input type="tel" id="residentPhone" placeholder="05xxxxxxxx">
-        </div>
-        <div style="background: #fffbeb; color: #b45309; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; border: 1px solid #fde68a;">
-          ⚠️ ÖNEMLİ: Raporların ve listelerin hatasız görüntülenmesi için tarayıcınızın otomatik Türkçe çeviri (Translate) özelliğini kapatınız!
-        </div>
-        <button class="btn btn-success" id="residentLoginBtn" style="width:100%;"><i class="fa-solid fa-key"></i> Daire Ödeme Bilgilerini Gör</button>
-        <div id="residentError" style="color:var(--danger);font-size:.8rem;margin-top:10px;display:none; font-weight:500;"></div>
-      </div>
-    </div>
-
-    <div class="grid grid-3" style="margin-top: 24px;">
+    <!-- ANA KASA STAT KARTLARI -->
+    <div class="grid grid-3">
       <div class="stat-card collected">
         <i class="fa-solid fa-hand-holding-dollar"></i>
         <span class="label">Toplam Toplanan Aidat</span>
@@ -273,37 +347,83 @@
       </div>
     </div>
 
+    <!-- ALT İKİLİ SÜTUN DÜZENİ -->
     <div class="grid grid-2" style="margin-top:24px;">
-      <div class="card">
+      <!-- SOL SÜTUN: SAKİN SORGULAMA & DUYURULAR -->
+      <div>
+        <div class="card" style="padding: 16px; margin-bottom: 20px;">
+          <h2 style="font-size: 1rem; margin-bottom: 12px;"><i class="fa-solid fa-house-chimney-user" style="color:var(--success);"></i> Kat Sakini Sorgulama</h2>
+          <div class="field" style="margin-bottom: 8px;">
+            <select id="residentSelect" style="padding: 8px 12px; font-size: 0.8rem;"><option value="">Veriler çekiliyor...</option></select>
+          </div>
+          <div class="field" style="margin-bottom: 8px;">
+            <input type="tel" id="residentPhone" placeholder="Sistemde kayıtlı telefon numarası" style="padding: 8px 12px; font-size: 0.8rem;">
+          </div>
+          <button class="btn btn-success btn-sm" id="residentLoginBtn" style="width:100%; font-size: 0.8rem; padding: 8px;"><i class="fa-solid fa-key"></i> Borç Bilgilerini Gör</button>
+          <div id="residentError" style="color:var(--danger);font-size:.75rem;margin-top:8px;display:none; font-weight:600;"></div>
+        </div>
+
+        <div class="card" style="padding: 20px;">
+          <h2><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> Blok Panosu Duyuruları</h2>
+          <div id="pubAnnouncementList"><div class="empty-note">Kayıt yok</div></div>
+        </div>
+      </div>
+
+      <!-- SAĞ SÜTUN: GİDER FATURALARI -->
+      <div class="card" style="padding: 20px;">
         <h2><i class="fa-solid fa-file-receipt" style="color:var(--danger);"></i> Son Siteden Çıkan Giderler</h2>
         <div id="pubExpenseList"><div class="empty-note">Kayıt yok</div></div>
-      </div>
-      <div class="card">
-        <h2><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> Blok Panosu Duyuruları</h2>
-        <div id="pubAnnouncementList"><div class="empty-note">Kayıt yok</div></div>
       </div>
     </div>
   </section>
 
+  <!-- KAT SAKİNİ GÖRÜNÜMÜ -->
   <section id="residentView" class="hidden">
     <div class="card">
       <h2><i class="fa-solid fa-id-card"></i> Daire Kayıt Kartı - No <span id="resApt"></span></h2>
       <div class="resident-info">
-        <div class="info-item">
+        <div class="info-item" style="margin-bottom:10px;">
           <label>Blok Konumu</label>
-          <div class="value"><span id="resBlock"></span></div>
+          <div class="value" style="font-weight:700;"><span id="resBlock"></span></div>
         </div>
-        <div class="info-item">
+        <div class="info-item" style="margin-bottom:10px;">
           <label>Mülk Sahibi / Sakini</label>
-          <div class="value" id="resName">-</div>
+          <div class="value" id="resName" style="font-weight:700;">-</div>
         </div>
-        <div class="info-item">
+        <div class="info-item" style="margin-bottom:10px;">
           <label>İletişim Hattı</label>
-          <div class="value" id="resPhone">-</div>
+          <div class="value" id="resPhone" style="font-weight:700;">-</div>
         </div>
-        <div class="info-item">
-          <label>Mevcut Dönem Durumu</label>
-          <div class="value"><span id="resDueBadge" class="badge neutral">Bilinmiyor</span></div>
+      </div>
+    </div>
+
+    <!-- DİNAMİK AYLIK AİDAT DURUMU SORGULAMA KARTI -->
+    <div class="card">
+      <h2><i class="fa-solid fa-calculator" style="color:var(--accent);"></i> Dönemlik Aidat Ödeme Durumu Sorgula</h2>
+      <div class="row">
+        <div class="field" style="flex:1; min-width:140px;">
+          <label>Yıl Seçimi</label>
+          <select id="resDueYear">
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+        <div class="field" style="flex:1; min-width:140px;">
+          <label>Ay Seçimi</label>
+          <select id="resDueMonth"></select>
+        </div>
+      </div>
+      
+      <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12px;">
+        <div>
+          <div style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; text-transform: uppercase;">Sorgulanan Dönem</div>
+          <div id="resDueSelectedPeriod" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Temmuz 2026</div>
+        </div>
+        <div>
+          <div style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; text-align: right;">Ödeme Durumu</div>
+          <div id="resDueStatusContainer" style="text-align: right;">
+            <span class="badge neutral">Yükleniyor...</span>
+          </div>
         </div>
       </div>
     </div>
@@ -323,6 +443,7 @@
     </div>
   </section>
 
+  <!-- YÖNETİCİ GÖRÜNÜMÜ -->
   <section id="adminView" class="hidden">
     <div class="tabs">
       <button class="tab-btn active" data-tab="tabOverview"><i class="fa-solid fa-users"></i> Sakinler Listesi</button>
@@ -486,7 +607,7 @@
           <div class="field" style="flex:0 0 160px;"><label>Rapor Dönemi</label><select id="reportMonth"><option value="Ocak">Ocak</option><option value="Şubat">Şubat</option><option value="Mart">Mart</option><option value="Nisan">Nisan</option><option value="Mayıs">Mayıs</option><option value="Haziran">Haziran</option><option value="Temmuz" selected>Temmuz</option><option value="Ağustos">Ağustos</option><option value="Eylül">Eylül</option><option value="Ekim">Ekim</option><option value="Kasım">Kasım</option><option value="Aralık">Aralık</option></select></div>
           <div class="field" style="flex:0 0 120px;"><label>Yıl</label><input type="number" id="reportYear" value="2026"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="reportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF Raporu Yeni Sekmede Aç</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> Yatay A4 PDF Aç</button></div>
         </div>
         
         <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="reportTableContainer">
@@ -523,7 +644,7 @@
           <div class="field" style="flex:0 0 180px;"><label>Başlangıç Tarihi</label><input type="date" id="expReportStart"></div>
           <div class="field" style="flex:0 0 180px;"><label>Bitiş Tarihi</label><input type="date" id="expReportEnd"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="expReportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF Gider Raporu Aç</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> Yatay A4 PDF Aç</button></div>
         </div>
         
         <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="expenseReportTableContainer">
@@ -551,6 +672,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -564,8 +686,11 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
-const ADMIN_PASSWORD = "admin123";
+
+// YÖNETİCİ ŞİFRESİ
+const ADMIN_PASSWORD = "0000";
 
 let session = { role: null, apt: null, phone: null, block: null, fullName: null };
 let APARTMENTS = [];
@@ -577,6 +702,39 @@ let searchTerm = '';
 let blockFilter = '';
 let expenseFilterStart = '';
 let expenseFilterEnd = '';
+
+// GÜVENLİ ÖZEL DIALOG MOTORU (CONFIRM MODAL)
+let activeConfirmCallback = null;
+function askConfirm(message, onOk, isDanger = true) {
+    activeConfirmCallback = onOk;
+    const modal = document.getElementById('confirmModal');
+    const msgEl = document.getElementById('confirmMessage');
+    const okBtn = document.getElementById('confirmOkBtn');
+    const titleEl = document.getElementById('confirmTitle');
+
+    msgEl.textContent = message;
+    if (isDanger) {
+        okBtn.className = "btn btn-danger btn-sm";
+        titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Onay Gerekiyor';
+    } else {
+        okBtn.className = "btn btn-success btn-sm";
+        titleEl.innerHTML = '<i class="fa-solid fa-circle-question" style="color:var(--success)"></i> Onay Gerekiyor';
+    }
+    modal.classList.remove('hidden');
+}
+
+document.getElementById('confirmCancelBtn').onclick = () => {
+    document.getElementById('confirmModal').classList.add('hidden');
+    activeConfirmCallback = null;
+};
+
+document.getElementById('confirmOkBtn').onclick = () => {
+    document.getElementById('confirmModal').classList.add('hidden');
+    if (activeConfirmCallback) {
+        activeConfirmCallback();
+    }
+    activeConfirmCallback = null;
+};
 
 function showLoading(text) {
     document.getElementById('loadingText').textContent = text || 'Lütfen bekleyin...';
@@ -599,6 +757,18 @@ function money(n) {
 function getBlockBadge(block) {
     var b = (block || 'A Blok').toUpperCase();
     return '<span class="block-badge ' + (b.includes('A') ? 'a' : 'b') + '">' + b + '</span>';
+}
+
+// TARİHSEL AİDAT DURUMU SORGULAMA KÜTÜPHANESİ
+function getDueState(apt, year, month) {
+    const key = year + '_' + month;
+    if (apt.dues && apt.dues[key]) {
+        return apt.dues[key];
+    }
+    if (year === '2026' && month === 'Temmuz') {
+        return { status: apt.feeStatus || 'Ödenmedi', date: apt.paymentDate || '-' };
+    }
+    return { status: 'Ödenmedi', date: '-' };
 }
 
 function getWhatsAppButton(phone, name, apartment, block, fee) {
@@ -652,13 +822,22 @@ function processApartments(snap) {
     snap.forEach(doc => {
         const d = doc.data();
         APARTMENTS.push({
-            id: doc.id, apartment: d.no || d.daireNo || d.apartment, block: d.block || d.blok || 'A Blok', fullName: d.name || d.isim || d.adSoyad || d.fullName, phone: d.phone || d.telefon, plate: d.plate || d.plaka || '-', feeAmount: d.fee || d.aidat || d.feeAmount || 500, feeStatus: d.feeStatus || d.durum || 'Ödenmedi', paymentDate: d.paymentDate || d.odemeTarihi || '-'
+            id: doc.id, 
+            apartment: d.no || d.daireNo || d.apartment, 
+            block: d.block || d.blok || 'A Blok', 
+            fullName: d.name || d.isim || d.adSoyad || d.fullName, 
+            phone: d.phone || d.telefon, 
+            plate: d.plate || d.plaka || '-', 
+            feeAmount: d.fee || d.aidat || d.feeAmount || 500, 
+            feeStatus: d.feeStatus || d.durum || 'Ödenmedi', 
+            paymentDate: d.paymentDate || d.odemeTarihi || '-',
+            dues: d.dues || {}
         });
     });
     renderPublicDashboard();
     populateResidentSelect();
     if (session.role === 'admin') renderAdminPanel();
-    if (session.role === 'resident') { renderResidentPanel(); renderResidentRepliesList(); }
+    if (session.role === 'resident') { renderResidentPanel(); }
     hideLoading();
 }
 
@@ -675,7 +854,7 @@ function processExpenses(snap) {
 function populateResidentSelect() {
     var sel = document.getElementById('residentSelect');
     if(!sel) return;
-    sel.innerHTML = '<option value="">Seçim Yapınız</option>';
+    sel.innerHTML = '<option value="">Daire Seçimi Yapınız</option>';
     APARTMENTS.forEach(a => {
         var opt = document.createElement('option');
         opt.value = a.id;
@@ -690,38 +869,103 @@ function checkNewRequests() {
     else { if(dot) dot.className = 'notification-dot'; }
 }
 
+// MODERN ŞİFRE MODALININ KONTROLLERİ
+const adminPasswordModal = document.getElementById('adminPasswordModal');
+document.getElementById('openAdminModalBtn').onclick = () => {
+    document.getElementById('adminPassword').value = '';
+    adminPasswordModal.classList.remove('hidden');
+    document.getElementById('adminPassword').focus();
+};
+document.getElementById('closeAdminModalBtn').onclick = () => {
+    adminPasswordModal.classList.add('hidden');
+};
+
 document.getElementById('adminLoginBtn').onclick = () => {
     var pw = document.getElementById('adminPassword').value;
     if (pw === ADMIN_PASSWORD) {
         session = { role: 'admin', apt: null, phone: null };
         localStorage.setItem('session_role', 'admin');
+        adminPasswordModal.classList.add('hidden');
         enterAdminView();
-    } else { toast('Erişim engellendi: Hatalı şifre!', 'danger'); }
+    } else { 
+        toast('Erişim Engellendi: Hatalı Şifre!', 'danger'); 
+    }
 };
+
+// Enter tuşu ile şifreyi hızlıca kabul etme
+document.getElementById('adminPassword').addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+        document.getElementById('adminLoginBtn').click();
+    }
+});
 
 document.getElementById('residentLoginBtn').onclick = () => {
     var resId = document.getElementById('residentSelect').value;
     var phone = document.getElementById('residentPhone').value.trim().replace(/\s/g, '');
     var errorDiv = document.getElementById('residentError');
     errorDiv.style.display = 'none';
-    if (!resId || !phone) { errorDiv.textContent = 'Lütfen alanları eksiksiz doldurun.'; errorDiv.style.display = 'block'; return; }
+    if (!resId || !phone) { errorDiv.textContent = 'Lütfen daire seçip telefon numaranızı yazınız.'; errorDiv.style.display = 'block'; return; }
     var found = APARTMENTS.find(a => a.id === resId && a.phone.replace(/\s+/g, '') === phone);
     if(found) {
         session = { role: 'resident', apt: found.apartment, phone: phone, id: found.id, block: found.block, fullName: found.fullName };
         localStorage.setItem('session_role', 'resident');
         localStorage.setItem('session_res_id', found.id);
         enterResidentView();
-    } else { errorDiv.textContent = 'Uyuşmazlık: Telefon numarası sistemdeki kayıtla eşleşmiyor.'; errorDiv.style.display = 'block'; }
+    } else { errorDiv.textContent = 'Telefon numarası sistemdeki daire kaydıyla eşleşmedi.'; errorDiv.style.display = 'block'; }
 };
 
-document.getElementById('logoutBtn').onclick = () => { session = { role: null, apt: null, phone: null }; localStorage.clear(); location.reload(); };
-function enterAdminView() { document.getElementById('loginView').classList.add('hidden'); document.getElementById('residentView').classList.add('hidden'); document.getElementById('adminView').classList.remove('hidden'); document.getElementById('logoutBtn').classList.remove('hidden'); document.getElementById('userLabel').textContent = 'Oturum: Sistem Yöneticisi'; renderAdminPanel(); }
-function enterResidentView() { document.getElementById('loginView').classList.add('hidden'); document.getElementById('adminView').classList.add('hidden'); document.getElementById('residentView').classList.remove('hidden'); document.getElementById('logoutBtn').classList.remove('hidden'); document.getElementById('userLabel').textContent = 'Daire: ' + session.apt; renderResidentPanel(); }
-function checkSession() { showLoading('Oturum Kontrol Ediliyor...'); const role = localStorage.getItem('session_role'); if (role === 'admin') { enterAdminView(); } else if (role === 'resident') { const resId = localStorage.getItem('session_res_id'); if (resId) { session = { role: 'resident', id: resId, apt: '', phone: '' }; enterResidentView(); } } initRealtimeListeners(); }
+document.getElementById('logoutBtn').onclick = () => { 
+    session = { role: null, apt: null, phone: null }; 
+    localStorage.clear(); 
+    location.reload(); 
+};
+
+function enterAdminView() { 
+    document.getElementById('loginView').classList.add('hidden'); 
+    document.getElementById('residentView').classList.add('hidden'); 
+    document.getElementById('adminView').classList.remove('hidden'); 
+    document.getElementById('logoutBtn').classList.remove('hidden'); 
+    document.getElementById('openAdminModalBtn').classList.add('hidden'); 
+    document.getElementById('userLabel').textContent = 'Oturum: Sistem Yöneticisi'; 
+    renderAdminPanel(); 
+}
+
+function enterResidentView() { 
+    document.getElementById('loginView').classList.add('hidden'); 
+    document.getElementById('adminView').classList.add('hidden'); 
+    document.getElementById('residentView').classList.remove('hidden'); 
+    document.getElementById('logoutBtn').classList.remove('hidden'); 
+    document.getElementById('openAdminModalBtn').classList.add('hidden'); 
+    document.getElementById('userLabel').textContent = 'Daire: ' + session.apt; 
+    renderResidentPanel(); 
+}
+
+async function checkSession() { 
+    showLoading('Bina Veritabanı Açılıyor...'); 
+    try {
+        await signInAnonymously(auth);
+    } catch(e) {
+        console.warn("Gizli oturum hatası.");
+    }
+    const role = localStorage.getItem('session_role'); 
+    if (role === 'admin') { 
+        enterAdminView(); 
+    } else if (role === 'resident') { 
+        const resId = localStorage.getItem('session_res_id'); 
+        if (resId) { 
+            session = { role: 'resident', id: resId, apt: '', phone: '' }; 
+            enterResidentView(); 
+        } 
+    } 
+    initRealtimeListeners(); 
+}
 
 function renderPublicDashboard() {
     let totalCollected = 0; let totalExpenses = 0;
-    APARTMENTS.forEach(a => { if(a.feeStatus === 'Ödendi') totalCollected += Number(a.feeAmount || 0); });
+    APARTMENTS.forEach(a => { 
+        const statusState = getDueState(a, '2026', 'Temmuz');
+        if(statusState.status === 'Ödendi') totalCollected += Number(a.feeAmount || 0); 
+    });
     EXPENSES.forEach(e => { totalExpenses += Number(e.amount || 0); });
     document.getElementById('pubCollected').textContent = money(totalCollected);
     document.getElementById('pubExpenses').textContent = money(totalExpenses);
@@ -741,9 +985,68 @@ function renderResidentPanel() {
     document.getElementById('resBlock').textContent = fresh.block;
     document.getElementById('resName').textContent = fresh.fullName || '-';
     document.getElementById('resPhone').textContent = fresh.phone || '-';
-    var paid = fresh.feeStatus === 'Ödendi'; var badge = document.getElementById('resDueBadge');
-    badge.textContent = paid ? 'Hesap Temiz (' + fresh.paymentDate + ')' : 'Borç Bulunuyor'; badge.className = 'badge ' + (paid ? 'success' : 'danger');
+    
+    if (document.getElementById('resDueMonth').children.length === 0) {
+        populateResidentMonths();
+    } else {
+        updateResidentDueDisplay();
+    }
 }
+
+function populateResidentMonths() {
+    var yearSel = document.getElementById('resDueYear');
+    var monthSel = document.getElementById('resDueMonth');
+    if(!yearSel || !monthSel) return;
+    
+    var selectedYear = yearSel.value;
+    monthSel.innerHTML = '';
+    
+    var months2026 = ["Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    var months2027 = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    
+    var list = selectedYear === '2026' ? months2026 : months2027;
+    list.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        monthSel.appendChild(opt);
+    });
+    
+    if (selectedYear === '2026') {
+        monthSel.value = "Temmuz";
+    } else {
+        monthSel.value = "Ocak";
+    }
+    updateResidentDueDisplay();
+}
+
+function updateResidentDueDisplay() {
+    var year = document.getElementById('resDueYear').value;
+    var month = document.getElementById('resDueMonth').value;
+    var periodEl = document.getElementById('resDueSelectedPeriod');
+    var statusContainer = document.getElementById('resDueStatusContainer');
+    if (!periodEl || !statusContainer) return;
+    
+    periodEl.textContent = month + " " + year;
+    
+    const fresh = APARTMENTS.find(a => a.id === session.id);
+    if (!fresh) {
+        statusContainer.innerHTML = '<span class="badge neutral">Daire kaydı bulunamadı</span>';
+        return;
+    }
+    
+    const state = getDueState(fresh, year, month);
+    var paid = state.status === 'Ödendi';
+    
+    if (paid) {
+        statusContainer.innerHTML = '<span class="badge success" style="font-size:0.8rem; padding: 6px 14px;"><i class="fa-solid fa-circle-check" style="margin-right:4px;"></i> Ödendi (' + state.date + ')</span>';
+    } else {
+        statusContainer.innerHTML = '<span class="badge danger" style="font-size:0.8rem; padding: 6px 14px;"><i class="fa-solid fa-circle-xmark" style="margin-right:4px;"></i> Ödenmedi</span>';
+    }
+}
+
+document.getElementById('resDueYear').onchange = populateResidentMonths;
+document.getElementById('resDueMonth').onchange = updateResidentDueDisplay;
 
 document.getElementById('resSubmitRequestBtn').onclick = async function() {
     var text = document.getElementById('resRequestText').value.trim(); if (!text) { toast('Boş bildirim gönderilemez.', 'danger'); return; }
@@ -762,10 +1065,10 @@ function renderResidentRepliesList() {
         html += '<div><strong>Benim Mesajım:</strong> ' + r.message + ' <span style="font-size:0.75rem; color:var(--secondary);">(' + r.timestamp + ')</span></div>';
         if(r.adminReply) {
             html += '<div style="margin-top:8px; padding:10px; background:#eff6ff; border-left:4px solid var(--primary); border-radius:4px; font-size:0.85rem;">';
-            html += '<strong>Yönetim Kurulu Yanıtı:</strong> ' + r.adminReply;
+            html += '<strong>Yönetici Cevabı:</strong> ' + r.adminReply;
             html += '</div>';
         } else {
-            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> Yönetim kurulunun incelemesi bekleniyor...</div>';
+            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> Yönetim inceleme aşamasında...</div>';
         }
         html += '</div>';
     });
@@ -778,9 +1081,11 @@ function renderOverviewTable() {
     var body = document.getElementById('overviewBody'); var html = '';
     if (APARTMENTS.length === 0) { html = '<tr><td colspan="3" class="empty-note">Kayıt yok</td></tr>'; } else {
         APARTMENTS.forEach((a, index) => {
-            var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
+            const state = getDueState(a, '2026', 'Temmuz');
+            var paid = state.status === 'Ödendi'; 
+            var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             html += '<tr class="clickable-row" onclick="toggleOverviewDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Plaka</strong>' + (a.plate || '-') + '</div><div class="details-block"><strong>Aidat</strong>' + money(a.feeAmount) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid?'success':'danger') + '">' + (paid ? 'Ödendi ('+a.paymentDate+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatıcı</strong>' + whatsapp + '</div></div></td></tr>';
+            html += '<tr class="details-row" id="details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Plaka</strong>' + (a.plate || '-') + '</div><div class="details-block"><strong>Aidat</strong>' + money(a.feeAmount) + '</div><div class="details-block"><strong>Temmuz 2026 Durumu</strong><span class="badge ' + (paid?'success':'danger') + '">' + (paid ? 'Ödendi ('+state.date+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatıcı</strong>' + whatsapp + '</div></div></td></tr>';
         });
     }
     body.innerHTML = html;
@@ -790,24 +1095,60 @@ window.toggleOverviewDetails = function(index) { var row = document.getElementBy
 function renderDuesTable() {
     var body = document.getElementById('duesBody'); if(!body) return; var html = '';
     var blockFilterValue = document.getElementById('dueBlockFilter').value; var statusFilterValue = document.getElementById('dueStatusFilter').value;
-    var filtered = APARTMENTS.filter(a => { if (blockFilterValue !== '' && a.block !== blockFilterValue) return false; if (statusFilterValue !== '' && a.feeStatus !== statusFilterValue) return false; return true; });
+    
+    var activeMonth = document.getElementById('dueMonth').value;
+    var activeYear = document.getElementById('dueYear').value;
+
+    var filtered = APARTMENTS.filter(a => { 
+        if (blockFilterValue !== '' && a.block !== blockFilterValue) return false; 
+        const state = getDueState(a, activeYear, activeMonth);
+        if (statusFilterValue !== '' && state.status !== statusFilterValue) return false; 
+        return true; 
+    });
+
     if (filtered.length === 0) { html = '<tr><td colspan="3" class="empty-note">Kayıt bulunamadı</td></tr>'; } else {
         filtered.forEach((a, index) => {
-            var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
+            const state = getDueState(a, activeYear, activeMonth);
+            var paid = state.status === 'Ödendi'; 
+            var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             html += '<tr class="clickable-row" onclick="toggleDueDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Tarife</strong>' + money(a.feeAmount || 0) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi ('+a.paymentDate+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatma</strong>' + whatsapp + '</div><div class="details-block"><strong>Aksiyon</strong><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '" style="width:100%;">' + (paid ? 'Ödemeyi İptal Et' : 'Ödendi Olarak İşle') + '</button></div></div></td></tr>';
+            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Tarife</strong>' + money(a.feeAmount || 0) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi ('+state.date+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatırlatma</strong>' + whatsapp + '</div><div class="details-block"><strong>Aksiyon</strong><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '" style="width:100%;">' + (paid ? 'Ödemeyi İptal Et' : 'Ödendi Olarak İşle') + '</button></div></div></td></tr>';
         });
     }
     body.innerHTML = html;
     body.querySelectorAll('.toggle-due-btn').forEach(btn => {
         btn.onclick = async (e) => {
             e.stopPropagation(); const id = e.currentTarget.dataset.id; const targetApt = APARTMENTS.find(a => a.id === id); if(!targetApt) return;
-            const targetStatus = targetApt.feeStatus === 'Ödendi' ? 'Ödenmedi' : 'Ödendi'; showLoading('Makbuz işleniyor...');
+            
+            const tgtMonth = document.getElementById('dueMonth').value;
+            const tgtYear = document.getElementById('dueYear').value;
+            const key = tgtYear + '_' + tgtMonth;
+
+            const currentState = getDueState(targetApt, tgtYear, tgtMonth);
+            const targetStatus = currentState.status === 'Ödendi' ? 'Ödenmedi' : 'Ödendi';
+            
+            showLoading('Makbuz işleniyor...');
             var now = new Date(); 
             var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
             var finalDate = targetStatus === 'Ödendi' ? dateTimeStr : '-';
-            try { await updateDoc(doc(db, "daireler", id), { feeStatus: targetStatus, paymentDate: finalDate }); } 
-            catch(ex) { await updateDoc(doc(db, "apartments", id), { feeStatus: targetStatus, paymentDate: finalDate }); }
+            
+            const duesMap = targetApt.dues || {};
+            duesMap[key] = { status: targetStatus, date: finalDate };
+            
+            const payload = {
+                dues: duesMap
+            };
+            
+            if (key === '2026_Temmuz') {
+                payload.feeStatus = targetStatus;
+                payload.paymentDate = finalDate;
+            }
+
+            try { 
+                await updateDoc(doc(db, "daireler", id), payload); 
+            } catch(ex) { 
+                await updateDoc(doc(db, "apartments", id), payload); 
+            }
             toast('Defter kaydı güncellendi.', 'success'); hideLoading();
         };
     });
@@ -815,6 +1156,8 @@ function renderDuesTable() {
 window.toggleDueDetails = function(index) { var row = document.getElementById('due-details-' + index); if(row) row.style.display = (window.getComputedStyle(row).display === 'none') ? 'table-row' : 'none'; }
 document.getElementById('dueBlockFilter').onchange = renderDuesTable;
 document.getElementById('dueStatusFilter').onchange = renderDuesTable;
+document.getElementById('dueMonth').onchange = renderDuesTable;
+document.getElementById('dueYear').onchange = renderDuesTable;
 
 document.getElementById('addExpenseBtn').onclick = async function() {
     var id = document.getElementById('expId').value; var desc = document.getElementById('expDesc').value.trim(); var amount = parseFloat(document.getElementById('expAmount').value); var date = document.getElementById('expDate').value;
@@ -850,36 +1193,27 @@ function renderExpensesTable() {
         };
     });
     body.querySelectorAll('.del-exp-btn').forEach(btn => {
-        btn.onclick = async (e) => {
-            if(confirm('Bu gider faturası tamamen silinsin mi?')) {
-                const id = e.currentTarget.dataset.id; showLoading('Kayıt siliniyor...');
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id;
+            // GÜVENLİ ÖZEL DIALOG ENTEGRASYONU
+            askConfirm('Bu gider faturası tamamen silinsin mi?', async () => {
+                showLoading('Kayıt siliniyor...');
                 try { await deleteDoc(doc(db, "giderler", id)); } catch(x) { await deleteDoc(doc(db, "expenses", id)); }
                 toast('Gider faturası iptal edildi.', 'success'); hideLoading();
-            }
+            });
         };
     });
 }
 document.getElementById('expFilterBtn').onclick = () => { expenseFilterStart = document.getElementById('expFilterStart').value; expenseFilterEnd = document.getElementById('expFilterEnd').value; renderExpensesTable(); };
 document.getElementById('expClearFilterBtn').onclick = () => { document.getElementById('expFilterStart').value = ''; document.getElementById('expFilterEnd').value = ''; expenseFilterStart = ''; expenseFilterEnd = ''; renderExpensesTable(); };
 
-document.getElementById('addApartmentBtn').onclick = async function() {
-    var id = document.getElementById('aptId').value; var block = document.getElementById('newApartmentBlock').value; var apartment = parseInt(document.getElementById('newApartmentNo').value); var fullName = document.getElementById('newApartmentName').value.trim(); var phone = document.getElementById('newApartmentPhone').value.trim(); var plate = document.getElementById('newApartmentPlate').value.trim(); var feeAmount = parseFloat(document.getElementById('newApartmentFee').value);
-    if (!apartment || !fullName || !feeAmount || !phone) { toast('Zorunlu alanları doldurun.', 'danger'); return; } showLoading('Kart güncelleniyor...');
-    try {
-        const payload = { block, no: apartment, name: fullName, phone, plate, fee: feeAmount };
-        if(id) { try { await updateDoc(doc(db, "daireler", id), payload); } catch(x) { await updateDoc(doc(db, "apartments", id), payload); } } 
-        else { try { await addDoc(collection(db, "daireler"), { ...payload, feeStatus: 'Ödenmedi' }); } catch(x) { await addDoc(collection(db, "apartments"), { ...payload, feeStatus: 'Ödenmedi' }); } }
-        resetApartmentForm(); toast('Sistem güncellendi.', 'success');
-    } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
-};
-function resetApartmentForm() { document.getElementById('aptId').value = ''; document.getElementById('newApartmentNo').value = ''; document.getElementById('newApartmentName').value = ''; document.getElementById('newApartmentPhone').value = ''; document.getElementById('newApartmentPlate').value = ''; document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Sistemi Güncelle'; }
-
 function renderApartmentsTable() {
     var body = document.getElementById('apartmentsBody'); var html = '';
     var filtered = APARTMENTS.filter(a => { const s = searchTerm.toLowerCase(); if(blockFilter && a.block !== blockFilter) return false; return String(a.apartment).includes(s) || (a.fullName && a.fullName.toLowerCase().includes(s)) || a.phone.includes(s) || (a.plate && a.plate.toLowerCase().includes(s)); });
     if (filtered.length === 0) { html = '<tr><td colspan="9" class="empty-note">Kayıt bulunamadı</td></tr>'; } else {
         filtered.forEach(a => {
-            var paid = a.feeStatus === 'Ödendi'; var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
+            var paid = getDueState(a, '2026', 'Temmuz').status === 'Ödendi'; 
+            var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
             html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + a.phone + '</td><td>' + (a.plate || '-') + '</td><td>' + money(a.feeAmount) + '</td><td><span class="badge '+(paid?'success':'danger')+'">'+(paid ? 'Ödendi' : 'Ödenmedi')+'</span></td><td>' + whatsapp + '</td><td><button class="btn btn-primary btn-sm edit-apt-btn" data-id="'+a.id+'"><i class="fa-solid fa-pen"></i></button></td></tr>';
         });
     }
@@ -896,11 +1230,6 @@ document.getElementById('apartmentSearch').oninput = function() { searchTerm = t
 document.getElementById('blockFilter').onchange = function() { blockFilter = this.value; renderApartmentsTable(); };
 document.getElementById('clearSearchBtn').onclick = function() { document.getElementById('apartmentSearch').value = ''; document.getElementById('blockFilter').value = ''; searchTerm = ''; blockFilter = ''; renderApartmentsTable(); };
 
-document.getElementById('addAnnouncementBtn').onclick = async function() {
-    var text = document.getElementById('announcementText').value.trim(); if (!text) { toast('Metin boş bırakılamaz.', 'danger'); return; } showLoading('Gönderiliyor...');
-    try { await addDoc(collection(db, "announcements"), { content: text, createdAt: new Date().toISOString() }); document.getElementById('announcementText').value = ''; toast('Duyuru panoya eklendi.', 'success'); } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
-};
-
 function renderAnnouncementsAdmin() {
     var list = document.getElementById('announcementsAdminList'); var html = '';
     if (ANNOUNCEMENTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayıt yok</div>'; return; }
@@ -913,12 +1242,14 @@ function renderAnnouncementsAdmin() {
     });
     list.innerHTML = html;
     list.querySelectorAll('.del-ann-btn').forEach(btn => {
-        btn.onclick = async (e) => {
-            if(confirm('Bu duyuru panodan kalıcı olarak kaldırılsın mı?')) {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id;
+            // GÜVENLİ ÖZEL DIALOG ENTEGRASYONU
+            askConfirm('Bu duyuru panodan kalıcı olarak kaldırılsın mı?', async () => {
                 showLoading('Duyuru indiriliyor...');
-                try { await deleteDoc(doc(db, "announcements", e.currentTarget.dataset.id)); toast('Duyuru silindi.', 'success'); } 
+                try { await deleteDoc(doc(db, "announcements", id)); toast('Duyuru silindi.', 'success'); } 
                 catch(x) { toast('Hata', 'danger'); } finally { hideLoading(); }
-            }
+            });
         };
     });
 }
@@ -940,12 +1271,14 @@ function renderRequestsAdmin() {
     });
     list.innerHTML = html;
     list.querySelectorAll('.del-req-btn').forEach(btn => {
-        btn.onclick = async (e) => {
-            if(confirm('Kat sakininden gelen bu mesaj arşivden kalıcı olarak silinsin mi?')) {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id;
+            // GÜVENLİ ÖZEL DIALOG ENTEGRASYONU
+            askConfirm('Kat sakininden gelen bu mesaj arşivden kalıcı olarak silinsin mi?', async () => {
                 showLoading('Kayıt siliniyor...');
-                try { await deleteDoc(doc(db, "requests", e.currentTarget.dataset.id)); toast('Talep kaldırıldı.', 'success'); } 
+                try { await deleteDoc(doc(db, "requests", id)); toast('Talep kaldırıldı.', 'success'); } 
                 catch(x) { toast('Hata', 'danger'); } finally { hideLoading(); }
-            }
+            });
         };
     });
     list.querySelectorAll('.reply-req-btn').forEach(btn => {
@@ -967,9 +1300,11 @@ function renderReport() {
     var html = ''; let paidCount = 0; let unpaidCount = 0; let totalPaid = 0; let totalUnpaid = 0;
     if (APARTMENTS.length === 0) { body.innerHTML = '<tr><td colspan="6" class="empty-note">Kayıt yok</td></tr>'; return; }
     APARTMENTS.forEach((a, i) => {
-        var isPaid = a.feeStatus === 'Ödendi'; var fee = Number(a.feeAmount || 0);
+        const state = getDueState(a, year, month);
+        var isPaid = state.status === 'Ödendi'; 
+        var fee = Number(a.feeAmount || 0);
         if (isPaid) { paidCount++; totalPaid += fee; } else { unpaidCount++; totalUnpaid += fee; }
-        var statusCell = isPaid ? 'Ödendi (' + a.paymentDate + ')' : 'Ödenmedi';
+        var statusCell = isPaid ? 'Ödendi (' + state.date + ')' : 'Ödenmedi';
         html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + statusCell + '</td></tr>';
     });
     body.innerHTML = html;
@@ -992,32 +1327,28 @@ function renderExpenseReport() {
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// MOBİL SIKIŞMA SORUNUNU GİZLİ MASAÜSTÜ GENİŞLİĞİYLE %100 ÇÖZEN YENİ MOTOR
+// YATAY A4 BASKISIYLA TAŞMALARI ENGELLEYEN YENİ MOTOR
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
-    
-    // O anki orijinal stil değerini yedekle
     var originalWidth = element.style.width;
     
-    // Elementi A4 kağıdını tam dolduracak ideal bir masaüstü genişliğine (794px) kilitliyoruz
-    element.style.width = '794px'; 
+    element.style.width = '1120px'; 
     
     var opt = {
       margin:       [10, 10, 10, 10],
       filename:     'tahirogullari_rapor.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
     
-    showLoading('A4 Kağıt Düzenine Oturtuluyor...');
+    showLoading('Yatay A4 Sayfasına Yerleştiriliyor...');
     html2pdf().set(opt).from(element).outputPdf('blob').then((pdfBlob) => {
-        // PDF üretildiği an çaktırmadan eski haline (mobil görünüme) geri döndür
         element.style.width = originalWidth; 
         hideLoading();
         var blobUrl = URL.createObjectURL(pdfBlob);
         window.open(blobUrl, '_blank');
-        toast('Rapor Tam Sayfa Olarak Yeni Sekmede Açıldı!', 'success');
+        toast('Rapor Yatay A4 Olarak Yeni Sekmede Açıldı!', 'success');
     }).catch((err) => {
         element.style.width = originalWidth;
         hideLoading();
@@ -1049,3 +1380,5 @@ checkSession();
 </script>
 </body>
 </html>
+
+```
