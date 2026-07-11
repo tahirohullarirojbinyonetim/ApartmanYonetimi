@@ -29,9 +29,10 @@
     -webkit-font-smoothing: antialiased;
   }
   
-  /* Mobil Cihazlardaki Çirkin Dokunma Parlamalarını Engelleme */
+  /* Mobil Dokunma Parlamalarını Kapatma */
   button, select, input, textarea, a, tr, td, th {
     -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
   }
 
   header.topbar {
@@ -270,6 +271,55 @@
     .btn-row-inline { flex-direction: column; align-items: stretch; }
     .btn-row-inline .field-btn { width: 100%; }
   }
+  
+  /* ============================================================ */
+  /* KUSURSUZ DİKEY A4 PDF BASKI TASARIMI */
+  /* ============================================================ */
+  .pdf-print-wrapper {
+    background: #ffffff !important;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+  }
+  
+  /* Raporlama Butonuna Basıldığında Geçici Olarak Giydirilen Sınıf */
+  .pdf-print-active {
+    padding: 4px 6px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    width: 100% !important;
+    font-size: 11px !important;
+  }
+  .pdf-print-active h2 {
+    font-size: 13px !important;
+    margin: 0 0 10px 0 !important;
+    padding-bottom: 4px !important;
+    text-align: center !important;
+    color: #1e3a8a !important;
+    border-bottom: 2px solid #d97706 !important;
+  }
+  .pdf-print-active table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10px !important;
+  }
+  .pdf-print-active th, .pdf-print-active td {
+    padding: 4px 6px !important;
+    border: 1px solid #94a3b8 !important;
+  }
+  .pdf-print-active th {
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    font-size: 9px !important;
+  }
+  .pdf-print-active tfoot td {
+    padding: 5px 6px !important;
+    font-weight: bold !important;
+    font-size: 10px !important;
+  }
 </style>
 </head>
 <body>
@@ -380,7 +430,7 @@
   <!-- KAT SAKİNİ GÖRÜNÜMÜ -->
   <section id="residentView" class="hidden">
     <div class="card">
-      <h2><i class="fa-solid fa-id-card"></i> Daire Kayıt Kartı - No <span id="resApt"></span></h2>
+      <h2><i class="fa-solid fa-id-card"></i> Daire Bilgilerim - No <span id="resApt"></span></h2>
       <div class="resident-info">
         <div class="info-item" style="margin-bottom:10px;">
           <label>Blok Konumu</label>
@@ -504,7 +554,7 @@
 
     <div id="tabExpenses" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-plus"></i> Yeni Apartman Masraf Faturası İşle</h2>
+        <h2><i class="fa-solid fa-plus"></i> Yeni Gider Ekle / Düzenle</h2>
         <input type="hidden" id="expId">
         <div class="row">
           <div class="field">
@@ -560,7 +610,7 @@
           <input type="hidden" id="aptId">
           <div class="field" style="flex:0 0 140px;"><label>Blok</label><select id="newApartmentBlock"><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
           <div class="field"><label>Daire No</label><input type="number" id="newApartmentNo" placeholder="0"></div>
-          <div class="field"><label>Mülk Sakini İsim</label><input type="text" id="newApartmentName" placeholder="Adı Soyadı"></div>
+          <div class="field"><label>Mülk Sahibi İsim</label><input type="text" id="newApartmentName" placeholder="Adı Soyadı"></div>
         </div>
         <div class="row">
           <div class="field"><label>GSM Telefon</label><input type="text" id="newApartmentPhone" placeholder="05xxxxxxxx"></div>
@@ -607,31 +657,26 @@
           <div class="field" style="flex:0 0 160px;"><label>Rapor Dönemi</label><select id="reportMonth"><option value="Ocak">Ocak</option><option value="Şubat">Şubat</option><option value="Mart">Mart</option><option value="Nisan">Nisan</option><option value="Mayıs">Mayıs</option><option value="Haziran">Haziran</option><option value="Temmuz" selected>Temmuz</option><option value="Ağustos">Ağustos</option><option value="Eylül">Eylül</option><option value="Ekim">Ekim</option><option value="Kasım">Kasım</option><option value="Aralık">Aralık</option></select></div>
           <div class="field" style="flex:0 0 120px;"><label>Yıl</label><input type="number" id="reportYear" value="2026"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="reportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> Yatay A4 PDF Aç</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF İndir</button></div>
         </div>
         
-        <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="reportTableContainer">
-          <h2 id="pdfDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.4rem; border-bottom: 2px solid #d97706; padding-bottom: 10px;">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
+        <!-- YENİ DIKEY STANDARTLARINA UYGUN PREMIUM PDF KAPSAYICI -->
+        <div class="table-wrap pdf-print-wrapper" id="reportTableContainer">
+          <h2 id="pdfDynamicTitle">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
           <table id="reportTable" style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr style="background-color: #1e3a8a !important; color: white !important;">
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">#</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Ad Soyad</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Blok</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Daire No</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Ödeme Zamanı (Saatli)</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">#</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Ad Soyad</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Blok</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Daire No</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Ödeme Zamanı (Saatli)</th>
               </tr>
             </thead>
             <tbody id="reportBody"><tr><td colspan="6" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
             <tfoot id="reportFooter"></tfoot>
           </table>
-        </div>
-        <div style="margin-top:16px;display:flex;justify-content:space-between;font-size:.85rem;color:var(--secondary);flex-wrap:wrap;gap:8px;">
-          <span>Toplam Daire: <strong id="reportTotalApt">0</strong></span>
-          <span>Ödenen: <strong id="reportPaidCount" style="color:var(--success);">0</strong></span>
-          <span>Ödenmeyen: <strong id="reportUnpaidCount" style="color:var(--danger);">0</strong></span>
-          <span>Toplam Alacak: <strong id="reportTotalAmount">₺0</strong></span>
         </div>
       </div>
     </div>
@@ -644,18 +689,18 @@
           <div class="field" style="flex:0 0 180px;"><label>Başlangıç Tarihi</label><input type="date" id="expReportStart"></div>
           <div class="field" style="flex:0 0 180px;"><label>Bitiş Tarihi</label><input type="date" id="expReportEnd"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="expReportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> Yatay A4 PDF Aç</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF İndir</button></div>
         </div>
         
-        <div class="table-wrap" style="padding: 24px; background: #fff; border: 1px solid #cbd5e1;" id="expenseReportTableContainer">
-          <h2 id="pdfExpenseDynamicTitle" style="text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 700; font-size: 1.4rem; border-bottom: 2px solid #d97706; padding-bottom: 10px;">Tahiroğulları Rojbin Sitesi Gider Raporu</h2>
+        <div class="table-wrap pdf-print-wrapper" id="expenseReportTableContainer">
+          <h2 id="pdfExpenseDynamicTitle">Tahiroğulları Rojbin Sitesi Gider Raporu</h2>
           <table id="expReportTable" style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr style="background-color: #1e3a8a !important; color: white !important;">
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">#</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Açıklama</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
-                <th style="border: 1px solid #cbd5e1; padding: 12px; color: #fff !important; background: #1e3a8a !important;">Kayıt Tarihi</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">#</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Açıklama</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Tutar</th>
+                <th style="border: 1px solid #cbd5e1; color: #fff !important; background: #1e3a8a !important;">Kayıt Tarihi</th>
               </tr>
             </thead>
             <tbody id="expReportBody"><tr><td colspan="4" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
@@ -689,7 +734,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// YÖNETİCİ ŞİFRESİ
 const ADMIN_PASSWORD = "0000";
 
 let session = { role: null, apt: null, phone: null, block: null, fullName: null };
@@ -892,7 +936,6 @@ document.getElementById('adminLoginBtn').onclick = () => {
     }
 };
 
-// Enter tuşu ile şifreyi hızlıca kabul etme
 document.getElementById('adminPassword').addEventListener('keyup', function(event) {
     if (event.key === 'Enter') {
         document.getElementById('adminLoginBtn').click();
@@ -1062,13 +1105,13 @@ function renderResidentRepliesList() {
     if(filteredRequests.length === 0) { listContainer.innerHTML = '<div class="empty-note">Geri bildirim bulunmuyor.</div>'; return; }
     filteredRequests.forEach(r => {
         html += '<div style="padding:14px; border-bottom:1px dashed #cbd5e1; margin-bottom:8px;">';
-        html += '<div><strong>Benim Mesajım:</strong> ' + r.message + ' <span style="font-size:0.75rem; color:var(--secondary);">(' + r.timestamp + ')</span></div>';
+        html += '<div><strong>Mesajım:</strong> ' + r.message + ' <span style="font-size:0.75rem; color:var(--secondary);">(' + r.timestamp + ')</span></div>';
         if(r.adminReply) {
             html += '<div style="margin-top:8px; padding:10px; background:#eff6ff; border-left:4px solid var(--primary); border-radius:4px; font-size:0.85rem;">';
-            html += '<strong>Yönetici Cevabı:</strong> ' + r.adminReply;
+            html += '<strong>Cevap:</strong> ' + r.adminReply;
             html += '</div>';
         } else {
-            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> Yönetim inceleme aşamasında...</div>';
+            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> İnceleme aşamasında...</div>';
         }
         html += '</div>';
     });
@@ -1195,7 +1238,6 @@ function renderExpensesTable() {
     body.querySelectorAll('.del-exp-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
-            // GÜVENLİ ÖZEL DIALOG ENTEGRASYONU
             askConfirm('Bu gider faturası tamamen silinsin mi?', async () => {
                 showLoading('Kayıt siliniyor...');
                 try { await deleteDoc(doc(db, "giderler", id)); } catch(x) { await deleteDoc(doc(db, "expenses", id)); }
@@ -1244,7 +1286,6 @@ function renderAnnouncementsAdmin() {
     list.querySelectorAll('.del-ann-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
-            // GÜVENLİ ÖZEL DIALOG ENTEGRASYONU
             askConfirm('Bu duyuru panodan kalıcı olarak kaldırılsın mı?', async () => {
                 showLoading('Duyuru indiriliyor...');
                 try { await deleteDoc(doc(db, "announcements", id)); toast('Duyuru silindi.', 'success'); } 
@@ -1273,7 +1314,6 @@ function renderRequestsAdmin() {
     list.querySelectorAll('.del-req-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
-            // GÜVENLİ ÖZEL DIALOG ENTEGRASYONU
             askConfirm('Kat sakininden gelen bu mesaj arşivden kalıcı olarak silinsin mi?', async () => {
                 showLoading('Kayıt siliniyor...');
                 try { await deleteDoc(doc(db, "requests", id)); toast('Talep kaldırıldı.', 'success'); } 
@@ -1293,26 +1333,71 @@ function renderRequestsAdmin() {
     });
 }
 
+// HESAP ÇİZELGESİ VE EN ALT HESAP SATIRLARININ RENDER MOTORU (PDF İLE %100 UYUMLU)
 function renderReport() {
     var month = document.getElementById('reportMonth').value; var year = document.getElementById('reportYear').value;
     var titleEl = document.getElementById('pdfDynamicTitle'); if(titleEl) titleEl.textContent = 'Tahiroğulları Rojbin Sitesi ' + month + ' ' + year + ' Dönemi Aidat Çizelgesi';
     var body = document.getElementById('reportBody'); var footer = document.getElementById('reportFooter');
-    var html = ''; let paidCount = 0; let unpaidCount = 0; let totalPaid = 0; let totalUnpaid = 0;
+    var html = ''; 
+    
+    let paidCount = 0; let unpaidCount = 0; 
+    let totalTariff = 0; // SİTE TOPLAM TARİFE ALACAĞI
+    let totalPaid = 0; // TOPLAM TOPLANAN
+    let totalUnpaid = 0; // TOPLAM TOPLANMAYAN (KALAN BORÇ)
+    let totalExpenses = 0; // TOPLAM GİDER
+
+    EXPENSES.forEach(e => { totalExpenses += Number(e.amount || 0); });
+
     if (APARTMENTS.length === 0) { body.innerHTML = '<tr><td colspan="6" class="empty-note">Kayıt yok</td></tr>'; return; }
     APARTMENTS.forEach((a, i) => {
         const state = getDueState(a, year, month);
         var isPaid = state.status === 'Ödendi'; 
         var fee = Number(a.feeAmount || 0);
-        if (isPaid) { paidCount++; totalPaid += fee; } else { unpaidCount++; totalUnpaid += fee; }
+        totalTariff += fee;
+
+        if (isPaid) { 
+            paidCount++; 
+            totalPaid += fee; 
+        } else { 
+            unpaidCount++; 
+            totalUnpaid += fee; 
+        }
         var statusCell = isPaid ? 'Ödendi (' + state.date + ')' : 'Ödenmedi';
-        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + statusCell + '</td></tr>';
+        html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + (a.fullName || '-') + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + a.block + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + a.apartment + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + money(fee) + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px; font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + statusCell + '</td></tr>';
     });
     body.innerHTML = html;
-    if(footer) { footer.innerHTML = '<tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">TOPLAM ÖDENEN:</td><td colspan="2" style="color:var(--success); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(totalPaid) + '</td></tr><tr><td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">TOPLAM KALAN ALACAK:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(totalUnpaid) + '</td></tr>'; }
+
+    let cashBalance = totalPaid - totalExpenses;
+
+    // ALTA EKLENEN PROFESYONEL ÖZET TABLOSU (ÇİZİME SADIK KALINDI)
+    if(footer) { 
+        footer.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#f1f5f9; color:#1e3a8a;">SİTE TOPLAM TARİFE ALACAĞI (HAK EDİŞ):</td>
+                <td colspan="2" style="color:#1e3a8a; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#f1f5f9; font-size:0.85rem;">${money(totalTariff)}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#ecfdf5; color:var(--success);">TOPLAM TOPLANAN (ÖDENEN):</td>
+                <td colspan="2" style="color:var(--success); border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#ecfdf5; font-size:0.85rem;">${money(totalPaid)}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#fef2f2; color:var(--danger);">TOPLAM TOPLANMAYAN (KALAN ALACAK):</td>
+                <td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#fef2f2; font-size:0.85rem;">${money(totalUnpaid)}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#fff7ed; color:#c2410c;">SİTE TOPLAM GİDERİ:</td>
+                <td colspan="2" style="color:#c2410c; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#fff7ed; font-size:0.85rem;">${money(totalExpenses)}</td>
+            </tr>
+            <tr style="border-top:2px solid var(--accent);">
+                <td colspan="4" style="text-align:right; border: 1px solid #cbd5e1; padding: 10px; font-weight:bold; background:#eff6ff; color:var(--primary); font-size:0.85rem;">KASA NET BAKİYE (TOPLANAN - GİDER):</td>
+                <td colspan="2" style="color:var(--primary); border: 1px solid #cbd5e1; padding: 10px; font-weight:bold; background:#eff6ff; font-size:0.95rem;">${money(cashBalance)}</td>
+            </tr>
+        `; 
+    }
     document.getElementById('reportTotalApt').textContent = APARTMENTS.length;
     document.getElementById('reportPaidCount').textContent = paidCount;
     document.getElementById('reportUnpaidCount').textContent = unpaidCount;
-    document.getElementById('reportTotalAmount').textContent = money(totalPaid + totalUnpaid);
+    document.getElementById('reportTotalAmount').textContent = money(totalTariff);
 }
 document.getElementById('reportFilterBtn').onclick = renderReport;
 
@@ -1321,36 +1406,34 @@ function renderExpenseReport() {
     var body = document.getElementById('expReportBody'); var footer = document.getElementById('expReportFooter'); var html = ''; let total = 0;
     var filtered = EXPENSES.filter(e => { if (start && e.date < start) return false; if (end && e.date > end) return false; return true; });
     if (filtered.length === 0) { body.innerHTML = '<tr><td colspan="4" class="empty-note">Kayıt yok</td></tr>'; if (footer) footer.innerHTML = ''; return; }
-    filtered.forEach((e, i) => { total += Number(e.amount || 0); html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 12px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.description + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + money(e.amount) + '</td><td style="border: 1px solid #cbd5e1; padding: 12px;">' + e.date + '</td></tr>'; });
+    filtered.forEach((e, i) => { total += Number(e.amount || 0); html += '<tr style="background-color: ' + (i % 2 === 0 ? '#ffffff' : '#f9fafb') + ';"><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + (i + 1) + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + e.description + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + money(e.amount) + '</td><td style="border: 1px solid #cbd5e1; padding: 6px 8px;">' + e.date + '</td></tr>'; });
     body.innerHTML = html;
-    if(footer) footer.innerHTML = '<tr><td colspan="2" style="text-align:right; border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">GENEL TOPLAM MASRAF:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 12px; font-weight:bold; background:#f8fafc;">' + money(total) + '</td></tr>';
+    if(footer) footer.innerHTML = '<tr><td colspan="2" style="text-align:right; border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#f8fafc;">GENEL TOPLAM MASRAF:</td><td colspan="2" style="color:var(--danger); border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; background:#f8fafc; font-size: 0.85rem;">' + money(total) + '</td></tr>';
 }
 document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 
-// YATAY A4 BASKISIYLA TAŞMALARI ENGELLEYEN YENİ MOTOR
+// DIKEY A4 PDF BASKI VE INDIRME MOTORU (KUSURSUZ MODEL)
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
-    var originalWidth = element.style.width;
     
-    element.style.width = '1120px'; 
+    // Geçici olarak baskı sınıfı ekleniyor (Üst boşluğu yok eder ve tabloyu dikey kağıda sığdırır)
+    element.classList.add('pdf-print-active');
     
     var opt = {
-      margin:       [10, 10, 10, 10],
+      margin:       [4, 4, 4, 4], // Üstte ve altta boşluk kalmaması için milimetrik marj
       filename:     'tahirogullari_rapor.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      html2canvas:  { scale: 2.2, useCORS: true, letterRendering: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } // Kusursuz dikey mod kuralı
     };
     
-    showLoading('Yatay A4 Sayfasına Yerleştiriliyor...');
-    html2pdf().set(opt).from(element).outputPdf('blob').then((pdfBlob) => {
-        element.style.width = originalWidth; 
+    showLoading('A4 PDF Raporu Çiziliyor...');
+    html2pdf().set(opt).from(element).save().then(() => {
+        element.classList.remove('pdf-print-active');
         hideLoading();
-        var blobUrl = URL.createObjectURL(pdfBlob);
-        window.open(blobUrl, '_blank');
-        toast('Rapor Yatay A4 Olarak Yeni Sekmede Açıldı!', 'success');
+        toast('Rapor Başarıyla Telefona İndirildi!', 'success');
     }).catch((err) => {
-        element.style.width = originalWidth;
+        element.classList.remove('pdf-print-active');
         hideLoading();
         toast('Hata Oluştu: ' + err.message, 'danger');
     });
