@@ -65,14 +65,14 @@
   .btn-outline{background:transparent;border:1px solid var(--border);color:#475569}
   .btn-sm{padding:3px 6px;font-size:10px;border-radius:4px}
   
-  table{width:100%;border-collapse:collapse;font-size:11px}
-  th,td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);word-break:break-word}
+  table{width:100%;border-collapse:collapse;font-size:11px;table-layout:auto;}
+  th,td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);word-break:normal;white-space:nowrap;}
   th{color:var(--secondary);font-weight:700;background:#f8fafc;font-size:.6rem;text-transform:uppercase;letter-spacing:.03em}
-  .table-wrap{width:100%;overflow-x:auto;border-radius:6px;border:1px solid var(--border);background:#fff}
+  .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:6px;border:1px solid var(--border);background:#fff}
   .clickable-row{cursor:pointer}
   .clickable-row:hover{background:#f8fafc!important}
   .details-row{background:#f8fafc!important;display:none}
-  .details-row td{padding:8px;border-bottom:1px solid var(--border)}
+  .details-row td{padding:8px;border-bottom:1px solid var(--border);white-space:normal;}
   
   .mobile-tabs-container{margin-bottom:12px;background:#e2e8f0;padding:5px;border-radius:6px;display:flex;align-items:center;gap:6px}
   .mobile-tabs-container label{margin:0;white-space:nowrap;font-size:.7rem;color:var(--primary)}
@@ -96,8 +96,8 @@
   .block-badge{display:inline-block;padding:2px 5px;border-radius:3px;font-size:.6rem;font-weight:800}
   .block-badge.a{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
   .block-badge.b{background:#fdf2f8;color:#9d174d;border:1px solid #fbcfe8}
-  .whatsapp-btn{display:inline-flex;align-items:center;gap:3px;background:#22c55e;color:#fff;padding:3px 6px;border-radius:3px;font-size:10px;text-decoration:none;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
-  .pay-btn{display:inline-flex;align-items:center;gap:3px;background:#059669;color:#fff;padding:3px 6px;border-radius:3px;font-size:10px;text-decoration:none;font-weight:700;cursor:pointer;border:none;white-space:nowrap}
+  .whatsapp-btn{display:inline-flex;align-items:center;gap:3px;background:#22c55e;color:#fff;padding:4px 8px;border-radius:4px;font-size:10px;text-decoration:none;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
+  .pay-btn{display:inline-flex;align-items:center;gap:3px;background:#059669;color:#fff;padding:4px 8px;border-radius:4px;font-size:10px;text-decoration:none;font-weight:700;cursor:pointer;border:none;white-space:nowrap}
   .unpaid-alert-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:10px;margin-top:8px}
   .unpaid-alert-box h4{margin:0 0 5px 0;color:var(--danger);font-size:11px;display:flex;align-items:center;gap:5px}
   .unpaid-tag{display:inline-block;background:#fee2e2;color:#991b1b;border:1px solid #f87171;padding:2px 5px;border-radius:3px;font-size:10px;font-weight:700;margin:2px}
@@ -549,8 +549,8 @@
         <h2><i class="fa-solid fa-list"></i> Mülk Listesi</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Blok</th><th>Daire</th><th>Ad Soyad</th><th>Tip</th><th>Telefon</th><th>Plaka</th><th>Aidat</th><th></th><th></th></tr></thead>
-            <tbody id="apartmentsBody"><tr><td colspan="9" class="empty-note">Yükleniyor...</td></tr></tbody>
+            <thead><tr><th>Blok</th><th>Daire</th><th>Ad Soyad / İletişim / Plaka</th><th>Tip</th><th>Aidat</th><th></th><th></th></tr></thead>
+            <tbody id="apartmentsBody"><tr><td colspan="7" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1716,14 +1716,27 @@ function renderApartmentsTable() {
         if(blockFilter && a.block !== blockFilter) return false; 
         return String(a.apartment).includes(s) || (a.fullName && a.fullName.toLowerCase().includes(s)) || a.phone.includes(s) || (a.plate && a.plate.toLowerCase().includes(s)); 
     });
-    if (filtered.length === 0) { html = '<tr><td colspan="9" class="empty-note">Kayıt bulunamadı</td></tr>'; } else {
+    if (filtered.length === 0) { html = '<tr><td colspan="7" class="empty-note">Kayıt bulunamadı</td></tr>'; } else {
         filtered.forEach(a => {
             const aidatState = getDueState(a, getCurrentYearStr(), getCurrentMonthName());
             const demirbasDebt = getDemirbasDebt(a);
             const hasAnyDebt = aidatState.status !== 'Ödendi' || demirbasDebt.total > 0;
             let waBtn = '—';
             if (hasAnyDebt) waBtn = '<button class="whatsapp-btn wa-apt-btn" data-id="' + a.id + '"><i class="fa-brands fa-whatsapp"></i></button>';
-            html += `<tr><td>${getBlockBadge(a.block)}</td><td><b>${a.apartment}</b></td><td>${a.fullName || '-'}</td><td>${getOccupantBadge(a.occupantType)}</td><td>${a.phone}</td><td>${a.plate || '-'}</td><td>${money(a.feeAmount)}</td><td>${waBtn}</td><td style="white-space:nowrap;"><button class="btn btn-primary btn-sm edit-apt-btn" data-id="${a.id}"><i class="fa-solid fa-pen"></i></button> <button class="btn btn-danger btn-sm del-apt-btn" data-id="${a.id}"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            
+            // Mobil uyumlu kompakt satır tasarımı
+            html += `<tr>
+                <td>${getBlockBadge(a.block)}</td>
+                <td><b>${a.apartment}</b></td>
+                <td>
+                    <div style="font-weight:700;color:var(--primary);">${a.fullName || '-'}</div>
+                    <div style="font-size:10px;color:var(--secondary);margin-top:2px;"><i class="fa-solid fa-phone"></i> ${a.phone || '-'} &nbsp;|&nbsp; <i class="fa-solid fa-car"></i> ${a.plate || '-'}</div>
+                </td>
+                <td>${getOccupantBadge(a.occupantType)}</td>
+                <td style="font-weight:700;color:var(--success);">${money(a.feeAmount)}</td>
+                <td>${waBtn}</td>
+                <td style="white-space:nowrap;"><button class="btn btn-primary btn-sm edit-apt-btn" data-id="${a.id}"><i class="fa-solid fa-pen"></i></button> <button class="btn btn-danger btn-sm del-apt-btn" data-id="${a.id}"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>`;
         });
     }
     body.innerHTML = html;
