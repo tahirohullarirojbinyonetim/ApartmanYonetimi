@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google" content="notranslate">
-<title>Tahiroullar Rojbin Sitesi - Kurumsal Yönetim Sistemi</title>
+<title>Tahiroğulları Rojbin Sitesi - Kurumsal Yönetim Sistemi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -178,17 +178,13 @@
   button.btn { cursor: pointer; border: none; font-weight: 700; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-sm); }
   .btn-primary { background: var(--primary); color: #fff; }
   .btn-primary:hover { background: var(--primary-light); }
-  
   .btn-success { background: var(--success); color: #fff; }
   .btn-success:hover { background: #047857; }
-  
   .btn-danger { background: var(--danger); color: #fff; }
   .btn-danger:hover { background: #b91c1c; }
-  
   .btn-secondary { background: var(--secondary); color: #fff; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: #475569; }
   .btn-outline:hover { background: #f8fafc; }
-  
   .btn-sm { padding: 6px 12px; font-size: .75rem; border-radius: 6px; }
 
   table { width: 100%; border-collapse: collapse; font-size: .875rem; }
@@ -259,7 +255,7 @@
   .block-badge.a { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
   .block-badge.b { background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; }
 
-  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: .75rem; text-decoration: none; font-weight: 600; }
+  .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: .75rem; text-decoration: none; font-weight: 600; cursor: pointer; border: none; }
   .whatsapp-btn:hover { background: #16a34a; }
 
   .unpaid-alert-box {
@@ -298,71 +294,44 @@
     .tab-btn { white-space: nowrap; }
   }
   
-  .pdf-print-wrapper {
-    background: #ffffff !important;
-    padding: 24px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-  }
-  
-  .pdf-print-active {
-    padding: 20px !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    width: 210mm !important;
-    box-sizing: border-box !important;
-  }
-  .pdf-print-active h2 {
-    font-size: 16px !important;
-    margin: 0 0 16px 0 !important;
-    padding-bottom: 8px !important;
-    text-align: center !important;
-    color: #0f172a !important;
-    border-bottom: 2px solid #d97706 !important;
-    font-weight: 800 !important;
-  }
-  .pdf-print-active table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 10px !important;
-    margin-bottom: 16px !important;
-  }
-  .pdf-print-active th, .pdf-print-active td {
-    padding: 6px 8px !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #000000 !important;
-    background: transparent !important;
-  }
-  .pdf-print-active th {
-    background-color: #0f172a !important;
-    color: #ffffff !important;
-    font-weight: bold !important;
-  }
-  .pdf-print-active tfoot td {
-    font-weight: bold !important;
-    background-color: #f8fafc !important;
-  }
-  .pdf-footer-signature {
-    display: none;
-    margin-top: 30px;
-    justify-content: space-between;
-    text-align: center;
-    font-size: 11px;
-    color: #334155;
-  }
-  .pdf-print-active .pdf-footer-signature {
-    display: flex !important;
-  }
+  .pdf-print-wrapper { background: #ffffff !important; padding: 24px; border-radius: 12px; border: 1px solid var(--border); }
+  .pdf-print-active { padding: 20px !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: #ffffff !important; color: #000000 !important; width: 210mm !important; box-sizing: border-box !important; }
+  .pdf-print-active h2 { font-size: 16px !important; margin: 0 0 16px 0 !important; padding-bottom: 8px !important; text-align: center !important; color: #0f172a !important; border-bottom: 2px solid #d97706 !important; font-weight: 800 !important; }
+  .pdf-print-active table { width: 100% !important; border-collapse: collapse !important; font-size: 10px !important; margin-bottom: 16px !important; }
+  .pdf-print-active th, .pdf-print-active td { padding: 6px 8px !important; border: 1px solid #cbd5e1 !important; color: #000000 !important; background: transparent !important; }
+  .pdf-print-active th { background-color: #0f172a !important; color: #ffffff !important; font-weight: bold !important; }
+  .pdf-print-active tfoot td { font-weight: bold !important; background-color: #f8fafc !important; }
+  .pdf-footer-signature { display: none; margin-top: 30px; justify-content: space-between; text-align: center; font-size: 11px; color: #334155; }
+  .pdf-print-active .pdf-footer-signature { display: flex !important; }
+
+  .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+  .status-pill.green { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .status-pill.red { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .status-pill.gray { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+  .matter-row { display: flex; gap: 8px; align-items: center; padding: 8px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); }
+  .matter-row input { flex: 1; padding: 8px 12px; }
+  .matter-row .matter-amount { flex: 0 0 130px; }
+  .matter-row .matter-del { flex: 0 0 40px; background: var(--danger); color: #fff; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
+
+  .template-area { font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.5; min-height: 200px; }
+
+  .occupant-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; margin-left: 6px; text-transform: uppercase; }
+  .occupant-badge.host { background: #dbeafe; color: #1e40af; }
+  .occupant-badge.tenant { background: #fef3c7; color: #92400e; }
+
+  .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; margin-top: 8px; }
+  .month-cell { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .month-cell.paid { background: #dcfce7; color: #166534; }
+  .month-cell.unpaid { background: #fee2e2; color: #991b1b; }
+  .month-cell.pending { background: #f1f5f9; color: #64748b; }
 </style>
 </head>
 <body>
 
 <div id="loadingMask">
   <div class="spinner"></div>
-  <div id="loadingText">Sistem Hazrlanyor...</div>
+  <div id="loadingText">Sistem Hazırlanıyor...</div>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -370,12 +339,12 @@
 <div id="adminPasswordModal" class="modal-overlay hidden">
   <div class="modal-card">
     <button class="close-modal" id="closeAdminModalBtn">&times;</button>
-    <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent);"></i> Yönetim Girii</h3>
+    <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent);"></i> Yönetim Girişi</h3>
     <div class="field">
-      <label>Eriim ifresi</label>
+      <label>Erişim Şifresi</label>
       <input type="password" id="adminPassword" placeholder="••••" autocomplete="off" style="text-align: center; font-size: 1.25rem; letter-spacing: 4px;">
     </div>
-    <button class="btn btn-primary" id="adminLoginBtn" style="width: 100%;"><i class="fa-solid fa-key"></i> Dorula ve Giri Yap</button>
+    <button class="btn btn-primary" id="adminLoginBtn" style="width: 100%;"><i class="fa-solid fa-key"></i> Doğrula ve Giriş Yap</button>
   </div>
 </div>
 
@@ -395,13 +364,12 @@
     <button class="close-modal" id="closeApiKeyModalBtn">&times;</button>
     <h3><i class="fa-solid fa-robot" style="color: #059669;"></i> Google Gemini AI Entegrasyonu</h3>
     <p style="font-size: 0.8rem; color: var(--secondary); margin-bottom: 16px; line-height: 1.6;">
-      Banka hareketlerini otomatik analiz edip aidat/demirba eletirmesi yapmak için 
-      <strong>Google Gemini API anahtarnz</strong> giriniz. Anahtar sadece bu taraycda saklanr, 
-      sunucuya gönderilmez. Ücretsiz anahtar için: 
+      Banka hareketlerini otomatik analiz edip aidat/demirbaş eşleştirmesi yapmak için 
+      <strong>Google Gemini API anahtarınızı</strong> giriniz. Ücretsiz anahtar için: 
       <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#059669; font-weight:700;">aistudio.google.com</a>
     </p>
     <div class="field">
-      <label>Gemini API Anahtar</label>
+      <label>Gemini API Anahtarı</label>
       <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy... veya AQ..." autocomplete="off" style="font-family:monospace; font-size:0.85rem;">
     </div>
     <div id="apiKeyStatus" style="font-size:0.75rem; margin-top:8px; font-weight:700;"></div>
@@ -410,26 +378,89 @@
       <button class="btn btn-success" id="saveApiKeyBtn" style="flex:1;"><i class="fa-solid fa-floppy-disk"></i> Kaydet</button>
     </div>
     <button class="btn btn-outline btn-sm" id="clearApiKeyBtn" style="width:100%; margin-top:10px; color:#dc2626;">
-      <i class="fa-solid fa-trash"></i> Kaytl API Anahtarn Sil
+      <i class="fa-solid fa-trash"></i> Kayıtlı API Anahtarını Sil
     </button>
+  </div>
+</div>
+
+<div id="whatsappTemplateModal" class="modal-overlay hidden">
+  <div class="modal-card" style="border-top: 4px solid #22c55e; max-width: 640px;">
+    <button class="close-modal" id="closeWaTemplateModalBtn">&times;</button>
+    <h3><i class="fa-brands fa-whatsapp" style="color: #22c55e;"></i> WhatsApp Mesaj Şablonu</h3>
+    <p style="font-size: 0.8rem; color: var(--secondary); margin-bottom: 12px; line-height: 1.6;">
+      Değişkenler: <code>{isim}</code>, <code>{blok}</code>, <code>{daire}</code>, <code>{ay}</code>, <code>{yil}</code>, <code>{tutar}</code>, <code>{aylar}</code>
+    </p>
+    <div class="field">
+      <textarea id="waTemplateText" rows="12" class="template-area"></textarea>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-outline" id="resetWaTemplateBtn" style="flex:1;"><i class="fa-solid fa-rotate-left"></i> Varsayılana Dön</button>
+      <button class="btn btn-success" id="saveWaTemplateBtn" style="flex:1;"><i class="fa-solid fa-floppy-disk"></i> Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- YENİ: Excel İçe Aktarma Modal -->
+<div id="excelImportModal" class="modal-overlay hidden">
+  <div class="modal-card" style="border-top: 4px solid #3b82f6; max-width: 900px; width: 95%;">
+    <button class="close-modal" id="closeExcelImportBtn">&times;</button>
+    <h3><i class="fa-solid fa-file-import" style="color: #3b82f6;"></i> Google Form Excel İçe Aktarma</h3>
+    <p style="font-size: 0.85rem; color: var(--secondary); margin-bottom: 16px; line-height: 1.6;">
+      Google Form'dan indirdiğiniz Excel/CSV dosyasını yükleyin. Sütunlar otomatik algılanır: 
+      <b>Zaman damgası, BLOK, DAİRE NO, ADI SOYADI, TELEFON BİLGİSİ, ARAÇ BİLGİSİ, KİRACI İSENİZ EV SAHİBİNİN ADI SOYADI, KİRACI İSENİZ EV SAHİBİNİN TELEFON BİLGİSİ</b>
+    </p>
+    <div class="field">
+      <label>Excel / CSV Dosyası</label>
+      <input type="file" id="importExcelInput" accept=".xlsx,.xls,.csv" style="padding:8px;">
+    </div>
+
+    <div id="importPreviewArea" class="hidden">
+      <div style="background:#eff6ff; padding:12px; border-radius:8px; border-left:4px solid #3b82f6; margin-bottom:16px;">
+        <div style="font-weight:700; color:#1e40af;">📊 <span id="importCount">0</span> kayıt bulundu</div>
+        <div style="font-size:0.8rem; color:#475569; margin-top:4px;" id="importSummary"></div>
+      </div>
+
+      <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border); border-radius:8px;">
+        <table style="font-size:0.8rem;">
+          <thead>
+            <tr>
+              <th style="padding:8px;">Durum</th>
+              <th style="padding:8px;">Blok</th>
+              <th style="padding:8px;">Daire</th>
+              <th style="padding:8px;">Ad Soyad</th>
+              <th style="padding:8px;">Telefon</th>
+              <th style="padding:8px;">Tip</th>
+              <th style="padding:8px;">Plaka</th>
+            </tr>
+          </thead>
+          <tbody id="importPreviewBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+        <button class="btn btn-secondary" id="cancelImportBtn">İptal</button>
+        <button class="btn btn-success" id="confirmImportBtn"><i class="fa-solid fa-check"></i> Onayla ve İçe Aktar</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <header class="topbar">
   <div class="top-row">
     <div>
-      <h1><i class="fa-solid fa-building-user" style="color: var(--accent);"></i> Tahiroullar Rojbin Sitesi</h1>
-      <div class="slogan">Kurumsal ve effaf Bina Otomasyon Sistemi</div>
+      <h1><i class="fa-solid fa-building-user" style="color: var(--accent);"></i> Tahiroğulları Rojbin Sitesi</h1>
+      <div class="slogan">Kurumsal ve Şeffaf Bina Otomasyon Sistemi</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <div class="designer-credit">
-        <span>Yazlm Editörü: Esafil SERT</span>
-        <button id="openAdminModalBtn" class="admin-trigger-btn"><i class="fa-solid fa-lock"></i> Yönetici Girii</button>
-        <button id="openApiKeyBtn" class="admin-trigger-btn hidden" style="background:#059669;" title="Gemini API Anahtar"><i class="fa-solid fa-key"></i> AI</button>
+        <span>Yazılım Editörü: Esafil SERT</span>
+        <button id="openAdminModalBtn" class="admin-trigger-btn"><i class="fa-solid fa-lock"></i> Yönetici Girişi</button>
+        <button id="openApiKeyBtn" class="admin-trigger-btn hidden" style="background:#059669;" title="Gemini API Anahtarı"><i class="fa-solid fa-key"></i> AI</button>
+        <button id="openWaTemplateBtn" class="admin-trigger-btn hidden" style="background:#22c55e;" title="WhatsApp Şablonu"><i class="fa-brands fa-whatsapp"></i> Şablon</button>
       </div>
       <div class="user-box" id="userBox">
         <span id="userLabel" style="font-weight: 600;"></span>
-        <button id="logoutBtn" class="logout-btn hidden"><i class="fa-solid fa-right-from-bracket"></i> Güvenli Çk</button>
+        <button id="logoutBtn" class="logout-btn hidden"><i class="fa-solid fa-right-from-bracket"></i> Güvenli Çıkış</button>
       </div>
     </div>
   </div>
@@ -442,17 +473,17 @@
       <div class="stat-card collected">
         <i class="fa-solid fa-hand-holding-dollar"></i>
         <span class="label">Cari Ay Toplanan Aidat</span>
-        <span class="value" id="pubCollected">0</span>
+        <span class="value" id="pubCollected">₺0</span>
       </div>
       <div class="stat-card expenses">
         <i class="fa-solid fa-money-bill-transfer"></i>
-        <span class="label">Toplam Yaplan Gider</span>
-        <span class="value" id="pubExpenses">0</span>
+        <span class="label">Toplam Yapılan Gider</span>
+        <span class="value" id="pubExpenses">₺0</span>
       </div>
       <div class="stat-card balance">
         <i class="fa-solid fa-vault"></i>
         <span class="label">Kasa Net Bakiye</span>
-        <span class="value" id="pubBalance">0</span>
+        <span class="value" id="pubBalance">₺0</span>
       </div>
     </div>
 
@@ -460,7 +491,6 @@
       <div>
         <div class="card" style="padding: 20px; margin-bottom: 20px;">
           <h2><i class="fa-solid fa-house-chimney-user" style="color:var(--success);"></i> Kat Sakini Sorgulama</h2>
-          
           <div class="row">
             <div class="field" style="flex:1;">
               <label>Blok Seçiniz</label>
@@ -474,25 +504,23 @@
               <select id="residentNoSelect"></select>
             </div>
           </div>
-
           <div class="field">
-            <label>Telefon Numaras</label>
-            <input type="tel" id="residentPhone" placeholder="Sistemde kaytl telefon numaras">
+            <label>Telefon Numarası</label>
+            <input type="tel" id="residentPhone" placeholder="Sistemde kayıtlı telefon numarası">
           </div>
-          
           <button class="btn btn-success" id="residentLoginBtn" style="width:100%;"><i class="fa-solid fa-key"></i> Borç Bilgilerini Gör</button>
           <div id="residentError" style="color:var(--danger);font-size:.75rem;margin-top:8px;display:none; font-weight:600;"></div>
         </div>
 
         <div class="card">
-          <h2><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> Blok Panosu Duyurular</h2>
-          <div id="pubAnnouncementList"><div class="empty-note">Kayt yok</div></div>
+          <h2><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> Blok Panosu Duyuruları</h2>
+          <div id="pubAnnouncementList"><div class="empty-note">Kayıt yok</div></div>
         </div>
       </div>
 
       <div class="card">
-        <h2><i class="fa-solid fa-file-receipt" style="color:var(--danger);"></i> Son Siteden Çkan Giderler</h2>
-        <div id="pubExpenseList"><div class="empty-note">Kayt yok</div></div>
+        <h2><i class="fa-solid fa-file-receipt" style="color:var(--danger);"></i> Son Siteden Çıkan Giderler</h2>
+        <div id="pubExpenseList"><div class="empty-note">Kayıt yok</div></div>
       </div>
     </div>
   </section>
@@ -506,7 +534,7 @@
           <div class="value" style="font-weight:700; font-size: 1.1rem; color: var(--primary);"><span id="resBlock"></span> - Daire: <span id="resApt"></span></div>
         </div>
         <div class="info-item" style="margin-bottom:10px;">
-          <label>letiim Hatt</label>
+          <label>İletişim Hattı</label>
           <div class="value" id="resPhone" style="font-weight:700;">-</div>
         </div>
       </div>
@@ -515,16 +543,9 @@
     <div class="card">
       <h2><i class="fa-solid fa-calculator" style="color:var(--accent);"></i> Dönemlik Aidat Ödeme Durumu Sorgula</h2>
       <div class="row">
-        <div class="field">
-          <label>Yl Seçimi</label>
-          <select id="resDueYear"></select>
-        </div>
-        <div class="field">
-          <label>Ay Seçimi</label>
-          <select id="resDueMonth"></select>
-        </div>
+        <div class="field"><label>Yıl Seçimi</label><select id="resDueYear"></select></div>
+        <div class="field"><label>Ay Seçimi</label><select id="resDueMonth"></select></div>
       </div>
-      
       <div style="background: #f8fafc; border: 1px solid var(--border); padding: 16px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12px;">
         <div>
           <div style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; text-transform: uppercase;">Sorgulanan Dönem</div>
@@ -532,28 +553,30 @@
         </div>
         <div>
           <div style="font-size: 0.75rem; color: var(--secondary); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; text-align: right;">Ödeme Durumu</div>
-          <div id="resDueStatusContainer" style="text-align: right;">
-            <span class="badge neutral">Yükleniyor...</span>
-          </div>
+          <div id="resDueStatusContainer" style="text-align: right;"><span class="badge neutral">Yükleniyor...</span></div>
         </div>
       </div>
-
       <div id="resUnpaidHistoryBox" class="unpaid-alert-box hidden">
-        <h4><i class="fa-solid fa-triangle-exclamation"></i> Ödenmemi Aidat Borçlarnz Bulunmaktadr!</h4>
+        <h4><i class="fa-solid fa-triangle-exclamation"></i> Ödenmemiş Aidat Borçlarınız Bulunmaktadır!</h4>
         <div id="resUnpaidHistoryList"></div>
       </div>
     </div>
 
     <div class="card">
-      <h2><i class="fa-solid fa-reply-all" style="color:var(--accent);"></i> Yönetim Kurulundan Gelen Cevaplar</h2>
-      <div id="resMyRequestsRepliesList"><div class="empty-note">Yönetimden dönen bir yant bulunmuyor.</div></div>
+      <h2><i class="fa-solid fa-toolbox" style="color:var(--accent);"></i> 🏗️ Site Demirbaş Borçlarınız</h2>
+      <div id="resDemirbasBorclari"><div class="empty-note">Demirbaş borcunuz bulunmuyor.</div></div>
     </div>
 
     <div class="card">
-      <h2><i class="fa-solid fa-pen-to-square"></i> Yönetim Kuruluna Mesaj let</h2>
+      <h2><i class="fa-solid fa-reply-all" style="color:var(--accent);"></i> Yönetim Kurulundan Gelen Cevaplar</h2>
+      <div id="resMyRequestsRepliesList"><div class="empty-note">Yönetimden dönen bir yanıt bulunmuyor.</div></div>
+    </div>
+
+    <div class="card">
+      <h2><i class="fa-solid fa-pen-to-square"></i> Yönetim Kuruluna Mesaj İlet</h2>
       <div class="field">
-        <label>Açklama ve Detaylar</label>
-        <textarea id="resRequestText" rows="4" placeholder="letmek istediiniz arza, talep veya öneriyi detaylca yaznz..."></textarea>
+        <label>Açıklama ve Detaylar</label>
+        <textarea id="resRequestText" rows="4" placeholder="İletmek istediğiniz arıza, talep veya öneriyi detaylıca yazınız..."></textarea>
       </div>
       <button class="btn btn-primary" id="resSubmitRequestBtn"><i class="fa-solid fa-paper-plane"></i> Talebi Gönder</button>
     </div>
@@ -562,25 +585,30 @@
   <section id="adminView" class="hidden">
     <div class="tabs">
       <button class="tab-btn active" data-tab="tabOverview"><i class="fa-solid fa-users"></i> Sakinler Listesi</button>
-      <button class="tab-btn" data-tab="tabDues"><i class="fa-solid fa-calculator"></i> Aidat Girii</button>
+      <button class="tab-btn" data-tab="tabDues"><i class="fa-solid fa-calculator"></i> Aidat & Borç Takip</button>
+      <button class="tab-btn" data-tab="tabDemirbas"><i class="fa-solid fa-toolbox"></i> Demirbaş Yönetimi</button>
       <button class="tab-btn" data-tab="tabExpenses"><i class="fa-solid fa-wrench"></i> Gider Ekle</button>
-      <button class="tab-btn" data-tab="tabApartments"><i class="fa-solid fa-folder-open"></i> Daire Ayarlar</button>
+      <button class="tab-btn" data-tab="tabApartments"><i class="fa-solid fa-folder-open"></i> Daire Ayarları</button>
       <button class="tab-btn" data-tab="tabAnnouncements"><i class="fa-solid fa-bullhorn"></i> Panoya As</button>
-      <button class="tab-btn" data-tab="tabRequests" id="requestsTabBtn"><i class="fa-solid fa-envelope-open-text"></i> Gelen stekler <span class="notification-dot" id="requestNotificationDot"></span></button>
-      <button class="tab-btn" data-tab="tabReport"><i class="fa-solid fa-file-pdf"></i> Aidat Çizelgesi PDF</button>
-      <button class="tab-btn" data-tab="tabExpenseReport"><i class="fa-solid fa-receipt"></i> Gider Raporu PDF</button>
-      <button class="tab-btn" data-tab="tabDemirbas"><i class="fa-solid fa-toolbox"></i> Demirba Yönetimi</button>
-      <button class="tab-btn" data-tab="tabBank"><i class="fa-solid fa-robot"></i> Banka & AI Analiz</button>
-      <button class="tab-btn" data-tab="tabExcel"><i class="fa-solid fa-file-excel"></i> Excel'e Aktar</button>
+      <button class="tab-btn" data-tab="tabRequests" id="requestsTabBtn"><i class="fa-solid fa-envelope-open-text"></i> Gelen İstekler <span class="notification-dot" id="requestNotificationDot"></span></button>
+      <button class="tab-btn" data-tab="tabReport"><i class="fa-solid fa-file-pdf"></i> Aidat PDF</button>
+      <button class="tab-btn" data-tab="tabExpenseReport"><i class="fa-solid fa-receipt"></i> Gider PDF</button>
+      <button class="tab-btn" data-tab="tabBank"><i class="fa-solid fa-robot"></i> Banka & AI</button>
+      <button class="tab-btn" data-tab="tabExcel"><i class="fa-solid fa-file-excel"></i> Excel</button>
     </div>
 
     <div id="tabOverview" class="tab-panel active">
       <div class="card">
-        <h2><i class="fa-solid fa-table-list"></i> Bina Sakinleri Detayl Listesi</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <h2 style="margin:0;"><i class="fa-solid fa-table-list"></i> Bina Sakinleri Detaylı Listesi</h2>
+          <button class="btn btn-primary" id="openImportExcelBtn" style="white-space:nowrap;">
+            <i class="fa-solid fa-file-import"></i> Google Form Excel'den İçe Aktar
+          </button>
+        </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Blok</th><th>Daire No</th><th>Ad Soyad</th></tr></thead>
-            <tbody id="overviewBody"><tr><td colspan="3" class="empty-note">Yükleniyor...</td></tr></tbody>
+            <thead><tr><th>Blok</th><th>Daire No</th><th>Ad Soyad</th><th>Tip</th><th>Telefon</th><th>Ev Sahibi</th></tr></thead>
+            <tbody id="overviewBody"><tr><td colspan="6" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -588,29 +616,27 @@
 
     <div id="tabDues" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-money-check-dollar"></i> Aylk Aidat Defteri Takibi</h2>
+        <h2><i class="fa-solid fa-list-check"></i> Aidat & Demirbaş Borç Takip Paneli</h2>
         <div class="row">
           <div class="field">
             <label>Blok Seçimi</label>
             <select id="dueBlockFilter"><option value="">Tümü</option><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select>
           </div>
-          <div class="field">
-            <label>Muhasebe Ay</label>
-            <select id="dueMonth"></select>
-          </div>
-          <div class="field">
-            <label>Yl</label>
-            <select id="dueYear"></select>
-          </div>
-          <div class="field">
-            <label>Filtre</label>
-            <select id="dueStatusFilter"><option value="">Herkes</option><option value="Ödendi">Ödeyenler</option><option value="Ödenmedi">Ödemeyenler</option></select>
+          <div class="field"><label>Muhasebe Ayı</label><select id="dueMonth"></select></div>
+          <div class="field"><label>Yıl</label><select id="dueYear"></select></div>
+          <div class="field" style="display:flex;align-items:flex-end;">
+            <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;letter-spacing:0;font-size:0.85rem;cursor:pointer;">
+              <input type="checkbox" id="onlyDebtors" style="width:auto;">
+              Sadece Borçluları Göster
+            </label>
           </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Blok</th><th>Daire No</th><th>Ad Soyad</th></tr></thead>
-            <tbody id="duesBody"><tr><td colspan="3" class="empty-note">Yükleniyor...</td></tr></tbody>
+            <thead>
+              <tr><th style="width:40px;"></th><th>Blok</th><th>Daire</th><th>Kişi</th><th>Aidat</th><th>Demirbaş</th><th>İşlem</th></tr>
+            </thead>
+            <tbody id="duesBody"><tr><td colspan="7" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -621,82 +647,71 @@
         <h2><i class="fa-solid fa-plus"></i> Yeni Gider Ekle / Düzenle</h2>
         <input type="hidden" id="expId">
         <div class="row">
-          <div class="field">
-            <label>Harcama Kalemi Açklamas</label>
-            <input type="text" id="expDesc" placeholder="Örn: Asansör bakm bedeli">
-          </div>
-          <div class="field">
-            <label>Harcama Tutar ()</label>
-            <input type="number" id="expAmount" placeholder="0">
-          </div>
-          <div class="field">
-            <label>Fatura Tarihi</label>
-            <input type="date" id="expDate">
-          </div>
+          <div class="field"><label>Harcama Kalemi Açıklaması</label><input type="text" id="expDesc" placeholder="Örn: Asansör bakım bedeli"></div>
+          <div class="field"><label>Harcama Tutarı (₺)</label><input type="number" id="expAmount" placeholder="0"></div>
+          <div class="field"><label>Fatura Tarihi</label><input type="date" id="expDate"></div>
         </div>
-        <button class="btn btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Faturay Kasadan Dü</button>
+        <button class="btn btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Faturayı Kasadan Düş</button>
         <button class="btn btn-secondary hidden" id="cancelExpenseBtn" style="margin-left: 8px;">Vazgeç</button>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-list"></i> Dönem Harcamalar Envanteri</h2>
+        <h2><i class="fa-solid fa-list"></i> Dönem Harcamaları Envanteri</h2>
         <div class="expense-filter">
-          <div class="field"><label>Balangç Tarihi</label><input type="date" id="expFilterStart"></div>
-          <div class="field"><label>Biti Tarihi</label><input type="date" id="expFilterEnd"></div>
+          <div class="field"><label>Başlangıç Tarihi</label><input type="date" id="expFilterStart"></div>
+          <div class="field"><label>Bitiş Tarihi</label><input type="date" id="expFilterEnd"></div>
           <div class="field style-btn-container" style="flex: 2; min-width: 260px; display: flex; align-items: flex-end;">
             <div class="btn-row-inline">
               <button class="btn btn-primary field-btn" id="expFilterBtn"><i class="fa-solid fa-filter"></i> Süzgeçten Geçir</button>
-              <button class="btn btn-secondary field-btn" id="expClearFilterBtn"><i class="fa-solid fa-times"></i> Sfrla</button>
+              <button class="btn btn-secondary field-btn" id="expClearFilterBtn"><i class="fa-solid fa-times"></i> Sıfırla</button>
               <button class="btn btn-success field-btn" id="expGenPrintBtn"><i class="fa-solid fa-file-pdf"></i> PDF Gider Raporu Aç</button>
             </div>
           </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Açklama</th><th>Tutar</th><th>Tarih</th><th>lemler</th></tr></thead>
+            <thead><tr><th>Açıklama</th><th>Tutar</th><th>Tarih</th><th>İşlemler</th></tr></thead>
             <tbody id="expensesBody"><tr><td colspan="4" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
         <div style="margin-top:16px;display:flex;justify-content:flex-end;font-weight:700;font-size:1.05rem;">
-          Filtrelenmi Toplam Gider: <span id="expTotalFilter" style="margin-left:8px;color:var(--danger);">0</span>
+          Filtrelenmiş Toplam Gider: <span id="expTotalFilter" style="margin-left:8px;color:var(--danger);">₺0</span>
         </div>
       </div>
     </div>
 
     <div id="tabApartments" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-building"></i> Daire Bilgi Kart Düzenleme</h2>
+        <h2><i class="fa-solid fa-building"></i> Daire Bilgi Kartı Düzenleme</h2>
         <div class="search-box" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-          <div class="field" style="flex:1;min-width:200px;"><label>Veritabannda Ara</label><input type="text" id="apartmentSearch" placeholder="sim, daire, plaka..."></div>
+          <div class="field" style="flex:1;min-width:200px;"><label>Veritabanında Ara</label><input type="text" id="apartmentSearch" placeholder="İsim, daire, plaka..."></div>
           <div class="field" style="flex:0 0 160px;"><label>Blok Süzgeci</label><select id="blockFilter"><option value="">Tümü</option><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-outline" id="clearSearchBtn"><i class="fa-solid fa-times"></i> Temizle</button></div>
         </div>
         <div class="row">
           <input type="hidden" id="aptId">
-          <div class="field" style="flex:0 0 140px;">
-            <label>Blok</label>
-            <select id="newApartmentBlock">
-              <option value="A Blok">A Blok</option>
-              <option value="B Blok">B Blok</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Daire No</label>
-            <select id="newApartmentNo"></select>
-          </div>
-          <div class="field"><label>Mülk Sakini sim</label><input type="text" id="newApartmentName" placeholder="Ad Soyad"></div>
+          <div class="field" style="flex:0 0 140px;"><label>Blok</label><select id="newApartmentBlock"><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select></div>
+          <div class="field"><label>Daire No</label><select id="newApartmentNo"></select></div>
+          <div class="field"><label>Oturan Kişi Tipi</label><select id="newOccupantType"><option value="Ev Sahibi">Ev Sahibi</option><option value="Kiracı">Kiracı</option></select></div>
+          <div class="field"><label>Oturan Ad Soyad</label><input type="text" id="newApartmentName" placeholder="Adı Soyadı"></div>
         </div>
         <div class="row">
-          <div class="field"><label>GSM Telefon</label><input type="text" id="newApartmentPhone" placeholder="05xxxxxxxx"></div>
+          <div class="field"><label>Oturan Telefon</label><input type="text" id="newApartmentPhone" placeholder="05xxxxxxxx"></div>
           <div class="field"><label>Oto Plaka</label><input type="text" id="newApartmentPlate" placeholder="01xx0101"></div>
-          <div class="field"><label>Aylk Sabit Aidat ()</label><input type="number" id="newApartmentFee" value="500"></div>
+          <div class="field"><label>Aylık Sabit Aidat (₺)</label><input type="number" id="newApartmentFee" value="500"></div>
+        </div>
+        <div class="row" id="hostInfoRow" style="display:none;">
+          <div class="field"><label>Ev Sahibi Ad Soyad</label><input type="text" id="newHostName" placeholder="Ev sahibinin adı"></div>
+          <div class="field"><label>Ev Sahibi Telefon</label><input type="text" id="newHostPhone" placeholder="05xxxxxxxx"></div>
+        </div>
+        <div class="row">
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="addApartmentBtn"><i class="fa-solid fa-floppy-disk"></i> Sistemi Güncelle</button></div>
         </div>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-list"></i> Sistemde Kaytl Mülk Listesi</h2>
+        <h2><i class="fa-solid fa-list"></i> Sistemde Kayıtlı Mülk Listesi</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Blok</th><th>Daire</th><th>Ad Soyad</th><th>Telefon</th><th>Plaka</th><th>Aidat</th><th>Durum</th><th>Yönlendirme</th><th>Aksiyon</th></tr></thead>
+            <thead><tr><th>Blok</th><th>Daire</th><th>Ad Soyad</th><th>Tip</th><th>Telefon</th><th>Plaka</th><th>Aidat</th><th>Yönlendirme</th><th>Aksiyon</th></tr></thead>
             <tbody id="apartmentsBody"><tr><td colspan="9" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
@@ -705,9 +720,9 @@
 
     <div id="tabAnnouncements" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-bullhorn"></i> Blok Giri Panosuna Duyuru Yaz</h2>
-        <div class="field"><label>Duyuru Bildiri çerii</label><textarea id="announcementText" rows="3" placeholder="Sakinlerin panosunda görünecek duyuru metni..."></textarea></div>
-        <button class="btn btn-primary" id="addAnnouncementBtn"><i class="fa-solid fa-bullhorn"></i> lan Panoya As</button>
+        <h2><i class="fa-solid fa-bullhorn"></i> Blok Giriş Panosuna Duyuru Yaz</h2>
+        <div class="field"><label>Duyuru Bildiri İçeriği</label><textarea id="announcementText" rows="3" placeholder="Sakinlerin panosunda görünecek duyuru metni..."></textarea></div>
+        <button class="btn btn-primary" id="addAnnouncementBtn"><i class="fa-solid fa-bullhorn"></i> İlanı Panoya As</button>
       </div>
       <div class="card">
         <h2><i class="fa-solid fa-list"></i> Aktif Duyurular</h2>
@@ -717,41 +732,30 @@
 
     <div id="tabRequests" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-comments"></i> Sakinlerden Gelen stekler ve Cevaplama Paneli</h2>
-        <div id="requestsAdminList"><div class="empty-note">Kayt yok</div></div>
+        <h2><i class="fa-solid fa-comments"></i> Sakinlerden Gelen İstekler</h2>
+        <div id="requestsAdminList"><div class="empty-note">Kayıt yok</div></div>
       </div>
     </div>
 
     <div id="tabReport" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-file-invoice"></i> Aylk Aidat Çizelge Raporu</h2>
+        <h2><i class="fa-solid fa-file-invoice"></i> Aylık Aidat Çizelge Raporu</h2>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
           <div class="field" style="flex:0 0 160px;"><label>Rapor Dönemi</label><select id="reportMonth"></select></div>
-          <div class="field" style="flex:0 0 120px;"><label>Yl</label><select id="reportYear"></select></div>
+          <div class="field" style="flex:0 0 120px;"><label>Yıl</label><select id="reportYear"></select></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="reportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF ndir</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF İndir</button></div>
         </div>
-        
         <div class="table-wrap pdf-print-wrapper" id="reportTableContainer">
-          <h2 id="pdfDynamicTitle">Tahiroullar Rojbin Sitesi Aidat Çizelgesi</h2>
+          <h2 id="pdfDynamicTitle">Tahiroğulları Rojbin Sitesi Aidat Çizelgesi</h2>
           <table id="reportTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ad Soyad</th>
-                <th>Blok</th>
-                <th>Daire No</th>
-                <th>Tutar</th>
-                <th>Ödeme Zaman (Saatli)</th>
-              </tr>
-            </thead>
+            <thead><tr><th>#</th><th>Ad Soyad</th><th>Blok</th><th>Daire No</th><th>Tutar</th><th>Ödeme Zamanı (Saatli)</th></tr></thead>
             <tbody id="reportBody"><tr><td colspan="6" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
             <tfoot id="reportFooter"></tfoot>
           </table>
-          
           <div class="pdf-footer-signature">
             <div><strong>Düzenleyen</strong><br><br>Site Yönetimi</div>
-            <div><strong>Onaylayan</strong><br><br>Yönetim Kurulu Bakan</div>
+            <div><strong>Onaylayan</strong><br><br>Yönetim Kurulu Başkanı</div>
           </div>
         </div>
       </div>
@@ -761,25 +765,21 @@
       <div class="card">
         <h2><i class="fa-solid fa-file-signature"></i> Dönemsel Apartman Gider Hesap Raporu</h2>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
-          <div class="field" style="flex:0 0 180px;"><label>Balangç Tarihi</label><input type="date" id="expReportStart"></div>
-          <div class="field" style="flex:0 0 180px;"><label>Biti Tarihi</label><input type="date" id="expReportEnd"></div>
+          <div class="field" style="flex:0 0 180px;"><label>Başlangıç Tarihi</label><input type="date" id="expReportStart"></div>
+          <div class="field" style="flex:0 0 180px;"><label>Bitiş Tarihi</label><input type="date" id="expReportEnd"></div>
           <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" id="expReportFilterBtn"><i class="fa-solid fa-filter"></i> Hesapla</button></div>
-          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF ndir</button></div>
+          <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-success" id="printExpenseReportBtn"><i class="fa-solid fa-file-pdf"></i> Dikey A4 PDF İndir</button></div>
         </div>
-        
         <div class="table-wrap pdf-print-wrapper" id="expenseReportTableContainer">
-          <h2 id="pdfExpenseDynamicTitle">Tahiroullar Rojbin Sitesi Gider Raporu</h2>
+          <h2 id="pdfExpenseDynamicTitle">Tahiroğulları Rojbin Sitesi Gider Raporu</h2>
           <table id="expReportTable">
-            <thead>
-              <tr><th>#</th><th>Açklama</th><th>Tutar</th><th>Kayt Tarihi</th></tr>
-            </thead>
+            <thead><tr><th>#</th><th>Açıklama</th><th>Tutar</th><th>Kayıt Tarihi</th></tr></thead>
             <tbody id="expReportBody"><tr><td colspan="4" class="empty-note">Veri bulunmuyor.</td></tr></tbody>
             <tfoot id="expReportFooter"></tfoot>
           </table>
-
           <div class="pdf-footer-signature">
             <div><strong>Düzenleyen</strong><br><br>Site Yönetimi</div>
-            <div><strong>Onaylayan</strong><br><br>Yönetim Kurulu Bakan</div>
+            <div><strong>Onaylayan</strong><br><br>Yönetim Kurulu Başkanı</div>
           </div>
         </div>
       </div>
@@ -787,59 +787,65 @@
 
     <div id="tabDemirbas" class="tab-panel">
       <div class="card">
-        <h2><i class="fa-solid fa-plus"></i> Yeni Demirba Ödemesi Ekle / Düzenle</h2>
-        <p style="font-size:0.8rem; color:var(--secondary); margin-bottom:16px;">
-          Demirba = Tek seferlik ödemeler (Kamera montaj, Asansör bakm, Boya, Çat tamiri vb.). Aidattan ayr takip edilir.
+        <h2><i class="fa-solid fa-file-invoice-dollar"></i> Yeni Demirbaş Borçlandırması Oluştur</h2>
+        <p style="font-size:0.85rem; color:var(--secondary); margin-bottom:16px;">
+          Demirbaş borçlandırma = Site sakinlerine dağıtılacak tek seferlik masraf. Madde madde ekleyip toplam tutarı belirleyin.
         </p>
-        <input type="hidden" id="demId">
-        <div class="row">
-          <div class="field" style="flex:2;">
-            <label>Demirba Açklamas</label>
-            <input type="text" id="demDesc" placeholder="Örn: Kamera montaj, Asansör bakm">
-          </div>
-          <div class="field">
-            <label>Tutar ()</label>
-            <input type="number" id="demAmount" placeholder="0">
-          </div>
-          <div class="field">
-            <label>Ödeme Tarihi</label>
-            <input type="date" id="demDate">
+        <div class="field">
+          <label>Borçlandırma Başlığı</label>
+          <input type="text" id="bulkTitle" placeholder="Örn: Kamera Montajı 2026">
+        </div>
+        <div class="field">
+          <label>Madde Listesi</label>
+          <div id="matterListContainer"></div>
+          <button class="btn btn-outline btn-sm" id="addMatterBtn" type="button" style="margin-top:8px;">
+            <i class="fa-solid fa-plus"></i> Madde Ekle
+          </button>
+        </div>
+        <div style="background:#f0fdf4; padding:12px 16px; border-radius:8px; border:1px solid #86efac; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:700; color:#166534;">KİŞİ BAŞI TOPLAM:</span>
+          <span id="bulkTotalDisplay" style="font-weight:800; font-size:1.2rem; color:#166534;">₺0</span>
+        </div>
+        <div class="field">
+          <label>Kime Uygulanacak?</label>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:0.85rem;cursor:pointer;margin:0;">
+              <input type="radio" name="bulkApplyTo" value="all" checked style="width:auto;"> Tüm Site
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:0.85rem;cursor:pointer;margin:0;">
+              <input type="radio" name="bulkApplyTo" value="block" style="width:auto;"> Belirli Blok
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:0.85rem;cursor:pointer;margin:0;">
+              <input type="radio" name="bulkApplyTo" value="single" style="width:auto;"> Tek Daire
+            </label>
           </div>
         </div>
-        <div class="row">
-          <div class="field">
-            <label>Blok (Opsiyonel)</label>
-            <select id="demBlock">
-              <option value="">Tüm Site</option>
-              <option value="A Blok">A Blok</option>
-              <option value="B Blok">B Blok</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Daire No (Opsiyonel)</label>
-            <input type="text" id="demApt" placeholder="Örn: 5">
-          </div>
-          <div class="field">
-            <label>Ödeyen Kii (Opsiyonel)</label>
-            <input type="text" id="demPayer" placeholder="Ad Soyad">
-          </div>
-          <div class="field" style="display:flex;align-items:flex-end;">
-            <button class="btn btn-success" id="addDemirbasBtn" style="width:100%;"><i class="fa-solid fa-floppy-disk"></i> Kaydet</button>
-          </div>
+        <div class="field hidden" id="bulkBlockSelectField">
+          <label>Blok Seç</label>
+          <select id="bulkBlockSelect"><option value="A Blok">A Blok</option><option value="B Blok">B Blok</option></select>
         </div>
-        <button class="btn btn-secondary hidden" id="cancelDemirbasBtn" style="margin-top:8px;">Vazgeç</button>
+        <div class="field hidden" id="bulkSingleSelectField">
+          <label>Daire Seç</label>
+          <select id="bulkSingleSelect"></select>
+        </div>
+        <button class="btn btn-success" id="createBulkDebtBtn" style="width:100%; padding:14px;">
+          <i class="fa-solid fa-bullhorn"></i> Tüm Seçili Sakinlere Borçlandır
+        </button>
       </div>
-
       <div class="card">
-        <h2><i class="fa-solid fa-list"></i> Kaytl Demirba Ödemeleri</h2>
+        <h2><i class="fa-solid fa-list"></i> Aktif Demirbaş Borçlandırmaları</h2>
+        <div id="activeBulkDebts"><div class="empty-note">Henüz borçlandırma yapılmadı.</div></div>
+      </div>
+      <div class="card">
+        <h2><i class="fa-solid fa-coins"></i> Demirbaş Tahsilatları (Ödenenler)</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Tarih</th><th>Açklama</th><th>Blok/Daire</th><th>Ödeyen</th><th>Tutar</th><th>lemler</th></tr></thead>
+            <thead><tr><th>Tarih</th><th>Açıklama</th><th>Blok/Daire</th><th>Ödeyen</th><th>Tutar</th><th>İşlemler</th></tr></thead>
             <tbody id="demirbasBody"><tr><td colspan="6" class="empty-note">Yükleniyor...</td></tr></tbody>
           </table>
         </div>
         <div style="margin-top:16px;display:flex;justify-content:flex-end;font-weight:700;font-size:1.05rem;">
-          Toplam Demirba Geliri: <span id="demTotal" style="margin-left:8px;color:var(--success);">0</span>
+          Toplam Tahsilat: <span id="demTotal" style="margin-left:8px;color:var(--success);">₺0</span>
         </div>
       </div>
     </div>
@@ -848,64 +854,46 @@
       <div class="card">
         <h2><i class="fa-solid fa-robot" style="color:#059669;"></i> Banka Hareketleri — AI Analiz</h2>
         <p style="font-size:0.85rem; color:var(--secondary); margin-bottom:16px; line-height:1.6;">
-          Banka ekstrenizi (Excel veya CSV) yükleyin. Gemini AI, açklama metinlerinden hangi dairenin aidat/demirba ödemesi olduunu otomatik bulur ve onay ekran sunar. 
-          <strong>Bakiye sütunu kullanlmaz</strong>, sadece Tarih + Açklama + Tutar okunur.
+          Banka ekstrenizi (Excel veya CSV) yükleyin. <strong>Açıklamada ay yazmıyorsa, ekstre tarihindeki ay kullanılır.</strong> 
+          Onay sonrası sistem otomatik olarak önce aidat, sonra demirbaş borcunu kapatır.
         </p>
-
         <div id="apiKeyWarning" class="hidden" style="background:#fef3c7; border:1px solid #fde68a; color:#92400e; padding:12px; border-radius:8px; margin-bottom:16px; font-size:0.85rem;">
-          <i class="fa-solid fa-triangle-exclamation"></i> Önce sa üstteki <strong>AI</strong> butonundan Gemini API anahtarnz girmelisiniz.
+          <i class="fa-solid fa-triangle-exclamation"></i> Önce sağ üstteki <strong>AI</strong> butonundan Gemini API anahtarınızı girmelisiniz.
         </div>
-
         <div class="row">
-          <div class="field">
-            <label>Banka Ekstresi Dosyas (Excel / CSV)</label>
-            <input type="file" id="bankFileInput" accept=".xlsx,.xls,.csv" style="padding:8px;">
-          </div>
+          <div class="field"><label>Banka Ekstresi Dosyası (Excel / CSV)</label><input type="file" id="bankFileInput" accept=".xlsx,.xls,.csv" style="padding:8px;"></div>
         </div>
-
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
           <button class="btn btn-primary" id="analyzeBankBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> AI ile Analiz Et</button>
           <button class="btn btn-outline" id="clearBankBtn"><i class="fa-solid fa-times"></i> Temizle</button>
           <button class="btn btn-secondary" id="loadSampleBtn"><i class="fa-solid fa-flask"></i> Örnek Yükle</button>
         </div>
       </div>
-
       <div class="card hidden" id="bankResultCard">
-        <h2><i class="fa-solid fa-list-check" style="color:var(--accent);"></i> Analiz Sonuçlar — Onay Bekliyor</h2>
+        <h2><i class="fa-solid fa-list-check" style="color:var(--accent);"></i> Analiz Sonuçları — Onay Bekliyor</h2>
         <p style="font-size:0.85rem; color:var(--secondary); margin-bottom:16px;">
-          Aadaki eletirmeleri kontrol edin. Onayladnzda sistem ilgili aylarn aidat kaytlarn <strong>Ödendi</strong> olarak iaretleyecek ve demirba kaytlarn ekleyecektir.
+          Eşleştirmeleri kontrol edin. Onayladığınızda sistem <strong>önce aidat, sonra demirbaş</strong> borcunu kapatır.
         </p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th><input type="checkbox" id="selectAllBankRows" style="width:auto;"></th>
-                <th>Tarih</th>
-                <th>Açklama (Banka)</th>
-                <th>Blok</th>
-                <th>Daire</th>
-                <th>Ay</th>
-                <th>Tutar</th>
-                <th>Tip</th>
-                <th>Güven</th>
+                <th>Tarih</th><th>Açıklama</th><th>Blok</th><th>Daire</th><th>Ay/Aylar</th><th>Tutar</th><th>Tip</th><th>Dağıtım Önizleme</th><th>Güven</th>
               </tr>
             </thead>
             <tbody id="bankResultBody"></tbody>
           </table>
         </div>
         <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
-          <button class="btn btn-secondary" id="cancelBankResultsBtn">ptal</button>
-          <button class="btn btn-success" id="approveBankResultsBtn"><i class="fa-solid fa-check"></i> Seçili Olanlar Sisteme le</button>
+          <button class="btn btn-secondary" id="cancelBankResultsBtn">İptal</button>
+          <button class="btn btn-success" id="approveBankResultsBtn"><i class="fa-solid fa-check"></i> Seçili Olanları Sisteme İşle</button>
         </div>
       </div>
-
       <div class="card hidden" id="bankManualCard">
-        <h2><i class="fa-solid fa-file-import"></i> Yüklenen Ham Veri (Manuel lem)</h2>
+        <h2><i class="fa-solid fa-file-import"></i> Yüklenen Ham Veri</h2>
         <div class="table-wrap">
-          <table>
-            <thead><tr><th>Tarih</th><th>Açklama</th><th>Tutar</th></tr></thead>
-            <tbody id="bankManualBody"></tbody>
-          </table>
+          <table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody id="bankManualBody"></tbody></table>
         </div>
       </div>
     </div>
@@ -914,39 +902,36 @@
       <div class="card">
         <h2><i class="fa-solid fa-file-excel" style="color:#059669;"></i> Tüm Verileri Excel'e Aktar</h2>
         <p style="color:var(--secondary); font-size:0.875rem; margin-bottom:20px;">
-          Aadaki butona bastnzda, tüm sistem verileri <strong>tek bir Excel dosyas</strong> içinde 
-          ayr sayfalar (sheet) halinde indirilecektir.
+          Tek bir Excel dosyası içinde ayrı sayfalar halinde tüm veriler indirilir.
         </p>
-        
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:20px;">
           <div style="background:#eff6ff; padding:14px; border-radius:10px; border-left:4px solid #3b82f6;">
-            <div style="font-weight:800; color:#1e40af; font-size:0.85rem;"> Daireler</div>
-            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Sakin bilgileri + aidat tarifesi</div>
+            <div style="font-weight:800; color:#1e40af; font-size:0.85rem;">📋 Daireler</div>
+            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Sakin bilgileri</div>
           </div>
           <div style="background:#f0fdf4; padding:14px; border-radius:10px; border-left:4px solid #22c55e;">
-            <div style="font-weight:800; color:#166534; font-size:0.85rem;"> Aidatlar (Matris)</div>
-            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Sakin × ay ödeme tablosu</div>
+            <div style="font-weight:800; color:#166534; font-size:0.85rem;">💰 Aidatlar</div>
+            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Ödeme matrisi</div>
           </div>
           <div style="background:#fef3c7; padding:14px; border-radius:10px; border-left:4px solid #d97706;">
-            <div style="font-weight:800; color:#92400e; font-size:0.85rem;"> Demirbalar</div>
-            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Tek seferlik ödemeler</div>
+            <div style="font-weight:800; color:#92400e; font-size:0.85rem;">🏗️ Demirbaşlar</div>
+            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Borç + tahsilat</div>
           </div>
           <div style="background:#fef2f2; padding:14px; border-radius:10px; border-left:4px solid #dc2626;">
-            <div style="font-weight:800; color:#991b1b; font-size:0.85rem;"> Giderler</div>
-            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Tüm gider kalemleri</div>
+            <div style="font-weight:800; color:#991b1b; font-size:0.85rem;">🧾 Giderler</div>
+            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Gider kalemleri</div>
           </div>
           <div style="background:#f5f3ff; padding:14px; border-radius:10px; border-left:4px solid #8b5cf6;">
-            <div style="font-weight:800; color:#5b21b6; font-size:0.85rem;"> Talepler</div>
-            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Sakin mesajlar + cevaplar</div>
+            <div style="font-weight:800; color:#5b21b6; font-size:0.85rem;">📨 Talepler</div>
+            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Sakin mesajları</div>
           </div>
           <div style="background:#f8fafc; padding:14px; border-radius:10px; border-left:4px solid #64748b;">
-            <div style="font-weight:800; color:#334155; font-size:0.85rem;"> Özet</div>
-            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">Genel istatistikler</div>
+            <div style="font-weight:800; color:#334155; font-size:0.85rem;">📊 Özet</div>
+            <div style="font-size:0.75rem; color:#475569; margin-top:4px;">İstatistikler</div>
           </div>
         </div>
-
         <button class="btn btn-success" id="exportExcelBtn" style="font-size:1rem; padding:14px 24px;">
-          <i class="fa-solid fa-download"></i> Excel Dosyasn ndir (.xlsx)
+          <i class="fa-solid fa-download"></i> Excel Dosyasını İndir (.xlsx)
         </button>
       </div>
     </div>
@@ -977,46 +962,95 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const ADMIN_PASSWORD = "0000";
+const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
-const MONTH_NAMES = ["Ocak", "ubat", "Mart", "Nisan", "Mays", "Haziran", "Temmuz", "Austos", "Eylül", "Ekim", "Kasm", "Aralk"];
+const DEFAULT_WA_TEMPLATE = `Sayın {isim},
+
+Tahiroğulları Rojbin Sitesi {blok} Daire {daire} için {aylar} dönemi aidat ödemeniz henüz sistemimize ulaşmamıştır.
+
+Ödeme Tutarı: {tutar}
+
+Ödemenizi en kısa sürede yapmanızı rica ederiz. Anlayışınız için teşekkür ederiz.
+
+Saygılarımızla,
+Tahiroğulları Rojbin Sitesi Yönetimi`;
 
 let session = { role: null, apt: null, phone: null, block: null, fullName: null };
 let APARTMENTS = [];
 let EXPENSES = [];
 let ANNOUNCEMENTS = [];
 let REQUESTS = [];
-
 let searchTerm = '';
 let blockFilter = '';
 let expenseFilterStart = '';
 let expenseFilterEnd = '';
-
 let DEMIRBAS_LIST = [];
+let BULK_DEBTS = [];
 let GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || '';
+let WA_TEMPLATE = localStorage.getItem('wa_template') || DEFAULT_WA_TEMPLATE;
 let BANK_TRANSACTIONS = [];
+let IMPORT_ROWS = [];
 
-function getCurrentMonthName() {
-    return MONTH_NAMES[new Date().getMonth()];
+function getDueState(apt, year, month) {
+    const key = year + '_' + month;
+    if (apt.dues && apt.dues[key]) return apt.dues[key];
+    return { status: 'Ödenmedi', date: '-' };
 }
 
-function getCurrentYearStr() {
-    return String(new Date().getFullYear());
+function getUnpaidMonths(apt) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonthIdx = now.getMonth();
+    const unpaid = [];
+    const startYear = 2026, startMonthIdx = 7;
+    for (let y = startYear; y <= currentYear; y++) {
+        const mStart = (y === startYear) ? startMonthIdx : 0;
+        const mEnd = (y === currentYear) ? currentMonthIdx : 11;
+        for (let m = mStart; m <= mEnd; m++) {
+            const state = getDueState(apt, String(y), MONTH_NAMES[m]);
+            if (state.status !== 'Ödendi') unpaid.push({ year: String(y), month: MONTH_NAMES[m], amount: Number(apt.feeAmount || 0) });
+        }
+    }
+    return unpaid;
 }
+
+function getDemirbasDebt(apt) {
+    let total = 0;
+    const items = [];
+    BULK_DEBTS.forEach(b => {
+        const targetBlock = b.target === 'block' ? b.blockFilter : null;
+        const targetApt = b.target === 'single' ? b.singleApt : null;
+        const targetAll = b.target === 'all';
+        let applies = false;
+        if (targetAll) applies = true;
+        else if (targetBlock && b.blockFilter === apt.block) applies = true;
+        else if (targetApt && String(b.singleApt) === String(apt.apartment) && b.blockFilter === apt.block) applies = true;
+        if (applies) {
+            const paidKey = b.id + '_' + apt.id;
+            const isPaid = apt.demirbasPayments && apt.demirbasPayments[paidKey];
+            if (!isPaid) {
+                const perAptAmount = Number(b.perApartmentTotal || 0);
+                total += perAptAmount;
+                items.push({ title: b.title, amount: perAptAmount, id: b.id });
+            }
+        }
+    });
+    return { total, items };
+}
+
+function getCurrentMonthName() { return MONTH_NAMES[new Date().getMonth()]; }
+function getCurrentYearStr() { return String(new Date().getFullYear()); }
 
 function populateYearSelects() {
     const currentYear = new Date().getFullYear();
     const startYear = 2026;
     const endYear = currentYear + 4;
-    
-    const yearSelects = ['resDueYear', 'dueYear', 'reportYear'];
-    yearSelects.forEach(id => {
-        const sel = document.getElementById(id);
-        if(!sel) return;
+    ['resDueYear', 'dueYear', 'reportYear'].forEach(id => {
+        const sel = document.getElementById(id); if(!sel) return;
         sel.innerHTML = '';
         for(let y = startYear; y <= endYear; y++) {
             const opt = document.createElement('option');
-            opt.value = String(y);
-            opt.textContent = String(y);
+            opt.value = String(y); opt.textContent = String(y);
             if(y === currentYear) opt.selected = true;
             sel.appendChild(opt);
         }
@@ -1025,15 +1059,12 @@ function populateYearSelects() {
 
 function populateMonthSelects() {
     const currentMonth = getCurrentMonthName();
-    const monthSelects = ['resDueMonth', 'dueMonth', 'reportMonth'];
-    monthSelects.forEach(id => {
-        const sel = document.getElementById(id);
-        if(!sel) return;
+    ['resDueMonth', 'dueMonth', 'reportMonth'].forEach(id => {
+        const sel = document.getElementById(id); if(!sel) return;
         sel.innerHTML = '';
         MONTH_NAMES.forEach(m => {
             const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
+            opt.value = m; opt.textContent = m;
             if(m === currentMonth) opt.selected = true;
             sel.appendChild(opt);
         });
@@ -1041,15 +1072,12 @@ function populateMonthSelects() {
 }
 
 function populateApartmentNoSelects() {
-    const selects = ['newApartmentNo', 'residentNoSelect'];
-    selects.forEach(id => {
-        const sel = document.getElementById(id);
-        if(!sel) return;
+    ['newApartmentNo', 'residentNoSelect'].forEach(id => {
+        const sel = document.getElementById(id); if(!sel) return;
         sel.innerHTML = '';
-        for(let i = 1; i <= 16; i++) {
+        for(let i = 1; i <= 32; i++) {
             const opt = document.createElement('option');
-            opt.value = String(i);
-            opt.textContent = "Daire " + i;
+            opt.value = String(i); opt.textContent = "Daire " + i;
             sel.appendChild(opt);
         }
     });
@@ -1059,11 +1087,9 @@ let activeConfirmCallback = null;
 function askConfirm(message, onOk, isDanger = true) {
     activeConfirmCallback = onOk;
     const modal = document.getElementById('confirmModal');
-    const msgEl = document.getElementById('confirmMessage');
+    document.getElementById('confirmMessage').textContent = message;
     const okBtn = document.getElementById('confirmOkBtn');
     const titleEl = document.getElementById('confirmTitle');
-
-    msgEl.textContent = message;
     if (isDanger) {
         okBtn.className = "btn btn-danger btn-sm";
         titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Onay Gerekiyor';
@@ -1078,7 +1104,6 @@ document.getElementById('confirmCancelBtn').onclick = () => {
     document.getElementById('confirmModal').classList.add('hidden');
     activeConfirmCallback = null;
 };
-
 document.getElementById('confirmOkBtn').onclick = () => {
     document.getElementById('confirmModal').classList.add('hidden');
     if (activeConfirmCallback) activeConfirmCallback();
@@ -1089,9 +1114,7 @@ function showLoading(text) {
     document.getElementById('loadingText').textContent = text || 'Lütfen bekleyin...';
     document.getElementById('loadingMask').classList.remove('hidden');
 }
-function hideLoading() {
-    document.getElementById('loadingMask').classList.add('hidden');
-}
+function hideLoading() { document.getElementById('loadingMask').classList.add('hidden'); }
 function toast(message, type) {
     var c = document.getElementById('toastContainer');
     var el = document.createElement('div');
@@ -1100,52 +1123,58 @@ function toast(message, type) {
     c.appendChild(el);
     setTimeout(function(){ el.remove(); }, 3000);
 }
-function money(n) {
-    return '' + Number(n || 0).toLocaleString('tr-TR', { maximumFractionDigits: 2 });
-}
+function money(n) { return '₺' + Number(n || 0).toLocaleString('tr-TR', { maximumFractionDigits: 2 }); }
 function getBlockBadge(block) {
     var b = (block || 'A Blok').toUpperCase();
     return '<span class="block-badge ' + (b.includes('A') ? 'a' : 'b') + '">' + b + '</span>';
 }
-
-function getDueState(apt, year, month) {
-    const key = year + '_' + month;
-    if (apt.dues && apt.dues[key]) return apt.dues[key];
-    return { status: 'Ödenmedi', date: '-' };
+function cleanPhone(p) {
+    if (!p || p === '-') return '';
+    var clean = String(p).replace(/\s/g, '').replace(/[()-]/g, '').replace(/^0/, '');
+    if (!clean.startsWith('90') && !clean.startsWith('+')) clean = '90' + clean;
+    return clean.replace(/^\+/, '');
 }
 
-function getWhatsAppButton(phone, name, apartment, block, fee) {
-    if (!phone || phone === '-') return '-';
-    var cleanPhone = String(phone).replace(/\s/g, '').replace(/^0/, '');
-    if (!cleanPhone.startsWith('90') && !cleanPhone.startsWith('+')) cleanPhone = '90' + cleanPhone;
-    cleanPhone = cleanPhone.replace(/^\+/, '');
-    var msg = 'ADAT ÖDEME HATIRLATMASI%0A%0A' +
-              'Daire ' + apartment + ' (' + block + ') aidat ödemeniz henüz yaplmamtr.%0A%0A' +
-              'Geciken ödemenizi en ksa sürede yapmanz rica ederiz.%0A%0A' +
-              'Tutar: ' + encodeURIComponent(money(fee)) + '%0A%0A' +
-              'Tahiroullar Rojbin Sitesi Yönetimi';
-    return '<a href="https://wa.me/' + cleanPhone + '?text=' + msg + '" target="_blank" class="whatsapp-btn" onclick="event.stopPropagation();"><i class="fa-brands fa-whatsapp"></i> Gönder</a>';
+function openWhatsApp(apt, unpaidMonths) {
+    const phone = cleanPhone(apt.phone);
+    if (!phone) { toast('Bu kişinin telefon numarası kayıtlı değil.', 'danger'); return; }
+    const aylarText = unpaidMonths.length > 0 
+        ? unpaidMonths.map(u => u.month + ' ' + u.year).join(', ')
+        : (getCurrentMonthName() + ' ' + getCurrentYearStr());
+    const totalDebt = unpaidMonths.reduce((sum, u) => sum + u.amount, 0) || Number(apt.feeAmount || 0);
+    let msg = WA_TEMPLATE
+        .replace(/{isim}/g, apt.fullName || 'Sayın Sakin')
+        .replace(/{blok}/g, apt.block || '')
+        .replace(/{daire}/g, apt.apartment || '')
+        .replace(/{ay}/g, getCurrentMonthName())
+        .replace(/{yil}/g, getCurrentYearStr())
+        .replace(/{aylar}/g, aylarText)
+        .replace(/{tutar}/g, money(totalDebt));
+    const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+}
+
+function getOccupantBadge(type) {
+    if (type === 'Kiracı') return '<span class="occupant-badge tenant">KİRACI</span>';
+    return '<span class="occupant-badge host">EV SAHİBİ</span>';
 }
 
 function initRealtimeListeners() {
     onSnapshot(query(collection(db, "daireler")), (snap) => { processApartments(snap); }, () => {
         onSnapshot(query(collection(db, "apartments")), (snap) => { processApartments(snap); });
     });
-
     onSnapshot(query(collection(db, "giderler")), (snap) => { processExpenses(snap); }, () => {
         onSnapshot(query(collection(db, "expenses")), (snap) => { processExpenses(snap); });
     });
-
     onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc")), (snap) => {
         ANNOUNCEMENTS = [];
         snap.forEach(doc => {
             const d = doc.data();
-            ANNOUNCEMENTS.push({ id: doc.id, text: d.content || d.text || d.acklama, timestamp: d.createdAt ? d.createdAt.substring(0, 16).replace('T', ' ') : '' });
+            ANNOUNCEMENTS.push({ id: doc.id, text: d.content || d.text || d.acıklama, timestamp: d.createdAt ? d.createdAt.substring(0, 16).replace('T', ' ') : '' });
         });
         renderPublicDashboard();
         if (session.role === 'admin') renderAnnouncementsAdmin();
     });
-
     onSnapshot(query(collection(db, "requests"), orderBy("createdAt", "desc")), (snap) => {
         REQUESTS = [];
         snap.forEach(doc => {
@@ -1159,26 +1188,36 @@ function initRealtimeListeners() {
     });
 }
 
+function initBulkDebtsListener() {
+    onSnapshot(query(collection(db, "toplu_borclar")), (snap) => {
+        BULK_DEBTS = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            BULK_DEBTS.push({
+                id: doc.id, title: d.title, matters: d.matters || [], perApartmentTotal: d.perApartmentTotal || 0,
+                target: d.target || 'all', blockFilter: d.blockFilter || '', singleApt: d.singleApt || '',
+                createdAt: d.createdAt || '', date: d.date || ''
+            });
+        });
+        BULK_DEBTS.sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        if (session.role === 'admin') { renderActiveBulkDebts(); renderDuesTable(); }
+        if (session.role === 'resident') renderResidentDemirbasDebts();
+    });
+}
+
 function initDemirbasListener() {
     onSnapshot(query(collection(db, "demirbaslar")), (snap) => {
         DEMIRBAS_LIST = [];
         snap.forEach(doc => {
             const d = doc.data();
             DEMIRBAS_LIST.push({
-                id: doc.id,
-                description: d.aciklama || d.description || '',
-                amount: d.tutar || d.amount || 0,
-                date: d.tarih || d.date || '',
-                block: d.blok || d.block || '',
-                apartment: d.daire || d.apartment || '',
-                payer: d.odeyen || d.payer || '',
-                createdAt: d.createdAt || ''
+                id: doc.id, description: d.aciklama || d.description || '', amount: d.tutar || d.amount || 0,
+                date: d.tarih || d.date || '', block: d.blok || d.block || '', apartment: d.daire || d.apartment || '',
+                payer: d.odeyen || d.payer || '', createdAt: d.createdAt || ''
             });
         });
         DEMIRBAS_LIST.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
         if (session.role === 'admin') renderDemirbasTable();
-    }, (err) => {
-        console.warn("Demirba listener:", err.message);
     });
 }
 
@@ -1187,24 +1226,17 @@ function processApartments(snap) {
     snap.forEach(doc => {
         const d = doc.data();
         APARTMENTS.push({
-            id: doc.id, 
-            apartment: d.no || d.daireNo || d.apartment, 
-            block: d.block || d.blok || 'A Blok', 
-            fullName: d.name || d.isim || d.adSoyad || d.fullName, 
-            phone: d.phone || d.telefon, 
-            plate: d.plate || d.plaka || '-', 
-            feeAmount: d.fee || d.aidat || d.feeAmount || 500, 
-            feeStatus: d.feeStatus || d.durum || 'Ödenmedi', 
-            paymentDate: d.paymentDate || d.odemeTarihi || '-',
-            dues: d.dues || {}
+            id: doc.id, apartment: d.no || d.daireNo || d.apartment, block: d.block || d.blok || 'A Blok',
+            fullName: d.name || d.isim || d.adSoyad || d.fullName, phone: d.phone || d.telefon,
+            plate: d.plate || d.plaka || '-', feeAmount: d.fee || d.aidat || d.feeAmount || 500,
+            occupantType: d.occupantType || 'Ev Sahibi', hostName: d.hostName || '', hostPhone: d.hostPhone || '',
+            dues: d.dues || {}, demirbasPayments: d.demirbasPayments || {}
         });
     });
-
     APARTMENTS.sort((a, b) => {
         if (a.block !== b.block) return a.block.localeCompare(b.block);
         return Number(a.apartment) - Number(b.apartment);
     });
-
     renderPublicDashboard();
     if (session.role === 'admin') renderAdminPanel();
     if (session.role === 'resident') { renderResidentPanel(); }
@@ -1215,13 +1247,10 @@ function processExpenses(snap) {
     EXPENSES = [];
     snap.forEach(doc => {
         const d = doc.data();
-        EXPENSES.push({ id: doc.id, description: d.acklama || d.açklama || d.desc || d.description, amount: d.miktar || d.amount || d.tutar, date: d.tarih || d.date });
+        EXPENSES.push({ id: doc.id, description: d.acıklama || d.açıklama || d.desc || d.description, amount: d.miktar || d.amount || d.tutar, date: d.tarih || d.date });
     });
     renderPublicDashboard();
-    if (session.role === 'admin') {
-        renderExpensesTable();
-        renderExpenseReport();
-    }
+    if (session.role === 'admin') { renderExpensesTable(); renderExpenseReport(); }
 }
 
 function checkNewRequests() {
@@ -1236,21 +1265,15 @@ document.getElementById('openAdminModalBtn').onclick = () => {
     adminPasswordModal.classList.remove('hidden');
     document.getElementById('adminPassword').focus();
 };
-document.getElementById('closeAdminModalBtn').onclick = () => {
-    adminPasswordModal.classList.add('hidden');
-};
-
+document.getElementById('closeAdminModalBtn').onclick = () => adminPasswordModal.classList.add('hidden');
 document.getElementById('adminLoginBtn').onclick = () => {
     var pw = document.getElementById('adminPassword').value;
     if (pw === ADMIN_PASSWORD) {
         session = { role: 'admin', apt: null, phone: null };
         adminPasswordModal.classList.add('hidden');
         enterAdminView();
-    } else { 
-        toast('Eriim Engellendi: Hatal ifre!', 'danger'); 
-    }
+    } else { toast('Erişim Engellendi: Hatalı Şifre!', 'danger'); }
 };
-
 document.getElementById('adminPassword').addEventListener('keyup', function(event) {
     if (event.key === 'Enter') document.getElementById('adminLoginBtn').click();
 });
@@ -1260,35 +1283,23 @@ document.getElementById('residentLoginBtn').onclick = () => {
     var selNo = document.getElementById('residentNoSelect').value;
     var phone = document.getElementById('residentPhone').value.trim().replace(/\s/g, '');
     var errorDiv = document.getElementById('residentError');
-    
     errorDiv.style.display = 'none';
-    if (!phone) { 
-        errorDiv.textContent = 'Lütfen sistemde kaytl telefon numaranz yaznz.'; 
-        errorDiv.style.display = 'block'; 
-        return; 
-    }
-
-    var found = APARTMENTS.find(a => 
-        a.block === selBlock && 
-        String(a.apartment) === String(selNo) && 
-        a.phone.replace(/\s+/g, '') === phone
-    );
-
+    if (!phone) { errorDiv.textContent = 'Lütfen telefon numaranızı yazınız.'; errorDiv.style.display = 'block'; return; }
+    var found = APARTMENTS.find(a => a.block === selBlock && String(a.apartment) === String(selNo) && a.phone.replace(/\s+/g, '') === phone);
     if(found) {
         session = { role: 'resident', apt: found.apartment, phone: phone, id: found.id, block: found.block, fullName: found.fullName };
         localStorage.setItem('session_role', 'resident');
         localStorage.setItem('session_res_id', found.id);
         enterResidentView();
     } else { 
-        errorDiv.textContent = selBlock + ' Daire ' + selNo + ' için girilen telefon numaras veritabanndaki kaytla elemedi.'; 
+        errorDiv.textContent = selBlock + ' Daire ' + selNo + ' için telefon eşleşmedi.'; 
         errorDiv.style.display = 'block'; 
     }
 };
 
 document.getElementById('logoutBtn').onclick = () => { 
     session = { role: null, apt: null, phone: null }; 
-    localStorage.clear(); 
-    location.reload(); 
+    localStorage.clear(); location.reload(); 
 };
 
 function enterAdminView() { 
@@ -1299,10 +1310,8 @@ function enterAdminView() {
     document.getElementById('openAdminModalBtn').classList.add('hidden'); 
     document.getElementById('userLabel').textContent = 'Oturum: Yönetici'; 
     renderAdminPanel(); 
-    updateApiKeyButtonVisibility();
-    updateBankApiWarning();
+    updateHeaderButtonsVisibility();
 }
-
 function enterResidentView() { 
     document.getElementById('loginView').classList.add('hidden'); 
     document.getElementById('adminView').classList.add('hidden'); 
@@ -1318,22 +1327,16 @@ async function checkSession() {
     populateYearSelects();
     populateMonthSelects();
     populateApartmentNoSelects();
-    try {
-        await signInAnonymously(auth);
-    } catch(e) {
-        console.warn("Gizli oturum hatas.");
-    }
+    try { await signInAnonymously(auth); } catch(e) { console.warn("Anonim giriş hatası"); }
     const role = localStorage.getItem('session_role'); 
     if (role === 'resident') { 
         const resId = localStorage.getItem('session_res_id'); 
-        if (resId) { 
-            session = { role: 'resident', id: resId, apt: '', phone: '' }; 
-            enterResidentView(); 
-        } 
+        if (resId) { session = { role: 'resident', id: resId, apt: '', phone: '' }; enterResidentView(); } 
     } 
     initRealtimeListeners(); 
     initDemirbasListener();
-    updateApiKeyButtonVisibility();
+    initBulkDebtsListener();
+    updateHeaderButtonsVisibility();
     setTimeout(() => {
         const demDate = document.getElementById('demDate');
         if (demDate && !demDate.value) demDate.value = new Date().toISOString().slice(0,10);
@@ -1341,13 +1344,10 @@ async function checkSession() {
 }
 
 function renderPublicDashboard() {
-    let totalCollected = 0; let totalExpenses = 0;
-    const cMonth = getCurrentMonthName();
-    const cYear = getCurrentYearStr();
-
+    let totalCollected = 0, totalExpenses = 0;
+    const cMonth = getCurrentMonthName(), cYear = getCurrentYearStr();
     APARTMENTS.forEach(a => { 
-        const statusState = getDueState(a, cYear, cMonth);
-        if(statusState.status === 'Ödendi') totalCollected += Number(a.feeAmount || 0); 
+        if(getDueState(a, cYear, cMonth).status === 'Ödendi') totalCollected += Number(a.feeAmount || 0); 
     });
     EXPENSES.forEach(e => { totalExpenses += Number(e.amount || 0); });
     document.getElementById('pubCollected').textContent = money(totalCollected);
@@ -1355,10 +1355,10 @@ function renderPublicDashboard() {
     document.getElementById('pubBalance').textContent = money(totalCollected - totalExpenses);
     var expList = document.getElementById('pubExpenseList'); var expHtml = '';
     EXPENSES.slice(0, 5).forEach(e => { expHtml += '<div class="list-item"><div>' + e.description + '</div><div class="meta">' + money(e.amount) + ' | ' + e.date + '</div></div>'; });
-    expList.innerHTML = expHtml || '<div class="empty-note">Kayt yok</div>';
+    expList.innerHTML = expHtml || '<div class="empty-note">Kayıt yok</div>';
     var annList = document.getElementById('pubAnnouncementList'); var annHtml = '';
     ANNOUNCEMENTS.slice(0, 5).forEach(a => { annHtml += '<div class="list-item"><div>' + a.text + '</div><div class="meta">' + a.timestamp + '</div></div>'; });
-    annList.innerHTML = annHtml || '<div class="empty-note">Kayt yok</div>';
+    annList.innerHTML = annHtml || '<div class="empty-note">Kayıt yok</div>';
 }
 
 function renderResidentPanel() {
@@ -1369,34 +1369,35 @@ function renderResidentPanel() {
     document.getElementById('resPhone').textContent = fresh.phone || '-';
     updateResidentDueDisplay();
     checkPastUnpaidDues(fresh);
+    renderResidentDemirbasDebts();
+}
+
+function renderResidentDemirbasDebts() {
+    const container = document.getElementById('resDemirbasBorclari');
+    if (!container) return;
+    const fresh = APARTMENTS.find(a => a.id === session.id);
+    if (!fresh) { container.innerHTML = '<div class="empty-note">Kayıt bulunamadı.</div>'; return; }
+    const debts = getDemirbasDebt(fresh);
+    if (debts.total === 0) {
+        container.innerHTML = '<div class="empty-note" style="color:var(--success);">🎉 Demirbaş borcunuz bulunmuyor.</div>';
+        return;
+    }
+    let html = '<div style="background:#fef2f2; padding:14px; border-radius:10px; border:1px solid #fca5a5;">';
+    html += '<div style="font-weight:800; color:#991b1b; margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i> Toplam Demirbaş Borcunuz: ' + money(debts.total) + '</div>';
+    html += '<ul style="margin:0; padding-left:20px; color:#7f1d1d; font-size:0.9rem;">';
+    debts.items.forEach(it => { html += '<li style="margin-bottom:6px;"><b>' + it.title + '</b> — ' + money(it.amount) + '</li>'; });
+    html += '</ul></div>';
+    container.innerHTML = html;
 }
 
 function checkPastUnpaidDues(apt) {
-    const currentYear = new Date().getFullYear();
-    const currentMonthIdx = new Date().getMonth();
-    const unpaidList = [];
-    const startYear = 2026;
-    const startMonthIdx = 7; 
-
-    for (let y = startYear; y <= currentYear; y++) {
-        const mStart = (y === startYear) ? startMonthIdx : 0;
-        const mEnd = (y === currentYear) ? currentMonthIdx : 11;
-        for (let m = mStart; m <= mEnd; m++) {
-            const monthName = MONTH_NAMES[m];
-            const state = getDueState(apt, String(y), monthName);
-            if (state.status !== 'Ödendi') unpaidList.push(monthName + ' ' + y);
-        }
-    }
-
+    const unpaidMonths = getUnpaidMonths(apt);
     const alertBox = document.getElementById('resUnpaidHistoryBox');
     const alertContainer = document.getElementById('resUnpaidHistoryList');
-
-    if (unpaidList.length > 0) {
+    if (unpaidMonths.length > 0) {
         alertBox.classList.remove('hidden');
-        alertContainer.innerHTML = unpaidList.map(item => `<span class="unpaid-tag">${item}</span>`).join('');
-    } else {
-        alertBox.classList.add('hidden');
-    }
+        alertContainer.innerHTML = unpaidMonths.map(u => `<span class="unpaid-tag">${u.month} ${u.year}</span>`).join('');
+    } else { alertBox.classList.add('hidden'); }
 }
 
 function updateResidentDueDisplay() {
@@ -1405,37 +1406,26 @@ function updateResidentDueDisplay() {
     var periodEl = document.getElementById('resDueSelectedPeriod');
     var statusContainer = document.getElementById('resDueStatusContainer');
     if (!periodEl || !statusContainer) return;
-    
     periodEl.textContent = month + " " + year;
     const fresh = APARTMENTS.find(a => a.id === session.id);
-    if (!fresh) {
-        statusContainer.innerHTML = '<span class="badge neutral">Daire kayd bulunamad</span>';
-        return;
-    }
+    if (!fresh) { statusContainer.innerHTML = '<span class="badge neutral">Kayıt bulunamadı</span>'; return; }
     const state = getDueState(fresh, year, month);
-    var paid = state.status === 'Ödendi';
-    if (paid) {
-        statusContainer.innerHTML = '<span class="badge success"><i class="fa-solid fa-circle-check" style="margin-right:4px;"></i> Ödendi (' + state.date + ')</span>';
-    } else {
-        statusContainer.innerHTML = '<span class="badge danger"><i class="fa-solid fa-circle-xmark" style="margin-right:4px;"></i> Ödenmedi</span>';
-    }
+    if (state.status === 'Ödendi') statusContainer.innerHTML = '<span class="badge success"><i class="fa-solid fa-circle-check" style="margin-right:4px;"></i> Ödendi (' + state.date + ')</span>';
+    else statusContainer.innerHTML = '<span class="badge danger"><i class="fa-solid fa-circle-xmark" style="margin-right:4px;"></i> Ödenmedi</span>';
 }
-
 document.getElementById('resDueYear').onchange = updateResidentDueDisplay;
 document.getElementById('resDueMonth').onchange = updateResidentDueDisplay;
 
 document.getElementById('resSubmitRequestBtn').onclick = async function() {
     var text = document.getElementById('resRequestText').value.trim(); 
-    if (!text) { toast('Bo bildirim gönderilemez.', 'danger'); return; }
+    if (!text) { toast('Boş bildirim gönderilemez.', 'danger'); return; }
     const fresh = APARTMENTS.find(a => a.id === session.id); 
-    showLoading('letiliyor...');
+    showLoading('İletiliyor...');
     try { 
         await addDoc(collection(db, "requests"), { 
             apartmentContext: fresh ? fresh.block + " No:" + fresh.apartment : "Bilinmiyor", 
             residentName: "Daire " + (fresh ? fresh.apartment : ''), 
-            message: text, 
-            createdAt: new Date().toISOString(), 
-            adminReply: '' 
+            message: text, createdAt: new Date().toISOString(), adminReply: '' 
         }); 
         document.getElementById('resRequestText').value = ''; 
         toast('Yönetime iletildi.', 'success'); 
@@ -1450,13 +1440,11 @@ function renderResidentRepliesList() {
     if(filteredRequests.length === 0) { listContainer.innerHTML = '<div class="empty-note">Geri bildirim bulunmuyor.</div>'; return; }
     filteredRequests.forEach(r => {
         html += '<div style="padding:12px; border-bottom:1px solid var(--border); margin-bottom:8px;">';
-        html += '<div><strong>Mesajm:</strong> ' + r.message + ' <span style="font-size:0.75rem; color:var(--secondary);">(' + r.timestamp + ')</span></div>';
+        html += '<div><strong>Mesajım:</strong> ' + r.message + ' <span style="font-size:0.75rem; color:var(--secondary);">(' + r.timestamp + ')</span></div>';
         if(r.adminReply) {
-            html += '<div style="margin-top:8px; padding:10px; background:#f8fafc; border-left:3px solid var(--primary); border-radius:4px; font-size:0.85rem;">';
-            html += '<strong>Cevap:</strong> ' + r.adminReply;
-            html += '</div>';
+            html += '<div style="margin-top:8px; padding:10px; background:#f8fafc; border-left:3px solid var(--primary); border-radius:4px; font-size:0.85rem;"><strong>Cevap:</strong> ' + r.adminReply + '</div>';
         } else {
-            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> ncelemede...</div>';
+            html += '<div style="margin-top:6px; font-size:0.8rem; color:var(--accent); font-style:italic;"><i class="fa-solid fa-spinner fa-spin"></i> İncelemede...</div>';
         }
         html += '</div>';
     });
@@ -1473,92 +1461,270 @@ function renderAdminPanel() {
     renderReport(); 
     renderExpenseReport();
     renderDemirbasTable();
+    renderActiveBulkDebts();
+    renderBulkSingleSelect();
 }
 
 function renderOverviewTable() {
     var body = document.getElementById('overviewBody'); var html = '';
-    const cMonth = getCurrentMonthName();
-    const cYear = getCurrentYearStr();
-
-    if (APARTMENTS.length === 0) { html = '<tr><td colspan="3" class="empty-note">Kayt yok</td></tr>'; } else {
-        APARTMENTS.forEach((a, index) => {
-            const state = getDueState(a, cYear, cMonth);
-            var paid = state.status === 'Ödendi'; 
-            var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
-            html += '<tr class="clickable-row" onclick="toggleOverviewDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Plaka</strong>' + (a.plate || '-') + '</div><div class="details-block"><strong>Aidat</strong>' + money(a.feeAmount) + '</div><div class="details-block"><strong>' + cMonth + ' ' + cYear + ' Durumu</strong><span class="badge ' + (paid?'success':'danger') + '">' + (paid ? 'Ödendi ('+state.date+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatrlatc</strong>' + whatsapp + '</div></div></td></tr>';
+    if (APARTMENTS.length === 0) { html = '<tr><td colspan="6" class="empty-note">Kayıt yok</td></tr>'; } else {
+        APARTMENTS.forEach(a => {
+            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + getOccupantBadge(a.occupantType) + '</td><td>' + (a.phone || '-') + '</td><td>' + (a.hostName ? a.hostName + ' / ' + (a.hostPhone || '-') : '-') + '</td></tr>';
         });
     }
     body.innerHTML = html;
 }
-window.toggleOverviewDetails = function(index) { var row = document.getElementById('details-' + index); if(row) row.style.display = (window.getComputedStyle(row).display === 'none') ? 'table-row' : 'none'; }
 
 function renderDuesTable() {
     var body = document.getElementById('duesBody'); if(!body) return; var html = '';
     var blockFilterValue = document.getElementById('dueBlockFilter').value; 
-    var statusFilterValue = document.getElementById('dueStatusFilter').value;
     var activeMonth = document.getElementById('dueMonth').value;
     var activeYear = document.getElementById('dueYear').value;
+    var onlyDebtors = document.getElementById('onlyDebtors').checked;
 
     var filtered = APARTMENTS.filter(a => { 
         if (blockFilterValue !== '' && a.block !== blockFilterValue) return false; 
-        const state = getDueState(a, activeYear, activeMonth);
-        if (statusFilterValue !== '' && state.status !== statusFilterValue) return false; 
+        if (onlyDebtors) {
+            const aidatOdenmedi = getDueState(a, activeYear, activeMonth).status !== 'Ödendi';
+            const demirbasDebt = getDemirbasDebt(a).total > 0;
+            if (!aidatOdenmedi && !demirbasDebt) return false;
+        }
         return true; 
     });
 
-    if (filtered.length === 0) { html = '<tr><td colspan="3" class="empty-note">Kayt bulunamad</td></tr>'; } else {
+    if (filtered.length === 0) { 
+        html = '<tr><td colspan="7" class="empty-note">Kayıt bulunamadı</td></tr>'; 
+    } else {
         filtered.forEach((a, index) => {
-            const state = getDueState(a, activeYear, activeMonth);
-            var paid = state.status === 'Ödendi'; 
-            var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
-            html += '<tr class="clickable-row" onclick="toggleDueDetails(' + index + ')"><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td></tr>';
-            html += '<tr class="details-row" id="due-details-' + index + '"><td colspan="3"><div class="details-container"><div class="details-block"><strong>Telefon</strong>' + (a.phone || '-') + '</div><div class="details-block"><strong>Tarife</strong>' + money(a.feeAmount || 0) + '</div><div class="details-block"><strong>Durum</strong><span class="badge ' + (paid ? 'success' : 'danger') + '">' + (paid ? 'Ödendi ('+state.date+')' : 'Ödenmedi') + '</span></div><div class="details-block"><strong>Hatrlatma</strong>' + whatsapp + '</div><div class="details-block"><strong>Aksiyon</strong><button class="btn btn-sm ' + (paid ? 'btn-secondary' : 'btn-success') + ' toggle-due-btn" data-id="' + a.id + '" style="width:100%;">' + (paid ? 'Ödemeyi ptal Et' : 'Ödendi Olarak le') + '</button></div></div></td></tr>';
+            const aidatState = getDueState(a, activeYear, activeMonth);
+            const aidatPaid = aidatState.status === 'Ödendi';
+            const demirbasDebt = getDemirbasDebt(a);
+            const demirbasHasDebt = demirbasDebt.total > 0;
+            const aidatPill = aidatPaid 
+                ? '<span class="status-pill green"><i class="fa-solid fa-check"></i> Ödendi</span>'
+                : '<span class="status-pill red"><i class="fa-solid fa-times"></i> Ödenmedi</span>';
+            const demirbasPill = demirbasHasDebt
+                ? '<span class="status-pill red"><i class="fa-solid fa-triangle-exclamation"></i> ' + money(demirbasDebt.total) + '</span>'
+                : '<span class="status-pill green"><i class="fa-solid fa-check"></i> Yok</span>';
+            const hasAnyDebt = !aidatPaid || demirbasHasDebt;
+            const waBtn = hasAnyDebt 
+                ? '<button class="whatsapp-btn wa-btn" data-id="' + a.id + '"><i class="fa-brands fa-whatsapp"></i> Hatırlat</button>'
+                : '<span style="color:#94a3b8; font-size:0.75rem;">—</span>';
+            html += `
+                <tr class="clickable-row" onclick="toggleDuesDetails(${index})">
+                    <td style="text-align:center;"><i class="fa-solid fa-chevron-right" id="chevron-${index}" style="transition: transform 0.2s;"></i></td>
+                    <td>${getBlockBadge(a.block)}</td>
+                    <td><b>${a.apartment}</b> ${getOccupantBadge(a.occupantType)}</td>
+                    <td>${a.fullName || '-'}</td>
+                    <td>${aidatPill}</td>
+                    <td>${demirbasPill}</td>
+                    <td>${waBtn}</td>
+                </tr>
+                <tr class="details-row" id="dues-details-${index}">
+                    <td colspan="7" style="padding:0;"><div style="padding:16px; background:#f8fafc;">${renderDuesDetailsContent(a)}</div></td>
+                </tr>
+            `;
         });
     }
     body.innerHTML = html;
-    body.querySelectorAll('.toggle-due-btn').forEach(btn => {
-        btn.onclick = async (e) => {
-            e.stopPropagation(); 
-            const id = e.currentTarget.dataset.id; 
-            const targetApt = APARTMENTS.find(a => a.id === id); 
-            if(!targetApt) return;
-            
-            const tgtMonth = document.getElementById('dueMonth').value;
-            const tgtYear = document.getElementById('dueYear').value;
-            const key = tgtYear + '_' + tgtMonth;
-            const currentState = getDueState(targetApt, tgtYear, tgtMonth);
-            const targetStatus = currentState.status === 'Ödendi' ? 'Ödenmedi' : 'Ödendi';
-            
-            showLoading('Kayt ileniyor...');
-            var now = new Date(); 
-            var dateTimeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-            var finalDate = targetStatus === 'Ödendi' ? dateTimeStr : '-';
-            
-            const duesMap = targetApt.dues || {};
-            duesMap[key] = { status: targetStatus, date: finalDate };
-            const payload = { dues: duesMap };
-
-            try { await updateDoc(doc(db, "daireler", id), payload); } 
-            catch(ex) { await updateDoc(doc(db, "apartments", id), payload); }
-            toast('Kayt güncellendi.', 'success'); 
-            hideLoading();
+    body.querySelectorAll('.wa-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const id = e.currentTarget.dataset.id;
+            const apt = APARTMENTS.find(x => x.id === id);
+            if (!apt) return;
+            openWhatsApp(apt, getUnpaidMonths(apt));
         };
     });
 }
-window.toggleDueDetails = function(index) { var row = document.getElementById('due-details-' + index); if(row) row.style.display = (window.getComputedStyle(row).display === 'none') ? 'table-row' : 'none'; }
+
+function renderDuesDetailsContent(apt) {
+    const unpaidMonths = getUnpaidMonths(apt);
+    const demirbasDebt = getDemirbasDebt(apt);
+    const aidatDebtTotal = unpaidMonths.reduce((s, u) => s + u.amount, 0);
+    const grandTotal = aidatDebtTotal + demirbasDebt.total;
+
+    let html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; flex-wrap:wrap;">';
+    html += '<div>';
+    html += '<h4 style="margin:0 0 10px 0; color:var(--primary); font-size:0.9rem;"><i class="fa-solid fa-calendar"></i> AİDAT ÖDEME GEÇMİŞİ</h4>';
+    if (unpaidMonths.length === 0) {
+        html += '<div style="color:var(--success); font-size:0.85rem;"><i class="fa-solid fa-circle-check"></i> Tüm aidatlar ödendi!</div>';
+    } else {
+        html += '<div class="month-grid">';
+        unpaidMonths.forEach(u => { html += '<div class="month-cell unpaid"><span>' + u.month + ' ' + u.year + '</span><span>' + money(u.amount) + '</span></div>'; });
+        html += '</div>';
+        html += '<div style="margin-top:10px; padding:10px; background:#fef2f2; border-radius:6px; border:1px solid #fca5a5; font-weight:700; color:#991b1b; font-size:0.85rem;">Aidat Borcu Toplam: ' + money(aidatDebtTotal) + ' (' + unpaidMonths.length + ' ay)</div>';
+    }
+    html += '</div>';
+    html += '<div>';
+    html += '<h4 style="margin:0 0 10px 0; color:var(--primary); font-size:0.9rem;"><i class="fa-solid fa-toolbox"></i> DEMİRBAŞ BORÇLARI</h4>';
+    if (demirbasDebt.total === 0) {
+        html += '<div style="color:var(--success); font-size:0.85rem;"><i class="fa-solid fa-circle-check"></i> Demirbaş borcu yok.</div>';
+    } else {
+        demirbasDebt.items.forEach(it => {
+            html += '<div style="background:#fef3c7; padding:8px 12px; border-radius:6px; margin-bottom:6px; border:1px solid #fde68a; font-size:0.85rem; display:flex; justify-content:space-between;"><span>' + it.title + '</span><b style="color:#92400e;">' + money(it.amount) + '</b></div>';
+        });
+        html += '<div style="margin-top:10px; padding:10px; background:#fef3c7; border-radius:6px; border:1px solid #fde68a; font-weight:700; color:#92400e; font-size:0.85rem;">Demirbaş Borcu Toplam: ' + money(demirbasDebt.total) + '</div>';
+    }
+    html += '</div></div>';
+    html += '<div style="margin-top:16px; padding:12px 16px; background:#0f172a; color:#fff; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<span style="font-weight:700;">GENEL TOPLAM BORÇ:</span>';
+    html += '<span style="font-size:1.3rem; font-weight:800; color:' + (grandTotal > 0 ? '#fca5a5' : '#86efac') + ';">' + money(grandTotal) + '</span>';
+    html += '</div>';
+    if (grandTotal > 0) {
+        html += '<div style="margin-top:12px; display:flex; gap:10px; justify-content:flex-end;">';
+        html += '<button class="btn btn-success wa-detail-btn" data-id="' + apt.id + '"><i class="fa-brands fa-whatsapp"></i> WhatsApp Hatırlatma Gönder</button>';
+        html += '</div>';
+    }
+    return html;
+}
+
+window.toggleDuesDetails = function(index) {
+    var row = document.getElementById('dues-details-' + index);
+    var chevron = document.getElementById('chevron-' + index);
+    if(row) {
+        const isHidden = window.getComputedStyle(row).display === 'none';
+        row.style.display = isHidden ? 'table-row' : 'none';
+        if (chevron) chevron.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
+    }
+};
+
 document.getElementById('dueBlockFilter').onchange = renderDuesTable;
-document.getElementById('dueStatusFilter').onchange = renderDuesTable;
 document.getElementById('dueMonth').onchange = renderDuesTable;
 document.getElementById('dueYear').onchange = renderDuesTable;
+document.getElementById('onlyDebtors').onchange = renderDuesTable;
 
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.wa-detail-btn')) {
+        e.stopPropagation();
+        const id = e.target.closest('.wa-detail-btn').dataset.id;
+        const apt = APARTMENTS.find(x => x.id === id);
+        if (!apt) return;
+        openWhatsApp(apt, getUnpaidMonths(apt));
+    }
+});
+
+/* TOPLU BORÇLANDIRMA */
+let matterCounter = 0;
+function addMatterRow(desc = '', amount = '') {
+    matterCounter++;
+    const container = document.getElementById('matterListContainer');
+    const row = document.createElement('div');
+    row.className = 'matter-row';
+    row.innerHTML = `
+        <input type="text" class="matter-desc" placeholder="Madde açıklaması" value="${desc}">
+        <input type="number" class="matter-amount" placeholder="0" value="${amount}">
+        <button type="button" class="matter-del" title="Sil"><i class="fa-solid fa-times"></i></button>
+    `;
+    container.appendChild(row);
+    row.querySelector('.matter-del').onclick = () => { row.remove(); updateBulkTotal(); };
+    row.querySelector('.matter-amount').oninput = updateBulkTotal;
+}
+
+function updateBulkTotal() {
+    let total = 0;
+    document.querySelectorAll('.matter-row').forEach(r => { total += parseFloat(r.querySelector('.matter-amount').value) || 0; });
+    document.getElementById('bulkTotalDisplay').textContent = money(total);
+}
+
+document.getElementById('addMatterBtn').onclick = () => addMatterRow();
+document.querySelectorAll('input[name="bulkApplyTo"]').forEach(radio => {
+    radio.onchange = () => {
+        const val = document.querySelector('input[name="bulkApplyTo"]:checked').value;
+        document.getElementById('bulkBlockSelectField').classList.toggle('hidden', val !== 'block');
+        document.getElementById('bulkSingleSelectField').classList.toggle('hidden', val !== 'single');
+    };
+});
+
+function renderBulkSingleSelect() {
+    const sel = document.getElementById('bulkSingleSelect');
+    if (!sel) return;
+    sel.innerHTML = '';
+    APARTMENTS.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.apartment + '|' + a.block;
+        opt.textContent = a.block + ' - Daire ' + a.apartment + ' (' + (a.fullName || '') + ')';
+        sel.appendChild(opt);
+    });
+}
+
+document.getElementById('createBulkDebtBtn').onclick = async () => {
+    const title = document.getElementById('bulkTitle').value.trim();
+    const matters = [];
+    let perAptTotal = 0;
+    document.querySelectorAll('.matter-row').forEach(r => {
+        const desc = r.querySelector('.matter-desc').value.trim();
+        const amt = parseFloat(r.querySelector('.matter-amount').value) || 0;
+        if (desc && amt > 0) { matters.push({ desc, amount: amt }); perAptTotal += amt; }
+    });
+    if (!title) { toast('Borçlandırma başlığı giriniz.', 'danger'); return; }
+    if (matters.length === 0) { toast('En az bir madde ekleyin.', 'danger'); return; }
+    const target = document.querySelector('input[name="bulkApplyTo"]:checked').value;
+    let blockFilter = '', singleApt = '';
+    if (target === 'block') blockFilter = document.getElementById('bulkBlockSelect').value;
+    if (target === 'single') {
+        const val = document.getElementById('bulkSingleSelect').value;
+        const parts = val.split('|');
+        singleApt = parts[0]; blockFilter = parts[1];
+    }
+    let targetCount = 0;
+    if (target === 'all') targetCount = APARTMENTS.length;
+    else if (target === 'block') targetCount = APARTMENTS.filter(a => a.block === blockFilter).length;
+    else targetCount = 1;
+
+    askConfirm(`"${title}" adıyla ${targetCount} daireye toplam ${money(perAptTotal)} borç eklenecek. Onaylıyor musunuz?`, async () => {
+        showLoading('Kaydediliyor...');
+        try {
+            await addDoc(collection(db, "toplu_borclar"), {
+                title, matters, perApartmentTotal: perAptTotal, target, blockFilter, singleApt,
+                date: new Date().toISOString().slice(0,10), createdAt: new Date().toISOString()
+            });
+            toast('Borçlandırma oluşturuldu.', 'success');
+            document.getElementById('bulkTitle').value = '';
+            document.getElementById('matterListContainer').innerHTML = '';
+            matterCounter = 0; addMatterRow(); updateBulkTotal();
+        } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
+    });
+};
+
+function renderActiveBulkDebts() {
+    const container = document.getElementById('activeBulkDebts');
+    if (!container) return;
+    if (BULK_DEBTS.length === 0) { container.innerHTML = '<div class="empty-note">Henüz borçlandırma yapılmadı.</div>'; return; }
+    let html = '';
+    BULK_DEBTS.forEach(b => {
+        const matterList = (b.matters || []).map(m => `• ${m.desc}: ${money(m.amount)}`).join('<br>');
+        const targetText = b.target === 'all' ? 'Tüm Site' : b.target === 'block' ? b.blockFilter : `${b.blockFilter} Daire ${b.singleApt}`;
+        html += `<div class="admin-box-item">`;
+        html += `<div class="item-title"><span><i class="fa-solid fa-file-invoice-dollar" style="color:var(--accent);"></i> <b>${b.title}</b> <span style="font-weight:normal;color:var(--secondary);font-size:0.8rem;">— ${targetText}</span></span>`;
+        html += `<button class="btn btn-danger btn-sm del-bulk-btn" data-id="${b.id}"><i class="fa-solid fa-trash"></i> Sil</button></div>`;
+        html += `<div style="font-size:0.8rem; color:var(--secondary); margin-bottom:8px;">${matterList}</div>`;
+        html += `<div style="display:flex; justify-content:space-between; padding:8px 12px; background:#eff6ff; border-radius:6px; font-weight:700;">`;
+        html += `<span>Kişi Başı Toplam:</span><span style="color:#1e40af;">${money(b.perApartmentTotal)}</span></div>`;
+        html += `<div style="font-size:0.7rem; color:var(--secondary); margin-top:6px;">Oluşturma: ${b.date || '-'}</div></div>`;
+    });
+    container.innerHTML = html;
+    container.querySelectorAll('.del-bulk-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id;
+            askConfirm('Bu borçlandırmayı silmek istediğinize emin misiniz?', async () => {
+                showLoading('Siliniyor...');
+                try { await deleteDoc(doc(db, "toplu_borclar", id)); toast('Silindi.', 'success'); }
+                catch (err) { toast('Hata: ' + err.message, 'danger'); }
+                finally { hideLoading(); }
+            });
+        };
+    });
+}
+
+/* GİDERLER */
 document.getElementById('addExpenseBtn').onclick = async function() {
     var id = document.getElementById('expId').value; 
     var desc = document.getElementById('expDesc').value.trim(); 
     var amount = parseFloat(document.getElementById('expAmount').value); 
     var date = document.getElementById('expDate').value;
-    if (!desc || !amount || !date) { toast('Eksik alanlar doldurunuz.', 'danger'); return; } 
-    showLoading('leniyor...');
+    if (!desc || !amount || !date) { toast('Eksik alanları doldurunuz.', 'danger'); return; } 
+    showLoading('İşleniyor...');
     try {
         if(id) {
             try { await updateDoc(doc(db, "giderler", id), { aciklama: desc, miktar: amount, tarih: date }); } 
@@ -1577,14 +1743,14 @@ function resetExpenseForm() {
     document.getElementById('expDesc').value = ''; 
     document.getElementById('expAmount').value = ''; 
     document.getElementById('cancelExpenseBtn').classList.add('hidden'); 
-    document.getElementById('addExpenseBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Faturay Kasadan Dü'; 
+    document.getElementById('addExpenseBtn').innerHTML = '<i class="fa-solid fa-plus"></i> Faturayı Kasadan Düş'; 
 }
 document.getElementById('cancelExpenseBtn').onclick = function() { resetExpenseForm(); };
 
 function renderExpensesTable() {
     var body = document.getElementById('expensesBody'); var html = ''; let total = 0;
     var filtered = EXPENSES.filter(e => { if (expenseFilterStart && e.date < expenseFilterStart) return false; if (expenseFilterEnd && e.date > expenseFilterEnd) return false; return true; });
-    if (filtered.length === 0) { html = '<tr><td colspan="4" class="empty-note">Kayt yok</td></tr>'; } else {
+    if (filtered.length === 0) { html = '<tr><td colspan="4" class="empty-note">Kayıt yok</td></tr>'; } else {
         filtered.forEach(e => {
             total += Number(e.amount || 0);
             html += '<tr><td>' + e.description + '</td><td>' + money(e.amount) + '</td><td>' + e.date + '</td><td><button class="btn btn-outline btn-sm edit-exp-btn" data-id="' + e.id + '"><i class="fa-solid fa-pen"></i></button> <button class="btn btn-danger btn-sm del-exp-btn" data-id="' + e.id + '"><i class="fa-solid fa-trash"></i></button></td></tr>';
@@ -1605,10 +1771,10 @@ function renderExpensesTable() {
     body.querySelectorAll('.del-exp-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
-            askConfirm('Bu gider kayd silinsin mi?', async () => {
+            askConfirm('Bu gider kaydı silinsin mi?', async () => {
                 showLoading('Siliniyor...');
                 try { await deleteDoc(doc(db, "giderler", id)); } catch(x) { await deleteDoc(doc(db, "expenses", id)); }
-                toast('Kayt silindi.', 'success'); hideLoading();
+                toast('Silindi.', 'success'); hideLoading();
             });
         };
     });
@@ -1616,135 +1782,150 @@ function renderExpensesTable() {
 document.getElementById('expFilterBtn').onclick = () => { expenseFilterStart = document.getElementById('expFilterStart').value; expenseFilterEnd = document.getElementById('expFilterEnd').value; renderExpensesTable(); };
 document.getElementById('expClearFilterBtn').onclick = () => { document.getElementById('expFilterStart').value = ''; document.getElementById('expFilterEnd').value = ''; expenseFilterStart = ''; expenseFilterEnd = ''; renderExpensesTable(); };
 
+/* DAİRELER */
 function renderApartmentsTable() {
     var body = document.getElementById('apartmentsBody'); var html = '';
-    const cMonth = getCurrentMonthName();
-    const cYear = getCurrentYearStr();
-
     var filtered = APARTMENTS.filter(a => { 
         const s = searchTerm.toLowerCase(); 
         if(blockFilter && a.block !== blockFilter) return false; 
         return String(a.apartment).includes(s) || (a.fullName && a.fullName.toLowerCase().includes(s)) || a.phone.includes(s) || (a.plate && a.plate.toLowerCase().includes(s)); 
     });
-    if (filtered.length === 0) { html = '<tr><td colspan="9" class="empty-note">Kayt bulunamad</td></tr>'; } else {
+    if (filtered.length === 0) { html = '<tr><td colspan="9" class="empty-note">Kayıt bulunamadı</td></tr>'; } else {
         filtered.forEach(a => {
-            var paid = getDueState(a, cYear, cMonth).status === 'Ödendi'; 
-            var whatsapp = getWhatsAppButton(a.phone, a.fullName, a.apartment, a.block, a.feeAmount);
-            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + a.phone + '</td><td>' + (a.plate || '-') + '</td><td>' + money(a.feeAmount) + '</td><td><span class="badge '+(paid?'success':'danger')+'">'+(paid ? 'Ödendi' : 'Ödenmedi')+'</span></td><td>' + whatsapp + '</td><td><button class="btn btn-primary btn-sm edit-apt-btn" data-id="'+a.id+'"><i class="fa-solid fa-pen"></i></button></td></tr>';
+            const aidatState = getDueState(a, getCurrentYearStr(), getCurrentMonthName());
+            const demirbasDebt = getDemirbasDebt(a);
+            const hasAnyDebt = aidatState.status !== 'Ödendi' || demirbasDebt.total > 0;
+            let waBtn = '—';
+            if (hasAnyDebt) waBtn = '<button class="whatsapp-btn wa-apt-btn" data-id="' + a.id + '"><i class="fa-brands fa-whatsapp"></i></button>';
+            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + getOccupantBadge(a.occupantType) + '</td><td>' + a.phone + '</td><td>' + (a.plate || '-') + '</td><td>' + money(a.feeAmount) + '</td><td>' + waBtn + '</td><td><button class="btn btn-primary btn-sm edit-apt-btn" data-id="'+a.id+'"><i class="fa-solid fa-pen"></i></button></td></tr>';
         });
     }
     body.innerHTML = html;
+    body.querySelectorAll('.wa-apt-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const id = e.currentTarget.dataset.id;
+            const apt = APARTMENTS.find(x => x.id === id);
+            if (!apt) return;
+            openWhatsApp(apt, getUnpaidMonths(apt));
+        };
+    });
     body.querySelectorAll('.edit-apt-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id; const a = APARTMENTS.find(item => item.id === id); if(!a) return;
             document.getElementById('aptId').value = a.id; 
             document.getElementById('newApartmentBlock').value = a.block; 
             document.getElementById('newApartmentNo').value = a.apartment; 
+            document.getElementById('newOccupantType').value = a.occupantType || 'Ev Sahibi';
             document.getElementById('newApartmentName').value = a.fullName; 
             document.getElementById('newApartmentPhone').value = a.phone; 
             document.getElementById('newApartmentPlate').value = a.plate || ''; 
             document.getElementById('newApartmentFee').value = a.feeAmount;
+            document.getElementById('newHostName').value = a.hostName || '';
+            document.getElementById('newHostPhone').value = a.hostPhone || '';
             document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Güncelle';
+            toggleHostFields();
         };
     });
 }
+
+function toggleHostFields() {
+    const type = document.getElementById('newOccupantType').value;
+    document.getElementById('hostInfoRow').style.display = (type === 'Kiracı') ? 'flex' : 'none';
+}
+document.getElementById('newOccupantType').onchange = toggleHostFields;
+
 document.getElementById('addApartmentBtn').onclick = async function() {
     var id = document.getElementById('aptId').value;
     var block = document.getElementById('newApartmentBlock').value;
     var no = document.getElementById('newApartmentNo').value;
+    var occupantType = document.getElementById('newOccupantType').value;
     var name = document.getElementById('newApartmentName').value.trim();
     var phone = document.getElementById('newApartmentPhone').value.trim();
     var plate = document.getElementById('newApartmentPlate').value.trim();
     var fee = parseFloat(document.getElementById('newApartmentFee').value);
-
-    if (!no || !name || !phone) { toast('Lütfen Daire No, sim ve Telefon alanlarn doldurunuz.', 'danger'); return; }
-
-    var payload = { block: block, no: no, name: name, phone: phone, plate: plate, fee: isNaN(fee) ? 500 : fee };
-
+    var hostName = document.getElementById('newHostName').value.trim();
+    var hostPhone = document.getElementById('newHostPhone').value.trim();
+    if (!no || !name || !phone) { toast('Daire No, İsim ve Telefon zorunludur.', 'danger'); return; }
+    var payload = { block, no, name, phone, plate, fee: isNaN(fee) ? 500 : fee, occupantType, hostName, hostPhone };
     showLoading('Kaydediliyor...');
     try {
         if (id) {
             try { await updateDoc(doc(db, "daireler", id), payload); } catch(e) { await updateDoc(doc(db, "apartments", id), payload); }
-            toast('Daire kart güncellendi.', 'success');
+            toast('Daire kartı güncellendi.', 'success');
         } else {
             try { await addDoc(collection(db, "daireler"), payload); } catch(e) { await addDoc(collection(db, "apartments"), payload); }
             toast('Yeni daire eklendi.', 'success');
         }
         resetApartmentForm();
-    } catch (err) {
-        toast('Hata: ' + err.message, 'danger');
-    } finally {
-        hideLoading();
-    }
+    } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
 
 function resetApartmentForm() {
     document.getElementById('aptId').value = '';
     document.getElementById('newApartmentBlock').value = 'A Blok';
     document.getElementById('newApartmentNo').value = '1';
+    document.getElementById('newOccupantType').value = 'Ev Sahibi';
     document.getElementById('newApartmentName').value = '';
     document.getElementById('newApartmentPhone').value = '';
     document.getElementById('newApartmentPlate').value = '';
     document.getElementById('newApartmentFee').value = 500;
+    document.getElementById('newHostName').value = '';
+    document.getElementById('newHostPhone').value = '';
     document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Sistemi Güncelle';
+    toggleHostFields();
 }
 
 document.getElementById('apartmentSearch').oninput = function() { searchTerm = this.value.trim(); renderApartmentsTable(); };
 document.getElementById('blockFilter').onchange = function() { blockFilter = this.value; renderApartmentsTable(); };
 document.getElementById('clearSearchBtn').onclick = function() { document.getElementById('apartmentSearch').value = ''; document.getElementById('blockFilter').value = ''; searchTerm = ''; blockFilter = ''; renderApartmentsTable(); };
 
+/* DUYURULAR */
 document.getElementById('addAnnouncementBtn').onclick = async function() {
     var text = document.getElementById('announcementText').value.trim();
     if (!text) { toast('Duyuru metni giriniz.', 'danger'); return; }
-    showLoading('Yaynlanyor...');
+    showLoading('Yayınlanıyor...');
     try {
         await addDoc(collection(db, "announcements"), { content: text, createdAt: new Date().toISOString() });
         document.getElementById('announcementText').value = '';
-        toast('Duyuru panoya asld.', 'success');
-    } catch (err) {
-        toast('Hata: ' + err.message, 'danger');
-    } finally {
-        hideLoading();
-    }
+        toast('Duyuru asıldı.', 'success');
+    } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
 
 function renderAnnouncementsAdmin() {
     var list = document.getElementById('announcementsAdminList'); var html = '';
-    if (ANNOUNCEMENTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayt yok</div>'; return; }
+    if (ANNOUNCEMENTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayıt yok</div>'; return; }
     ANNOUNCEMENTS.forEach(a => {
         html += '<div class="admin-box-item">';
-        html += '<div class="item-title"><span><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> lan</span> <button class="btn btn-sm btn-danger del-ann-btn" data-id="' + a.id + '"><i class="fa-solid fa-trash"></i> Kaldr</button></div>';
+        html += '<div class="item-title"><span><i class="fa-solid fa-bullhorn" style="color:var(--accent);"></i> İlan</span> <button class="btn btn-sm btn-danger del-ann-btn" data-id="' + a.id + '"><i class="fa-solid fa-trash"></i> Kaldır</button></div>';
         html += '<div style="font-size:0.875rem; margin-bottom:8px;">' + a.text + '</div>';
-        html += '<div class="meta">' + a.timestamp + '</div>';
-        html += '</div>';
+        html += '<div class="meta">' + a.timestamp + '</div></div>';
     });
     list.innerHTML = html;
     list.querySelectorAll('.del-ann-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
             askConfirm('Bu duyuru silinsin mi?', async () => {
-                showLoading('Kaldrlyor...');
-                try { await deleteDoc(doc(db, "announcements", id)); toast('Duyuru silindi.', 'success'); } 
+                showLoading('Kaldırılıyor...');
+                try { await deleteDoc(doc(db, "announcements", id)); toast('Silindi.', 'success'); } 
                 catch(x) { toast('Hata', 'danger'); } finally { hideLoading(); }
             });
         };
     });
 }
 
+/* İSTEKLER */
 function renderRequestsAdmin() {
     var list = document.getElementById('requestsAdminList'); var html = '';
-    if (REQUESTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayt yok</div>'; return; }
+    if (REQUESTS.length === 0) { list.innerHTML = '<div class="empty-note">Kayıt yok</div>'; return; }
     REQUESTS.forEach((r) => {
         html += '<div class="admin-box-item">';
         html += '<div class="item-title"><span>Daire: ' + r.apartment + '</span> <button class="btn btn-sm btn-danger del-req-btn" data-id="' + r.id + '"><i class="fa-solid fa-trash"></i> Sil</button></div>';
         html += '<div style="font-size:0.875rem; background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:10px;">' + r.message + '</div>';
-        if(r.adminReply) {
-            html += '<div style="font-size:0.8rem; color:var(--success); font-weight:600; margin-bottom:10px;"><i class="fa-solid fa-circle-check"></i> Yant: ' + r.adminReply + '</div>';
-        }
-        html += '<div style="display:flex; gap:8px; margin-top:8px;"><input type="text" id="replyInput-' + r.id + '" placeholder="Cevabnz yazn..." value="' + r.adminReply + '" style="flex:1;">';
+        if(r.adminReply) html += '<div style="font-size:0.8rem; color:var(--success); font-weight:600; margin-bottom:10px;"><i class="fa-solid fa-circle-check"></i> Yanıt: ' + r.adminReply + '</div>';
+        html += '<div style="display:flex; gap:8px; margin-top:8px;"><input type="text" id="replyInput-' + r.id + '" placeholder="Cevabınızı yazın..." value="' + r.adminReply + '" style="flex:1;">';
         html += '<button class="btn btn-primary btn-sm reply-req-btn" data-id="' + r.id + '"><i class="fa-solid fa-reply"></i> Cevapla</button></div>';
-        html += '<div class="meta" style="margin-top:10px;">' + r.timestamp + '</div>';
-        html += '</div>';
+        html += '<div class="meta" style="margin-top:10px;">' + r.timestamp + '</div></div>';
     });
     list.innerHTML = html;
     list.querySelectorAll('.del-req-btn').forEach(btn => {
@@ -1761,52 +1942,42 @@ function renderRequestsAdmin() {
         btn.onclick = async (e) => {
             const id = e.currentTarget.dataset.id;
             var replyText = document.getElementById('replyInput-' + id).value.trim();
-            if(!replyText) { toast('Geçerli bir yant yaznz.', 'danger'); return; }
-            showLoading('letiliyor...');
-            try { await updateDoc(doc(db, "requests", id), { adminReply: replyText }); toast('Yant iletildi.', 'success'); } 
-            catch(x) { toast('lem baarsz.', 'danger'); } finally { hideLoading(); }
+            if(!replyText) { toast('Geçerli bir yanıt yazınız.', 'danger'); return; }
+            showLoading('İletiliyor...');
+            try { await updateDoc(doc(db, "requests", id), { adminReply: replyText }); toast('Yanıt iletildi.', 'success'); } 
+            catch(x) { toast('İşlem başarısız.', 'danger'); } finally { hideLoading(); }
         };
     });
 }
 
+/* RAPORLAR */
 function renderReport() {
     var month = document.getElementById('reportMonth').value; var year = document.getElementById('reportYear').value;
     var titleEl = document.getElementById('pdfDynamicTitle'); 
-    if(titleEl) titleEl.textContent = 'Tahiroullar Rojbin Sitesi ' + month + ' ' + year + ' Dönemi Aidat Çizelgesi';
+    if(titleEl) titleEl.textContent = 'Tahiroğulları Rojbin Sitesi ' + month + ' ' + year + ' Dönemi Aidat Çizelgesi';
     var body = document.getElementById('reportBody'); var footer = document.getElementById('reportFooter');
     var html = ''; 
-    
-    let paidCount = 0; let unpaidCount = 0; 
-    let totalTariff = 0; 
-    let totalPaid = 0; 
-    let totalUnpaid = 0; 
-    let totalExpenses = 0; 
-
+    let totalTariff = 0, totalPaid = 0, totalUnpaid = 0, totalExpenses = 0; 
     EXPENSES.forEach(e => { totalExpenses += Number(e.amount || 0); });
-
-    if (APARTMENTS.length === 0) { body.innerHTML = '<tr><td colspan="6" class="empty-note">Kayt yok</td></tr>'; return; }
+    if (APARTMENTS.length === 0) { body.innerHTML = '<tr><td colspan="6" class="empty-note">Kayıt yok</td></tr>'; return; }
     APARTMENTS.forEach((a, i) => {
         const state = getDueState(a, year, month);
         var isPaid = state.status === 'Ödendi'; 
         var fee = Number(a.feeAmount || 0);
         totalTariff += fee;
-
-        if (isPaid) { paidCount++; totalPaid += fee; } 
-        else { unpaidCount++; totalUnpaid += fee; }
+        if (isPaid) { totalPaid += fee; } else { totalUnpaid += fee; }
         var statusCell = isPaid ? 'Ödendi (' + state.date + ')' : 'Ödenmedi';
         html += '<tr><td>' + (i + 1) + '</td><td>' + (a.fullName || '-') + '</td><td>' + a.block + '</td><td>' + a.apartment + '</td><td>' + money(fee) + '</td><td style="font-weight: bold; color: ' + (isPaid ? 'var(--success)' : 'var(--danger)') + ';">' + statusCell + '</td></tr>';
     });
     body.innerHTML = html;
-
     let cashBalance = totalPaid - totalExpenses;
-
     if(footer) { 
         footer.innerHTML = `
-            <tr><td colspan="4" style="text-align:right; font-weight:bold;">STE TOPLAM ALACAI:</td><td colspan="2" style="font-weight:bold;">${money(totalTariff)}</td></tr>
+            <tr><td colspan="4" style="text-align:right; font-weight:bold;">SİTE TOPLAM ALACAĞI:</td><td colspan="2" style="font-weight:bold;">${money(totalTariff)}</td></tr>
             <tr><td colspan="4" style="text-align:right; font-weight:bold; color:var(--success);">TOPLAM TOPLANAN:</td><td colspan="2" style="color:var(--success); font-weight:bold;">${money(totalPaid)}</td></tr>
             <tr><td colspan="4" style="text-align:right; font-weight:bold; color:var(--danger);">TOPLAM KALAN ALACAK:</td><td colspan="2" style="color:var(--danger); font-weight:bold;">${money(totalUnpaid)}</td></tr>
-            <tr><td colspan="4" style="text-align:right; font-weight:bold; color:#c2410c;">STE TOPLAM GDER:</td><td colspan="2" style="color:#c2410c; font-weight:bold;">${money(totalExpenses)}</td></tr>
-            <tr><td colspan="4" style="text-align:right; font-weight:bold; color:var(--primary);">KASA NET BAKYE:</td><td colspan="2" style="color:var(--primary); font-weight:bold;">${money(cashBalance)}</td></tr>
+            <tr><td colspan="4" style="text-align:right; font-weight:bold; color:#c2410c;">SİTE TOPLAM GİDERİ:</td><td colspan="2" style="color:#c2410c; font-weight:bold;">${money(totalExpenses)}</td></tr>
+            <tr><td colspan="4" style="text-align:right; font-weight:bold; color:var(--primary);">KASA NET BAKİYE:</td><td colspan="2" style="color:var(--primary); font-weight:bold;">${money(cashBalance)}</td></tr>
         `; 
     }
 }
@@ -1816,7 +1987,7 @@ function renderExpenseReport() {
     var start = document.getElementById('expReportStart').value; var end = document.getElementById('expReportEnd').value;
     var body = document.getElementById('expReportBody'); var footer = document.getElementById('expReportFooter'); var html = ''; let total = 0;
     var filtered = EXPENSES.filter(e => { if (start && e.date < start) return false; if (end && e.date > end) return false; return true; });
-    if (filtered.length === 0) { body.innerHTML = '<tr><td colspan="4" class="empty-note">Kayt yok</td></tr>'; if (footer) footer.innerHTML = ''; return; }
+    if (filtered.length === 0) { body.innerHTML = '<tr><td colspan="4" class="empty-note">Kayıt yok</td></tr>'; if (footer) footer.innerHTML = ''; return; }
     filtered.forEach((e, i) => { total += Number(e.amount || 0); html += '<tr><td>' + (i + 1) + '</td><td>' + e.description + '</td><td>' + money(e.amount) + '</td><td>' + e.date + '</td></tr>'; });
     body.innerHTML = html;
     if(footer) footer.innerHTML = '<tr><td colspan="2" style="text-align:right; font-weight:bold;">GENEL TOPLAM MASRAF:</td><td colspan="2" style="color:var(--danger); font-weight:bold;">' + money(total) + '</td></tr>';
@@ -1826,43 +1997,27 @@ document.getElementById('expReportFilterBtn').onclick = renderExpenseReport;
 function openPDFInNewTab(elementId) {
     var element = document.getElementById(elementId);
     if (!element) return;
-    
     var clone = element.cloneNode(true);
     clone.classList.add('pdf-print-active');
-    clone.style.position = 'absolute';
-    clone.style.left = '-9999px';
-    clone.style.top = '0px';
-    clone.style.width = '210mm'; 
-    clone.style.backgroundColor = '#ffffff';
+    clone.style.position = 'absolute'; clone.style.left = '-9999px'; clone.style.top = '0px';
+    clone.style.width = '210mm'; clone.style.backgroundColor = '#ffffff';
     document.body.appendChild(clone);
-    
     var titleMonth = document.getElementById('reportMonth').value;
     var titleYear = document.getElementById('reportYear').value;
     var filename = elementId === 'reportTableContainer' ? 'aidat_raporu_' + titleMonth + '_' + titleYear + '.pdf' : 'gider_raporu_' + titleMonth + '_' + titleYear + '.pdf';
-    
-    var opt = {
-      margin:       [8, 8, 8, 8],
-      filename:     filename,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    showLoading('A4 PDF Raporu Oluturuluyor...');
-    
+    var opt = { margin: [8, 8, 8, 8], filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+    showLoading('A4 PDF Oluşturuluyor...');
     setTimeout(() => {
         html2pdf().set(opt).from(clone).save().then(() => {
-            document.body.removeChild(clone);
-            hideLoading();
-            toast('Rapor ndirildi! ', 'success');
+            document.body.removeChild(clone); hideLoading();
+            toast('Rapor İndirildi! 📥', 'success');
         }).catch((err) => {
             if (clone.parentNode) document.body.removeChild(clone);
             hideLoading();
-            toast('Hata Olutu: ' + err.message, 'danger');
+            toast('Hata: ' + err.message, 'danger');
         });
     }, 300);
 }
-
 document.getElementById('printReportBtn').onclick = () => openPDFInNewTab('reportTableContainer');
 document.getElementById('printExpenseReportBtn').onclick = () => openPDFInNewTab('expenseReportTableContainer');
 document.getElementById('expGenPrintBtn').onclick = () => openPDFInNewTab('expenseReportTableContainer');
@@ -1876,8 +2031,9 @@ tabBtns.forEach(btn => {
         document.getElementById(this.dataset.tab).classList.add('active');
         if (this.dataset.tab === 'tabReport') renderReport();
         if (this.dataset.tab === 'tabExpenseReport') renderExpenseReport();
-        if (this.dataset.tab === 'tabDemirbas') renderDemirbasTable();
+        if (this.dataset.tab === 'tabDemirbas') { renderDemirbasTable(); renderActiveBulkDebts(); renderBulkSingleSelect(); }
         if (this.dataset.tab === 'tabBank') updateBankApiWarning();
+        if (this.dataset.tab === 'tabDues') renderDuesTable();
     };
 });
 
@@ -1888,106 +2044,105 @@ var m = String(now.getMonth() + 1).padStart(2, '0');
 var firstDayStr = y + '-' + m + '-01';
 var lastDayVal = new Date(y, now.getMonth() + 1, 0).getDate();
 var lastDayStr = y + '-' + m + '-' + String(lastDayVal).padStart(2, '0');
-
 document.getElementById('expDate').value = todayStr;
 document.getElementById('expFilterStart').value = firstDayStr;
 document.getElementById('expFilterEnd').value = lastDayStr;
 document.getElementById('expReportStart').value = firstDayStr;
 document.getElementById('expReportEnd').value = lastDayStr;
-
 expenseFilterStart = firstDayStr;
 expenseFilterEnd = lastDayStr;
 
-/* ============================================================
-   API KEY YÖNETM
-   ============================================================ */
-function updateApiKeyButtonVisibility() {
-    const btn = document.getElementById('openApiKeyBtn');
-    if (!btn) return;
-    if (session.role === 'admin') btn.classList.remove('hidden');
-    else btn.classList.add('hidden');
+/* API KEY */
+function updateHeaderButtonsVisibility() {
+    const apiBtn = document.getElementById('openApiKeyBtn');
+    const waBtn = document.getElementById('openWaTemplateBtn');
+    const isAdmin = session.role === 'admin';
+    if (apiBtn) apiBtn.classList.toggle('hidden', !isAdmin);
+    if (waBtn) waBtn.classList.toggle('hidden', !isAdmin);
 }
 
 const apiKeyModal = document.getElementById('apiKeyModal');
 document.getElementById('openApiKeyBtn').onclick = () => {
     document.getElementById('geminiApiKeyInput').value = GEMINI_API_KEY;
     const statusEl = document.getElementById('apiKeyStatus');
-    statusEl.textContent = GEMINI_API_KEY ? ' Kaytl anahtar mevcut' : ' Henüz API anahtar girilmedi';
+    statusEl.textContent = GEMINI_API_KEY ? '✅ Kayıtlı anahtar mevcut' : '⚠️ Henüz girilmedi';
     statusEl.style.color = GEMINI_API_KEY ? '#059669' : '#dc2626';
     apiKeyModal.classList.remove('hidden');
 };
-
 document.getElementById('closeApiKeyModalBtn').onclick = () => apiKeyModal.classList.add('hidden');
-
 document.getElementById('saveApiKeyBtn').onclick = () => {
     const key = document.getElementById('geminiApiKeyInput').value.trim();
-    if (!key) { toast('Bo anahtar kaydedilemez.', 'danger'); return; }
+    if (!key) { toast('Boş anahtar kaydedilemez.', 'danger'); return; }
     GEMINI_API_KEY = key;
     localStorage.setItem('gemini_api_key', key);
-    document.getElementById('apiKeyStatus').textContent = ' Kaydedildi!';
+    document.getElementById('apiKeyStatus').textContent = '✅ Kaydedildi!';
     document.getElementById('apiKeyStatus').style.color = '#059669';
-    toast('Gemini API anahtar kaydedildi.', 'success');
+    toast('API anahtarı kaydedildi.', 'success');
     updateBankApiWarning();
     setTimeout(() => apiKeyModal.classList.add('hidden'), 800);
 };
-
 document.getElementById('clearApiKeyBtn').onclick = () => {
-    askConfirm('Kaytl API anahtar silinsin mi?', () => {
+    askConfirm('API anahtarı silinsin mi?', () => {
         GEMINI_API_KEY = '';
         localStorage.removeItem('gemini_api_key');
         document.getElementById('geminiApiKeyInput').value = '';
-        document.getElementById('apiKeyStatus').textContent = ' Anahtar silindi';
+        document.getElementById('apiKeyStatus').textContent = '⚠️ Silindi';
         document.getElementById('apiKeyStatus').style.color = '#dc2626';
-        toast('API anahtar silindi.', 'success');
+        toast('Silindi.', 'success');
         updateBankApiWarning();
     });
 };
-
 document.getElementById('testApiKeyBtn').onclick = async () => {
     const key = document.getElementById('geminiApiKeyInput').value.trim();
     if (!key) { toast('Önce anahtar giriniz.', 'danger'); return; }
-    
     const statusEl = document.getElementById('apiKeyStatus');
-    statusEl.textContent = ' Test ediliyor...';
-    statusEl.style.color = '#d97706';
-    
+    statusEl.textContent = '⏳ Test ediliyor...'; statusEl.style.color = '#d97706';
     try {
-        // YEN: gemini-3.5-flash + x-goog-api-key header
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'x-goog-api-key': key
-            },
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
             body: JSON.stringify({ contents: [{ parts: [{ text: "Sadece 'OK' yaz." }] }] })
         });
         const data = await res.json();
         if (res.ok && data.candidates && data.candidates[0]) {
-            statusEl.textContent = ' API anahtar geçerli ve çalyor!';
-            statusEl.style.color = '#059669';
-            toast('Gemini API balants baarl.', 'success');
+            statusEl.textContent = '✅ Geçerli ve çalışıyor!'; statusEl.style.color = '#059669';
+            toast('API bağlantısı başarılı.', 'success');
         } else {
             const errMsg = data.error?.message || 'Bilinmeyen hata';
-            statusEl.textContent = ' Hata: ' + errMsg;
-            statusEl.style.color = '#dc2626';
-            toast('API test baarsz.', 'danger');
+            statusEl.textContent = '❌ ' + errMsg; statusEl.style.color = '#dc2626';
+            toast('API test başarısız.', 'danger');
         }
     } catch (err) {
-        statusEl.textContent = ' Balant hatas: ' + err.message;
-        statusEl.style.color = '#dc2626';
-        toast('Balant hatas', 'danger');
+        statusEl.textContent = '❌ Bağlantı hatası'; statusEl.style.color = '#dc2626';
     }
 };
-
 function updateBankApiWarning() {
     const warn = document.getElementById('apiKeyWarning');
     if (!warn) return;
-    if (!GEMINI_API_KEY) warn.classList.remove('hidden');
-    else warn.classList.add('hidden');
+    warn.classList.toggle('hidden', !!GEMINI_API_KEY);
 }
 
-/* ---------- DEMRBA YÖNETM ---------- */
+/* WhatsApp Şablon */
+document.getElementById('openWaTemplateBtn').onclick = () => {
+    document.getElementById('waTemplateText').value = WA_TEMPLATE;
+    document.getElementById('whatsappTemplateModal').classList.remove('hidden');
+};
+document.getElementById('closeWaTemplateModalBtn').onclick = () => document.getElementById('whatsappTemplateModal').classList.add('hidden');
+document.getElementById('saveWaTemplateBtn').onclick = () => {
+    const t = document.getElementById('waTemplateText').value;
+    if (!t.trim()) { toast('Şablon boş olamaz.', 'danger'); return; }
+    WA_TEMPLATE = t;
+    localStorage.setItem('wa_template', t);
+    toast('WhatsApp şablonu kaydedildi.', 'success');
+    document.getElementById('whatsappTemplateModal').classList.add('hidden');
+};
+document.getElementById('resetWaTemplateBtn').onclick = () => {
+    document.getElementById('waTemplateText').value = DEFAULT_WA_TEMPLATE;
+    toast('Varsayılan şablon yüklendi (kaydetmeyi unutmayın).', 'success');
+};
+
+/* DEMİRBAŞ Tahsilat */
 document.getElementById('addDemirbasBtn').onclick = async function() {
     const id = document.getElementById('demId').value;
     const desc = document.getElementById('demDesc').value.trim();
@@ -1996,30 +2151,21 @@ document.getElementById('addDemirbasBtn').onclick = async function() {
     const block = document.getElementById('demBlock').value;
     const apt = document.getElementById('demApt').value.trim();
     const payer = document.getElementById('demPayer').value.trim();
-
-    if (!desc || !amount || !date) { toast('Açklama, tutar ve tarih zorunludur.', 'danger'); return; }
-
+    if (!desc || !amount || !date) { toast('Açıklama, tutar ve tarih zorunludur.', 'danger'); return; }
     showLoading('Kaydediliyor...');
     const payload = { aciklama: desc, tutar: amount, tarih: date, blok: block, daire: apt, odeyen: payer, createdAt: new Date().toISOString() };
-
     try {
         if (id) {
             await updateDoc(doc(db, "demirbaslar", id), payload);
-            toast('Demirba kayd güncellendi.', 'success');
+            toast('Güncellendi.', 'success');
         } else {
             await addDoc(collection(db, "demirbaslar"), payload);
-            toast('Yeni demirba ödemesi eklendi.', 'success');
+            toast('Eklendi.', 'success');
         }
         resetDemirbasForm();
-    } catch (err) {
-        toast('Hata: ' + err.message, 'danger');
-    } finally {
-        hideLoading();
-    }
+    } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
-
 document.getElementById('cancelDemirbasBtn').onclick = resetDemirbasForm;
-
 function resetDemirbasForm() {
     document.getElementById('demId').value = '';
     document.getElementById('demDesc').value = '';
@@ -2031,19 +2177,16 @@ function resetDemirbasForm() {
     document.getElementById('addDemirbasBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Kaydet';
     document.getElementById('cancelDemirbasBtn').classList.add('hidden');
 }
-
 function renderDemirbasTable() {
     const body = document.getElementById('demirbasBody');
     if (!body) return;
     const html = [];
     let total = 0;
-
     if (DEMIRBAS_LIST.length === 0) {
-        body.innerHTML = '<tr><td colspan="6" class="empty-note">Henüz demirba kayd yok</td></tr>';
+        body.innerHTML = '<tr><td colspan="6" class="empty-note">Henüz demirbaş tahsilatı yok</td></tr>';
         document.getElementById('demTotal').textContent = money(0);
         return;
     }
-
     DEMIRBAS_LIST.forEach(d => {
         total += Number(d.amount || 0);
         const blockApt = (d.block || d.apartment) ? `${d.block || '-'} / ${d.apartment || '-'}` : '-';
@@ -2063,7 +2206,6 @@ function renderDemirbasTable() {
     });
     body.innerHTML = html.join('');
     document.getElementById('demTotal').textContent = money(total);
-
     body.querySelectorAll('.edit-dem-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
@@ -2078,16 +2220,14 @@ function renderDemirbasTable() {
             document.getElementById('demPayer').value = d.payer || '';
             document.getElementById('addDemirbasBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Güncelle';
             document.getElementById('cancelDemirbasBtn').classList.remove('hidden');
-            document.getElementById('demDesc').focus();
         };
     });
-
     body.querySelectorAll('.del-dem-btn').forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
-            askConfirm('Bu demirba kayd silinsin mi?', async () => {
+            askConfirm('Bu kayıt silinsin mi?', async () => {
                 showLoading('Siliniyor...');
-                try { await deleteDoc(doc(db, "demirbaslar", id)); toast('Kayt silindi.', 'success'); } 
+                try { await deleteDoc(doc(db, "demirbaslar", id)); toast('Silindi.', 'success'); } 
                 catch (err) { toast('Hata: ' + err.message, 'danger'); } 
                 finally { hideLoading(); }
             });
@@ -2095,27 +2235,18 @@ function renderDemirbasTable() {
     });
 }
 
-/* ---------- EXCEL EXPORT ---------- */
+/* EXCEL EXPORT */
 document.getElementById('exportExcelBtn').onclick = function() {
-    if (typeof XLSX === 'undefined') {
-        toast('Excel kütüphanesi yüklenemedi.', 'danger');
-        return;
-    }
-
-    showLoading('Excel dosyas hazrlanyor...');
-
+    if (typeof XLSX === 'undefined') { toast('Excel kütüphanesi yüklenemedi.', 'danger'); return; }
+    showLoading('Excel hazırlanıyor...');
     try {
         const wb = XLSX.utils.book_new();
-
-        const daireRows = [["Blok", "Daire No", "Ad Soyad", "Telefon", "Plaka", "Aylk Aidat ()", "Güncel Durum"]];
-        const cMonth = getCurrentMonthName();
-        const cYear = getCurrentYearStr();
+        const daireRows = [["Blok", "Daire No", "Ad Soyad", "Tip", "Telefon", "Ev Sahibi", "Ev Sahibi Tel", "Plaka", "Aylık Aidat (₺)"]];
         APARTMENTS.forEach(a => {
-            const state = getDueState(a, cYear, cMonth);
-            daireRows.push([a.block, a.apartment, a.fullName || '', a.phone || '', a.plate || '-', Number(a.feeAmount || 0), state.status]);
+            daireRows.push([a.block, a.apartment, a.fullName || '', a.occupantType || '', a.phone || '', a.hostName || '', a.hostPhone || '', a.plate || '-', Number(a.feeAmount || 0)]);
         });
         const wsDaire = XLSX.utils.aoa_to_sheet(daireRows);
-        wsDaire['!cols'] = [{wch:10},{wch:10},{wch:25},{wch:15},{wch:15},{wch:15},{wch:15}];
+        wsDaire['!cols'] = [{wch:10},{wch:10},{wch:25},{wch:10},{wch:15},{wch:20},{wch:15},{wch:15},{wch:15}];
         XLSX.utils.book_append_sheet(wb, wsDaire, "Daireler");
 
         const now = new Date();
@@ -2141,47 +2272,52 @@ document.getElementById('exportExcelBtn').onclick = function() {
         wsAidat['!cols'] = [{wch:10},{wch:8},{wch:25}, ...matrixMonths.map(() => ({wch:10}))];
         XLSX.utils.book_append_sheet(wb, wsAidat, "Aidatlar");
 
-        const demRows = [["Tarih", "Açklama", "Blok", "Daire", "Ödeyen", "Tutar ()"]];
-        DEMIRBAS_LIST.forEach(d => {
-            demRows.push([d.date || '', d.description || '', d.block || '', d.apartment || '', d.payer || '', Number(d.amount || 0)]);
+        const demRows = [["Tür", "Tarih", "Açıklama", "Blok", "Daire", "Kişi", "Tutar (₺)"]];
+        BULK_DEBTS.forEach(b => {
+            const tgt = b.target === 'all' ? 'Tüm Site' : b.target === 'block' ? b.blockFilter : `${b.blockFilter} Daire ${b.singleApt}`;
+            (b.matters || []).forEach(m => {
+                demRows.push(['BORÇ', b.date || '', b.title + ' - ' + m.desc, tgt, '', '', Number(m.amount || 0)]);
+            });
         });
-        if (DEMIRBAS_LIST.length === 0) demRows.push(["-", "Kayt yok", "", "", "", 0]);
+        DEMIRBAS_LIST.forEach(d => {
+            demRows.push(['TAHSİLAT', d.date || '', d.description || '', d.block || '', d.apartment || '', d.payer || '', Number(d.amount || 0)]);
+        });
+        if (demRows.length === 1) demRows.push(['-', '-', 'Kayıt yok', '', '', '', 0]);
         const wsDem = XLSX.utils.aoa_to_sheet(demRows);
-        wsDem['!cols'] = [{wch:12},{wch:35},{wch:10},{wch:8},{wch:20},{wch:12}];
-        XLSX.utils.book_append_sheet(wb, wsDem, "Demirbalar");
+        wsDem['!cols'] = [{wch:10},{wch:12},{wch:40},{wch:15},{wch:8},{wch:20},{wch:12}];
+        XLSX.utils.book_append_sheet(wb, wsDem, "Demirbaşlar");
 
-        const expRows = [["Tarih", "Açklama", "Tutar ()"]];
+        const expRows = [["Tarih", "Açıklama", "Tutar (₺)"]];
         EXPENSES.forEach(e => expRows.push([e.date || '', e.description || '', Number(e.amount || 0)]));
-        if (EXPENSES.length === 0) expRows.push(["-", "Kayt yok", 0]);
+        if (EXPENSES.length === 0) expRows.push(["-", "Kayıt yok", 0]);
         const wsExp = XLSX.utils.aoa_to_sheet(expRows);
         wsExp['!cols'] = [{wch:12},{wch:35},{wch:12}];
         XLSX.utils.book_append_sheet(wb, wsExp, "Giderler");
 
-        const reqRows = [["Tarih", "Daire", "Sakin Ad", "Mesaj", "Yönetim Cevab"]];
+        const reqRows = [["Tarih", "Daire", "Sakin Adı", "Mesaj", "Yönetim Cevabı"]];
         REQUESTS.forEach(r => reqRows.push([r.timestamp || '', r.apartment || '', r.residentName || '', r.message || '', r.adminReply || '-']));
-        if (REQUESTS.length === 0) reqRows.push(["-", "-", "-", "Kayt yok", "-"]);
+        if (REQUESTS.length === 0) reqRows.push(["-", "-", "-", "Kayıt yok", "-"]);
         const wsReq = XLSX.utils.aoa_to_sheet(reqRows);
         wsReq['!cols'] = [{wch:18},{wch:15},{wch:20},{wch:40},{wch:40}];
         XLSX.utils.book_append_sheet(wb, wsReq, "Talepler");
 
-        let totalAidat = 0, totalDem = 0, totalExp = 0;
+        let totalAidat = 0, totalDemTahsil = 0, totalExp = 0;
         const cM = getCurrentMonthName(), cY = getCurrentYearStr();
         APARTMENTS.forEach(a => { if (getDueState(a, cY, cM).status === 'Ödendi') totalAidat += Number(a.feeAmount || 0); });
-        DEMIRBAS_LIST.forEach(d => totalDem += Number(d.amount || 0));
+        DEMIRBAS_LIST.forEach(d => totalDemTahsil += Number(d.amount || 0));
         EXPENSES.forEach(e => totalExp += Number(e.amount || 0));
-        
         const ozetRows = [
-            ["Tahiroullar Rojbin Sitesi - Özet Rapor"],
-            ["Oluturulma Tarihi", new Date().toLocaleString('tr-TR')],
+            ["Tahiroğulları Rojbin Sitesi - Özet Rapor"],
+            ["Oluşturulma Tarihi", new Date().toLocaleString('tr-TR')],
             [],
-            ["Kategori", "Tutar ()"],
+            ["Kategori", "Tutar (₺)"],
             ["Cari Ay Toplanan Aidat (" + cM + " " + cY + ")", totalAidat],
-            ["Toplam Demirba Geliri", totalDem],
+            ["Toplam Demirbaş Tahsilatı", totalDemTahsil],
             ["Toplam Gider", totalExp],
-            ["NET BAKYE (Aidat + Demirba - Gider)", totalAidat + totalDem - totalExp],
+            ["NET BAKİYE", totalAidat + totalDemTahsil - totalExp],
             [],
-            ["Toplam Daire Says", APARTMENTS.length],
-            ["Toplam Talep Says", REQUESTS.length],
+            ["Toplam Daire Sayısı", APARTMENTS.length],
+            ["Toplam Talep Sayısı", REQUESTS.length],
         ];
         const wsOzet = XLSX.utils.aoa_to_sheet(ozetRows);
         wsOzet['!cols'] = [{wch:45},{wch:20}];
@@ -2189,40 +2325,181 @@ document.getElementById('exportExcelBtn').onclick = function() {
 
         const filename = 'Rojbin_Sitesi_Verileri_' + new Date().toISOString().slice(0,10) + '.xlsx';
         XLSX.writeFile(wb, filename);
-        toast('Excel dosyas indirildi! ', 'success');
-    } catch (err) {
-        toast('Hata: ' + err.message, 'danger');
-        console.error(err);
-    } finally {
-        hideLoading();
-    }
+        toast('Excel indirildi! 📥', 'success');
+    } catch (err) { toast('Hata: ' + err.message, 'danger'); console.error(err); } 
+    finally { hideLoading(); }
 };
 
-/* ---------- BANKA HAREKETLER & AI ANALZ ---------- */
-document.getElementById('bankFileInput').addEventListener('change', async (e) => {
+/* GOOGLE FORM EXCEL İÇE AKTARMA */
+document.getElementById('openImportExcelBtn').onclick = () => {
+    IMPORT_ROWS = [];
+    document.getElementById('importExcelInput').value = '';
+    document.getElementById('importPreviewArea').classList.add('hidden');
+    document.getElementById('excelImportModal').classList.remove('hidden');
+};
+document.getElementById('closeExcelImportBtn').onclick = () => document.getElementById('excelImportModal').classList.add('hidden');
+document.getElementById('cancelImportBtn').onclick = () => document.getElementById('excelImportModal').classList.add('hidden');
+
+document.getElementById('importExcelInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     showLoading('Dosya okunuyor...');
     try {
         const data = await file.arrayBuffer();
         const wb = XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (json.length < 2) { toast('Dosya boş.', 'danger'); hideLoading(); return; }
 
-        if (json.length < 2) { toast('Dosya bo veya geçersiz.', 'danger'); hideLoading(); return; }
+        // Başlık satırını normalize et
+        const headers = json[0].map(h => String(h).toUpperCase().trim());
+        const findCol = (...keywords) => {
+            for (let i = 0; i < headers.length; i++) {
+                for (const kw of keywords) {
+                    if (headers[i].includes(kw)) return i;
+                }
+            }
+            return -1;
+        };
+        const blockIdx = findCol('BLOK');
+        const aptIdx = findCol('DAİRE', 'DAIRE');
+        const nameIdx = findCol('ADI SOYADI', 'AD SOYAD', 'İSİM', 'ISIM');
+        const phoneIdx = findCol('TELEFON');
+        const plateIdx = findCol('ARAÇ', 'ARAC', 'PLAKA');
+        // Kiracı için ev sahibi sütunları (farklı TELEFON header'ı)
+        const hostNameIdx = headers.findIndex((h, i) => i > phoneIdx && h.includes('ADI SOYADI'));
+        const hostPhoneIdx = headers.findIndex((h, i) => i > phoneIdx && h.includes('TELEFON'));
 
-        const headers = json[0].map(h => String(h).toLowerCase().trim());
-        const dateIdx = headers.findIndex(h => h.includes('tarih'));
-        const descIdx = headers.findIndex(h => h.includes('açklama') || h.includes('aciklama') || h.includes('description'));
-        const amtIdx = headers.findIndex(h => h.includes('tutar') || h.includes('amount') || h.includes('ilem'));
-
-        if (dateIdx === -1 || descIdx === -1 || amtIdx === -1) {
-            toast('Tarih/Açklama/Tutar sütunlar bulunamad.', 'danger');
+        if (blockIdx === -1 || aptIdx === -1 || nameIdx === -1) {
+            toast('Gerekli sütunlar (BLOK, DAİRE NO, ADI SOYADI) bulunamadı.', 'danger');
             hideLoading();
             return;
         }
 
+        IMPORT_ROWS = [];
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || row.length === 0) continue;
+            const block = String(row[blockIdx] || '').trim();
+            const apt = String(row[aptIdx] || '').trim();
+            const name = String(row[nameIdx] || '').trim();
+            if (!block || !apt || !name) continue;
+
+            const phone = phoneIdx >= 0 ? String(row[phoneIdx] || '').trim() : '';
+            const plate = plateIdx >= 0 ? String(row[plateIdx] || '').trim() : '';
+            const hostName = hostNameIdx >= 0 ? String(row[hostNameIdx] || '').trim() : '';
+            const hostPhone = hostPhoneIdx >= 0 ? String(row[hostPhoneIdx] || '').trim() : '';
+
+            // Kiracı mı ev sahibi mi? Host bilgisi varsa kiracı
+            const occupantType = (hostName || hostPhone) ? 'Kiracı' : 'Ev Sahibi';
+
+            // Blok normalize
+            let blockNormalized = block.toUpperCase();
+            if (!blockNormalized.includes('BLOK')) blockNormalized = blockNormalized + ' BLOK';
+
+            IMPORT_ROWS.push({
+                block: blockNormalized,
+                apartment: apt,
+                fullName: name,
+                phone, plate, occupantType, hostName, hostPhone,
+                status: 'yeni' // sonra güncelleme olacak
+            });
+        }
+
+        // Mevcut kayıtlarla karşılaştır
+        IMPORT_ROWS.forEach(r => {
+            const existing = APARTMENTS.find(a => a.block === r.block && String(a.apartment) === String(r.apartment));
+            r.status = existing ? 'güncelle' : 'yeni';
+        });
+
+        renderImportPreview();
+        document.getElementById('importPreviewArea').classList.remove('hidden');
+        toast(`${IMPORT_ROWS.length} kayıt okundu.`, 'success');
+    } catch (err) {
+        toast('Dosya hatası: ' + err.message, 'danger');
+    } finally { hideLoading(); }
+});
+
+function renderImportPreview() {
+    const body = document.getElementById('importPreviewBody');
+    let newCount = 0, updateCount = 0;
+    const html = IMPORT_ROWS.map(r => {
+        if (r.status === 'yeni') newCount++; else updateCount++;
+        const badge = r.status === 'yeni' 
+            ? '<span class="badge success">Yeni</span>' 
+            : '<span class="badge warning">Güncelle</span>';
+        const typBadge = r.occupantType === 'Kiracı' 
+            ? '<span class="badge warning">Kiracı</span>' 
+            : '<span class="badge neutral">Ev Sahibi</span>';
+        return `<tr>
+            <td style="padding:8px;">${badge}</td>
+            <td style="padding:8px;">${r.block}</td>
+            <td style="padding:8px;"><b>${r.apartment}</b></td>
+            <td style="padding:8px;">${r.fullName}</td>
+            <td style="padding:8px;">${r.phone || '-'}</td>
+            <td style="padding:8px;">${typBadge}</td>
+            <td style="padding:8px;">${r.plate || '-'}</td>
+        </tr>`;
+    }).join('');
+    body.innerHTML = html;
+    document.getElementById('importCount').textContent = IMPORT_ROWS.length;
+    document.getElementById('importSummary').innerHTML = `<b>${newCount}</b> yeni kayıt eklenecek, <b>${updateCount}</b> mevcut kayıt güncellenecek.`;
+}
+
+document.getElementById('confirmImportBtn').onclick = async () => {
+    if (IMPORT_ROWS.length === 0) { toast('Kayıt yok.', 'danger'); return; }
+    askConfirm(`${IMPORT_ROWS.length} kayıt içe aktarılacak. Onaylıyor musunuz?`, async () => {
+        showLoading('İçe aktarılıyor...');
+        let successCount = 0, failCount = 0;
+        for (const r of IMPORT_ROWS) {
+            try {
+                const existing = APARTMENTS.find(a => a.block === r.block && String(a.apartment) === String(r.apartment));
+                const payload = {
+                    block: r.block,
+                    no: r.apartment,
+                    name: r.fullName,
+                    phone: r.phone,
+                    plate: r.plate,
+                    fee: 500, // varsayılan
+                    occupantType: r.occupantType,
+                    hostName: r.hostName,
+                    hostPhone: r.hostPhone
+                };
+                if (existing) {
+                    // Güncelle - aidat tarifesini koru
+                    payload.fee = existing.feeAmount || 500;
+                    try { await updateDoc(doc(db, "daireler", existing.id), payload); } 
+                    catch(e) { await updateDoc(doc(db, "apartments", existing.id), payload); }
+                } else {
+                    // Yeni ekle
+                    try { await addDoc(collection(db, "daireler"), payload); } 
+                    catch(e) { await addDoc(collection(db, "apartments"), payload); }
+                }
+                successCount++;
+            } catch (err) { console.error(err); failCount++; }
+        }
+        hideLoading();
+        toast(`${successCount} kayıt aktarıldı${failCount > 0 ? `, ${failCount} hata` : ''}.`, successCount > 0 ? 'success' : 'danger');
+        document.getElementById('excelImportModal').classList.add('hidden');
+    });
+};
+
+/* BANKA & AI */
+document.getElementById('bankFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    showLoading('Dosya okunuyor...');
+    try {
+        const data = await file.arrayBuffer();
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (json.length < 2) { toast('Dosya boş.', 'danger'); hideLoading(); return; }
+        const headers = json[0].map(h => String(h).toLowerCase().trim());
+        const dateIdx = headers.findIndex(h => h.includes('tarih'));
+        const descIdx = headers.findIndex(h => h.includes('açıklama') || h.includes('aciklama') || h.includes('description'));
+        const amtIdx = headers.findIndex(h => h.includes('tutar') || h.includes('amount') || h.includes('işlem'));
+        if (dateIdx === -1 || descIdx === -1 || amtIdx === -1) { toast('Sütunlar bulunamadı.', 'danger'); hideLoading(); return; }
         BANK_TRANSACTIONS = [];
         for (let i = 1; i < json.length; i++) {
             const row = json[i];
@@ -2230,25 +2507,15 @@ document.getElementById('bankFileInput').addEventListener('change', async (e) =>
             const date = String(row[dateIdx] || '').trim();
             const desc = String(row[descIdx] || '').trim();
             let amt = row[amtIdx];
-            
-            if (typeof amt === 'string') {
-                amt = amt.replace(/[TL\s]/gi, '').replace(/\./g, '').replace(',', '.');
-                amt = parseFloat(amt);
-            } else {
-                amt = parseFloat(amt);
-            }
-            
+            if (typeof amt === 'string') { amt = amt.replace(/[₺TL\s]/gi, '').replace(/\./g, '').replace(',', '.'); amt = parseFloat(amt); }
+            else { amt = parseFloat(amt); }
             if (!date || !desc || isNaN(amt)) continue;
             BANK_TRANSACTIONS.push({ date, description: desc, amount: amt });
         }
-
-        toast(`${BANK_TRANSACTIONS.length} banka hareketi okundu.`, 'success');
+        toast(`${BANK_TRANSACTIONS.length} hareket okundu.`, 'success');
         renderBankManualTable();
-    } catch (err) {
-        toast('Dosya okuma hatas: ' + err.message, 'danger');
-    } finally {
-        hideLoading();
-    }
+    } catch (err) { toast('Hata: ' + err.message, 'danger'); } 
+    finally { hideLoading(); }
 });
 
 function renderBankManualTable() {
@@ -2256,11 +2523,8 @@ function renderBankManualTable() {
     const body = document.getElementById('bankManualBody');
     if (!card || !body) return;
     if (BANK_TRANSACTIONS.length === 0) { card.classList.add('hidden'); return; }
-    
-    const html = BANK_TRANSACTIONS.slice(0, 50).map(t => 
-        `<tr><td>${t.date}</td><td>${t.description}</td><td>${money(t.amount)}</td></tr>`
-    ).join('');
-    body.innerHTML = html || '<tr><td colspan="3" class="empty-note">Kayt yok</td></tr>';
+    const html = BANK_TRANSACTIONS.slice(0, 50).map(t => `<tr><td>${t.date}</td><td>${t.description}</td><td>${money(t.amount)}</td></tr>`).join('');
+    body.innerHTML = html;
     card.classList.remove('hidden');
 }
 
@@ -2274,205 +2538,201 @@ document.getElementById('clearBankBtn').onclick = () => {
 
 document.getElementById('loadSampleBtn').onclick = () => {
     BANK_TRANSACTIONS = [
-        { date: '17.09.2026', description: 'MELH BAYRAM, A BLOK 14 NUMARALI DARE EYLÜL AYI ADATI VE DEMRBA ÖDEMESNN YARISIDIR', amount: 2501.00 },
-        { date: '17.09.2026', description: 'ZÜBEYR KURT, B Blok no:5 Eylül Ay Aidat', amount: 750.00 },
-        { date: '17.09.2026', description: 'LHAN KAPLAN, LHAN KAPLAN EYLÜL ADAT B BLOK D:11', amount: 750.00 },
-        { date: '17.09.2026', description: 'HÜSAMETTN ÇORTUL, Rojbin sitesi b blok kat:3 Daire:7', amount: 750.00 },
-        { date: '17.09.2026', description: 'ESAFL SERT, b8 austos aidat', amount: 750.00 }
+        { date: '17.09.2026', description: 'MELİH BAYRAM, A BLOK 14 NUMARALI DAİRE EYLÜL AYI AİDATI', amount: 750.00 },
+        { date: '17.09.2026', description: 'ZÜBEYİR KURT, B Blok no:5 Eylül Ayı Aidat', amount: 750.00 },
+        { date: '17.09.2026', description: 'İLHAN KAPLAN, İLHAN KAPLAN EYLÜL AİDAT B BLOK D:11', amount: 750.00 },
+        { date: '17.09.2026', description: 'HÜSAMETTİN ÇORTUL, Rojbin sitesi b blok kat:3 Daire:7', amount: 750.00 },
+        { date: '17.09.2026', description: 'ESAFİL SERT, b8 ağustos aidat', amount: 750.00 }
     ];
     renderBankManualTable();
-    toast('Örnek veri yüklendi. AI ile Analiz Et butonuna basn.', 'success');
+    toast('Örnek yüklendi.', 'success');
 };
 
 document.getElementById('analyzeBankBtn').onclick = async () => {
-    if (!GEMINI_API_KEY) { toast('Önce API anahtar giriniz (sa üst AI butonu).', 'danger'); return; }
-    if (BANK_TRANSACTIONS.length === 0) { toast('Önce banka dosyas yükleyin veya örnek yükleyin.', 'danger'); return; }
+    if (!GEMINI_API_KEY) { toast('Önce API anahtarı giriniz.', 'danger'); return; }
+    if (BANK_TRANSACTIONS.length === 0) { toast('Önce banka dosyası yükleyin.', 'danger'); return; }
+    showLoading('Gemini AI analiz ediyor...');
 
-    showLoading('Gemini AI banka hareketlerini analiz ediyor...');
+    const aptList = APARTMENTS.map(a => {
+        const unpaid = getUnpaidMonths(a);
+        const demDebt = getDemirbasDebt(a);
+        const unpaidText = unpaid.length > 0 ? unpaid.map(u => u.month + ' ' + u.year).join(', ') : 'yok';
+        const demText = demDebt.total > 0 ? money(demDebt.total) : 'yok';
+        return `${a.block} Daire ${a.apartment} - ${a.fullName} (Aidat: ${a.feeAmount}₺) [Ödenmemiş aylar: ${unpaidText}] [Demirbaş borcu: ${demText}]`;
+    }).join('\n');
 
-    const aptList = APARTMENTS.map(a => `${a.block} Daire ${a.apartment} - ${a.fullName || 'simsiz'} (Aidat: ${a.feeAmount})`).join('\n');
-    const txList = BANK_TRANSACTIONS.map((t, i) => `${i+1}. Tarih: ${t.date} | Tutar: ${t.amount} | Açklama: "${t.description}"`).join('\n');
+    const txList = BANK_TRANSACTIONS.map((t, i) => `${i+1}. Tarih: ${t.date} | Tutar: ${t.amount}₺ | Açıklama: "${t.description}"`).join('\n');
+    const currentDate = new Date();
+    const currentMonthTR = MONTH_NAMES[currentDate.getMonth()];
+    const currentYearTR = currentDate.getFullYear();
 
-    const prompt = `Sen bir site yönetim sistemi için veri analisti olarak çalyorsun. Aada bir sitedeki daire listesi ve banka hareketleri verilmitir.
+    const prompt = `Sen bir site yönetim sistemi için veri analisti olarak çalışıyorsun.
 
-DARE LSTES:
+DAİRE LİSTESİ:
 ${aptList}
 
-BANKA HAREKETLER:
+BANKA HAREKETLERİ:
 ${txList}
 
-GÖREV: Her banka hareketini analiz et ve hangi daireye ait olduunu, hangi ay için olduunu ve tipini (aidat / demirba / belirsiz) tespit et.
+BUGÜNÜN TARİHİ: ${currentMonthTR} ${currentYearTR}
 
-KURALLAR:
-- Açklamadaki isim, blok, daire no, ay bilgilerini çkar.
-- Türkçe ay isimlerini kullan (Ocak, ubat, ..., Aralk).
-- "aidat" kelimesi geçiyorsa tip="aidat"
-- "demirba", "kamera", "asansör", "boya" gibi tek seferlik ödeme geçiyorsa tip="demirba"
-- Emin deilsen tip="belirsiz" yaz ve confidence deerini düür.
-- Her iki tip de geçiyorsa (örn: "aidat ve demirba") tip="karma" yaz.
-- Yl belirtilmemise, banka tarihindeki yl kullan.
+GÖREV: Her banka hareketini analiz et ve hangi daireye ait olduğunu, hangi aylara ait olduğunu ve tipini tespit et.
 
-SADECE U JSON FORMATINDA CEVAP VER, baka hiçbir ey yazma:
+AY TESPİT KURALLARI (ÇOK ÖNEMLİ):
+1. Açıklamada AY adı geçiyorsa → o ayları kullan
+2. Açıklamada ay geçmiyorsa → banka ekstresindeki TARİHİN ayını kullan
+3. Birden fazla ay geçiyorsa → hepsini listele
+4. Aylar JSON array olarak, örn: ["Eylül"] veya ["Temmuz", "Ağustos"]
+
+TİP:
+- Sadece "aidat" → "aidat"
+- "kamera", "asansör", "boya", "demirbaş" → "demirbaş"
+- Her ikisi de → "karma"
+- Belirsiz → "belirsiz"
+
+SADECE ŞU JSON FORMATINDA CEVAP VER:
 [
   {
     "index": 1,
     "blok": "A Blok" veya "B Blok" veya "",
     "daire": "14" veya "",
-    "isim": "MELH BAYRAM" veya "",
-    "ay": "Eylül" veya "",
+    "isim": "MELİH BAYRAM" veya "",
+    "aylar": ["Eylül"] veya ["Temmuz", "Ağustos"],
     "yil": "2026",
-    "tip": "aidat" veya "demirba" veya "belirsiz" veya "karma",
+    "tip": "aidat" veya "demirbaş" veya "karma" veya "belirsiz",
     "confidence": 95,
-    "not": "Ksa açklama"
+    "not": "Kısa açıklama"
   }
-]
-
-Eer bir hareket hiç elemiyorsa, blok ve daire bo kalsn, confidence 0 olsun.`;
+]`;
 
     try {
-        // YEN: gemini-3.5-flash + x-goog-api-key header
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'x-goog-api-key': GEMINI_API_KEY
-            },
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
             })
         });
-
         const data = await res.json();
         if (!res.ok || !data.candidates || !data.candidates[0]) {
-            const errMsg = data.error?.message || 'AI yant vermedi';
-            toast('AI Hatas: ' + errMsg, 'danger');
-            hideLoading();
-            return;
+            toast('AI Hatası: ' + (data.error?.message || 'Yanıt yok'), 'danger');
+            hideLoading(); return;
         }
-
-        let rawText = data.candidates[0].content.parts[0].text;
-        rawText = rawText.trim();
+        let rawText = data.candidates[0].content.parts[0].text.trim();
         if (rawText.startsWith('```')) rawText = rawText.replace(/```json\n?|\n?```/g, '').trim();
-        
         let parsed;
-        try { parsed = JSON.parse(rawText); } 
-        catch (e) { 
-            console.error('AI JSON parse hatas:', rawText);
-            toast('AI yant ilenemedi.', 'danger'); 
-            hideLoading(); 
-            return; 
-        }
-
+        try { parsed = JSON.parse(rawText); } catch (e) { toast('AI yanıtı işlenemedi.', 'danger'); hideLoading(); return; }
         renderBankResults(parsed);
-        toast(`${parsed.length} hareket analiz edildi. Onaynz bekliyor.`, 'success');
-    } catch (err) {
-        toast('AI balant hatas: ' + err.message, 'danger');
-    } finally {
-        hideLoading();
-    }
+        toast(`${parsed.length} hareket analiz edildi.`, 'success');
+    } catch (err) { toast('AI bağlantı hatası: ' + err.message, 'danger'); } 
+    finally { hideLoading(); }
 };
 
 function renderBankResults(results) {
     const card = document.getElementById('bankResultCard');
     const body = document.getElementById('bankResultBody');
     const html = [];
-
     results.forEach((r, i) => {
         const tx = BANK_TRANSACTIONS[r.index - 1] || {};
         const confColor = r.confidence >= 80 ? 'success' : r.confidence >= 50 ? 'warning' : 'danger';
+        const aylarText = Array.isArray(r.aylar) ? r.aylar.join(', ') : '?';
+        let preview = '—';
+        if (r.blok && r.daire) {
+            const apt = APARTMENTS.find(a => a.block === r.blok && String(a.apartment) === String(r.daire));
+            if (apt) {
+                const unpaid = getUnpaidMonths(apt);
+                const demDebt = getDemirbasDebt(apt);
+                const lines = [];
+                if (unpaid.length > 0) lines.push(`🎯 ${unpaid.length} ay aidat (${money(unpaid.reduce((s,u)=>s+u.amount,0))})`);
+                if (demDebt.total > 0) lines.push(`🏗️ Demirbaş (${money(demDebt.total)})`);
+                if (lines.length === 0) lines.push('✅ Borç yok');
+                preview = lines.join('<br>');
+            }
+        }
         html.push(`
             <tr>
                 <td><input type="checkbox" class="bank-row-check" data-index="${i}" style="width:auto;" ${r.confidence >= 70 && r.blok && r.daire ? 'checked' : ''}></td>
                 <td>${tx.date || '-'}</td>
-                <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis;" title="${tx.description || ''}">${(tx.description || '').substring(0, 60)}...</td>
-                <td>${r.blok || ''}</td>
-                <td>${r.daire || ''}</td>
-                <td>${r.ay || ''} ${r.yil || ''}</td>
+                <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis;" title="${tx.description || ''}">${(tx.description || '').substring(0, 50)}...</td>
+                <td>${r.blok || '❓'}</td>
+                <td>${r.daire || '❓'}</td>
+                <td><b>${aylarText}</b></td>
                 <td>${money(tx.amount || 0)}</td>
-                <td><span class="badge ${r.tip === 'aidat' ? 'success' : r.tip === 'demirba' ? 'warning' : 'neutral'}">${r.tip}</span></td>
+                <td><span class="badge ${r.tip === 'aidat' ? 'success' : r.tip === 'demirbaş' ? 'warning' : r.tip === 'karma' ? 'neutral' : 'danger'}">${r.tip}</span></td>
+                <td style="font-size:0.75rem;">${preview}</td>
                 <td><span class="badge ${confColor}">${r.confidence}%</span></td>
             </tr>
         `);
     });
-
     body.innerHTML = html.join('');
     card.classList.remove('hidden');
     card.dataset.results = JSON.stringify(results);
-
     document.getElementById('selectAllBankRows').onchange = function() {
         body.querySelectorAll('.bank-row-check').forEach(cb => cb.checked = this.checked);
     };
 }
 
-document.getElementById('cancelBankResultsBtn').onclick = () => {
-    document.getElementById('bankResultCard').classList.add('hidden');
-};
+document.getElementById('cancelBankResultsBtn').onclick = () => document.getElementById('bankResultCard').classList.add('hidden');
 
 document.getElementById('approveBankResultsBtn').onclick = async () => {
     const card = document.getElementById('bankResultCard');
     const results = JSON.parse(card.dataset.results || '[]');
     const checks = document.querySelectorAll('.bank-row-check');
-
     const approved = [];
-    checks.forEach(cb => {
-        if (cb.checked) approved.push(results[parseInt(cb.dataset.index)]);
-    });
-
-    if (approved.length === 0) { toast('Hiçbir satr seçilmedi.', 'danger'); return; }
-
-    showLoading(`${approved.length} kayt ileniyor...`);
-
+    checks.forEach(cb => { if (cb.checked) approved.push(results[parseInt(cb.dataset.index)]); });
+    if (approved.length === 0) { toast('Hiçbir satır seçilmedi.', 'danger'); return; }
+    showLoading(`${approved.length} kayıt işleniyor...`);
     let successCount = 0, failCount = 0;
-
     for (const r of approved) {
         try {
             const tx = BANK_TRANSACTIONS[r.index - 1] || {};
-            const targetApt = APARTMENTS.find(a => 
-                (r.blok ? a.block === r.blok : true) && 
-                String(a.apartment) === String(r.daire)
-            );
-
+            const targetApt = APARTMENTS.find(a => (r.blok ? a.block === r.blok : true) && String(a.apartment) === String(r.daire));
             if (!targetApt) { failCount++; continue; }
 
             if (r.tip === 'aidat' || r.tip === 'karma') {
-                if (r.ay && r.yil) {
-                    const key = r.yil + '_' + r.ay;
-                    const duesMap = targetApt.dues || {};
-                    const existing = duesMap[key];
-                    if (!existing || existing.status !== 'Ödendi') {
+                const aylarArr = Array.isArray(r.aylar) ? r.aylar : [];
+                const duesMap = targetApt.dues || {};
+                for (const ay of aylarArr) {
+                    const key = (r.yil || getCurrentYearStr()) + '_' + ay;
+                    if (!duesMap[key] || duesMap[key].status !== 'Ödendi') {
                         duesMap[key] = { status: 'Ödendi', date: tx.date + ' (AI)' };
-                        try { await updateDoc(doc(db, "daireler", targetApt.id), { dues: duesMap }); } 
-                        catch(e) { await updateDoc(doc(db, "apartments", targetApt.id), { dues: duesMap }); }
-                        successCount++;
                     }
                 }
+                try { await updateDoc(doc(db, "daireler", targetApt.id), { dues: duesMap }); } 
+                catch(e) { await updateDoc(doc(db, "apartments", targetApt.id), { dues: duesMap }); }
+                successCount++;
             }
 
-            if (r.tip === 'demirba') {
+            if (r.tip === 'demirbaş' || r.tip === 'karma') {
+                const demirbasDebt = getDemirbasDebt(targetApt);
+                if (demirbasDebt.items.length > 0) {
+                    const payments = targetApt.demirbasPayments || {};
+                    demirbasDebt.items.forEach(it => {
+                        payments[it.id + '_' + targetApt.id] = { date: tx.date, amount: it.amount };
+                    });
+                    try { await updateDoc(doc(db, "daireler", targetApt.id), { demirbasPayments: payments }); } 
+                    catch(e) { await updateDoc(doc(db, "apartments", targetApt.id), { demirbasPayments: payments }); }
+                }
                 await addDoc(collection(db, "demirbaslar"), {
-                    aciklama: tx.description || 'Demirba ödemesi',
+                    aciklama: tx.description || 'Demirbaş tahsilatı',
                     tutar: tx.amount || 0,
                     tarih: tx.date || new Date().toISOString().slice(0,10),
-                    blok: r.blok || '',
-                    daire: r.daire || '',
-                    odeyen: r.isim || '',
+                    blok: r.blok || '', daire: r.daire || '', odeyen: r.isim || '',
                     createdAt: new Date().toISOString()
                 });
                 successCount++;
             }
-        } catch (err) {
-            console.error('leme hatas:', err);
-            failCount++;
-        }
+        } catch (err) { console.error(err); failCount++; }
     }
-
     hideLoading();
-    toast(`${successCount} kayt baaryla ilendi${failCount > 0 ? `, ${failCount} hata` : ''}.`, successCount > 0 ? 'success' : 'danger');
+    toast(`${successCount} kayıt işlendi${failCount > 0 ? `, ${failCount} hata` : ''}.`, successCount > 0 ? 'success' : 'danger');
     card.classList.add('hidden');
 };
 
+addMatterRow();
+updateBulkTotal();
 checkSession();
 </script>
 </body>
