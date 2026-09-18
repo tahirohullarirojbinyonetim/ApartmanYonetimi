@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr" class="notranslate">
 <head>
@@ -368,7 +367,6 @@
   </section>
 
   <section id="adminView" class="hidden">
-    <!-- MOBİL UYUMLU AÇILIR LİSTE SEKMELERİ (Aidat BAŞTA, Sakinler EN SONDA) -->
     <div class="mobile-tabs-container">
       <label for="adminTabSelect"><i class="fa-solid fa-bars-staggered"></i> Menü:</label>
       <select id="adminTabSelect" class="mobile-tab-select" style="flex:1;">
@@ -384,7 +382,7 @@
       </select>
     </div>
 
-    <!-- 1. AİDAT & BORÇ (BAŞLANGIÇ SEKMESİ) -->
+    <!-- 1. AİDAT & BORÇ -->
     <div id="tabDues" class="tab-panel active">
       <div class="card" style="border-left:3px solid #059669;">
         <h2><i class="fa-solid fa-money-bill-wave" style="color:#059669;"></i> Toplu Aidat Güncelleme</h2>
@@ -596,7 +594,7 @@
       </div>
     </div>
 
-    <!-- 9. SAKİNLER LİSTESİ (EN SONDA) -->
+    <!-- 9. SAKİNLER LİSTESİ -->
     <div id="tabOverview" class="tab-panel">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
@@ -857,7 +855,7 @@ function initRealtimeListeners() {
         });
         renderPublicDashboard();
         if (session.role === 'admin') renderAnnouncementsAdmin();
-    });
+    }, (err) => { console.warn("Announcement listener:", err.message); });
     onSnapshot(query(collection(db, "requests"), orderBy("createdAt", "desc")), (snap) => {
         REQUESTS = [];
         snap.forEach(doc => {
@@ -868,7 +866,7 @@ function initRealtimeListeners() {
         checkNewRequests();
         if (session.role === 'admin') renderRequestsAdmin();
         if (session.role === 'resident') renderResidentRepliesList();
-    });
+    }, (err) => { console.warn("Request listener:", err.message); });
 }
 
 function initBulkDebtsListener() {
@@ -1231,7 +1229,7 @@ function renderDuesTable() {
             const waBtn = hasAnyDebt ? '<button class="whatsapp-btn wa-btn" data-id="' + a.id + '"><i class="fa-brands fa-whatsapp"></i></button>' : '';
             const quickPayBtn = '<button class="pay-btn open-pay-modal-btn" data-id="' + a.id + '"><i class="fa-solid fa-credit-card"></i> Ödeme Al</button>';
 
-            html += `<tr class="clickable-row" onclick="toggleDuesDetails(${index})"><td style="text-align:center;"><i class="fa-solid fa-chevron-right" id="chevron-${index}"></i></td><td>${getBlockBadge(a.block)}</td><td><b>${a.apartment}</b></td><td>${a.fullName || '-'}</td><td>${aidatPill}</td><td>${demirbasPill}</td><td style="display:flex;gap:4px;align-items:center;"><span style="font-weight:800;color:${netDebt>0?'var(--danger)':'var(--success)'};margin-right:4px;">${money(netDebt)}</span> ${quickPayBtn} ${waBtn}</td></tr>`;
+            html += `<tr class="clickable-row" onclick="toggleDuesDetails(${index})"><td style="text-align:center;"><i class="fa-solid fa-chevron-right" id="chevron-${index}" style="${window.openAccordionIndex === index ? 'transform:rotate(90deg);' : ''}"></i></td><td>${getBlockBadge(a.block)}</td><td><b>${a.apartment}</b></td><td>${a.fullName || '-'}</td><td>${aidatPill}</td><td>${demirbasPill}</td><td style="display:flex;gap:4px;align-items:center;"><span style="font-weight:800;color:${netDebt>0?'var(--danger)':'var(--success)'};margin-right:2px;">${money(netDebt)}</span> ${quickPayBtn} ${waBtn}</td></tr>`;
             html += `<tr class="details-row" id="dues-details-${index}" style="${window.openAccordionIndex === index ? 'display:table-row!important;' : ''}"><td colspan="7" style="padding:0;"><div style="padding:8px;background:#f8fafc;">${renderDuesDetailsContent(a, activeYear, index)}</div></td></tr>`;
         });
     }
@@ -1305,13 +1303,7 @@ window.toggleDuesDetails = function(index) {
     } else {
         window.openAccordionIndex = index;
     }
-    var row = document.getElementById('dues-details-' + index);
-    var chevron = document.getElementById('chevron-' + index);
-    if(row) {
-        const isHidden = window.getComputedStyle(row).display === 'none';
-        row.style.display = isHidden ? 'table-row' : 'none';
-        if (chevron) chevron.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
-    }
+    renderDuesTable();
 };
 
 document.getElementById('dueBlockFilter').onchange = renderDuesTable;
@@ -1342,14 +1334,12 @@ function updatePayModalPreview() {
     let rem = inputAmt;
     let descLines = [];
     
-    // Önce aidatları kapat
     for(const u of unpaid) {
         if(rem <= 0) break;
         const take = Math.min(rem, u.amount);
         rem -= take;
         descLines.push(`• ${u.month} ${u.year} aidatından <b>${money(take)}</b> ödenecek.`);
     }
-    // Artan para varsa demirbastan düş
     if(rem > 0 && dem.items.length > 0) {
         for(const it of dem.items) {
             if(rem <= 0) break;
@@ -1359,7 +1349,7 @@ function updatePayModalPreview() {
         }
     }
     if(rem > 0) {
-        descLines.push(`⚠️ Girilen tutar borçtan fazla! Artan <b>${money(rem)}</b> avans/fazla ödeme olarak kalacak.`);
+        descLines.push(`⚠️ Girilen tutar borçtan fazla! Artan <b>${money(rem)}</b> avans olarak kalacak.`);
     }
     if(descLines.length === 0) {
         descLines.push('ℹ️ Bu dairenin kaplanacak borcu bulunmuyor.');
@@ -1386,7 +1376,6 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
         const unpaid = getUnpaidMonths(apt);
         const duesMap = apt.dues || {};
         
-        // 1. Aidatları sırasıyla öde
         for(const u of unpaid) {
             if(rem <= 0) break;
             const key = u.year + '_' + u.month;
@@ -1406,7 +1395,6 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
             }
         }
 
-        // 2. Artan para varsa demirbaş borçlarından düş
         const dem = getDemirbasDebt(apt);
         const payments = apt.demirbasPayments || {};
         if(rem > 0 && dem.items.length > 0) {
@@ -1433,7 +1421,7 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
         try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap, demirbasPayments: payments }); }
         catch(e) { await updateDoc(doc(db, "apartments", apt.id), { dues: duesMap, demirbasPayments: payments }); }
 
-        toast('Ödeme akıllıca dağıtıldı ve kaydedildi.', 'success');
+        toast('Ödeme başarıyla işlendi.', 'success');
         document.getElementById('payModal').classList.add('hidden');
     } catch(err) { toast('Hata: ' + err.message, 'danger'); }
     finally { hideLoading(); }
@@ -2213,24 +2201,54 @@ document.getElementById('approveBankResultsBtn').onclick = async () => {
             const aylarArr = r.aylar || ['Ocak'];
             const txAmount = Number(tx.amount || 0);
 
-            const duesMap = targetApt.dues || {};
             let rem = txAmount;
-            for (const ay of aylarArr) {
-                if (rem <= 0) break;
-                const key = itemYear + '_' + ay;
-                const st = duesMap[key] || { status: 'Ödenmedi', paidAmount: 0 };
-                const fullFee = Number(targetApt.feeAmount || 500);
-                const already = Number(st.paidAmount || 0);
-                const needed = Math.max(0, fullFee - already);
-                if (needed > 0) {
-                    const apply = Math.min(rem, needed);
-                    rem -= apply;
-                    const totalPaid = already + apply;
-                    duesMap[key] = { status: totalPaid >= fullFee ? 'Ödendi' : 'Ödenmedi', date: tx.date, paidAmount: totalPaid };
+            const unpaid = getUnpaidMonths(targetApt);
+            const duesMap = targetApt.dues || {};
+            
+            for(const u of unpaid) {
+                if(rem <= 0) break;
+                const key = u.year + '_' + u.month;
+                const existingState = duesMap[key] || { status: 'Ödenmedi', paidAmount: 0 };
+                const already = Number(existingState.paidAmount || 0);
+                const needed = Math.max(0, u.fullAmount - already);
+                const take = Math.min(rem, needed);
+                
+                if(take > 0) {
+                    rem -= take;
+                    const totalPaid = already + take;
+                    duesMap[key] = {
+                        status: totalPaid >= u.fullAmount ? 'Ödendi' : 'Ödenmedi',
+                        date: totalPaid >= u.fullAmount ? tx.date : '-',
+                        paidAmount: totalPaid
+                    };
                 }
             }
-            try { await updateDoc(doc(db, "daireler", targetApt.id), { dues: duesMap }); } 
-            catch(e) { await updateDoc(doc(db, "apartments", targetApt.id), { dues: duesMap }); }
+
+            const dem = getDemirbasDebt(targetApt);
+            const payments = targetApt.demirbasPayments || {};
+            if(rem > 0 && dem.items.length > 0) {
+                for(const it of dem.items) {
+                    if(rem <= 0) break;
+                    const paidKey = it.id + '_' + targetApt.id;
+                    const existingPay = payments[paidKey] || { amount: 0, status: 'Ödenmedi' };
+                    const alreadyPaid = Number(existingPay.amount || 0);
+                    const needed = Math.max(0, it.fullAmount - alreadyPaid);
+                    const take = Math.min(rem, needed);
+
+                    if(take > 0) {
+                        rem -= take;
+                        const totalPaid = alreadyPaid + take;
+                        payments[paidKey] = {
+                            date: tx.date,
+                            amount: totalPaid,
+                            status: totalPaid >= it.fullAmount ? 'Ödendi' : 'Ödenmedi'
+                        };
+                    }
+                }
+            }
+
+            try { await updateDoc(doc(db, "daireler", targetApt.id), { dues: duesMap, demirbasPayments: payments }); } 
+            catch(e) { await updateDoc(doc(db, "apartments", targetApt.id), { dues: duesMap, demirbasPayments: payments }); }
         } catch (err) { console.error(err); }
     }
     hideLoading();
