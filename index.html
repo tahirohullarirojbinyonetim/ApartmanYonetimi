@@ -413,7 +413,7 @@
         <option value="tabRequests">✉️ İstekler <span id="reqBadgeDot" style="color:red;"></span></option>
         <option value="tabBank">🤖 Banka & AI Analiz</option>
         <option value="tabExcel">📊 Excel Raporları</option>
-        <option value="tabOverview">👥 Bina Sakinleri Listesi</option>
+        <option value="tabOverview">👥 Sakinler Listesi</option>
       </select>
     </div>
 
@@ -619,7 +619,7 @@
     <div id="tabOverview" class="tab-panel">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
-          <h2 style="margin:0;"><i class="fa-solid fa-table-list"></i> Bina Sakinleri Listesi</h2>
+          <h2 style="margin:0;"><i class="fa-solid fa-table-list"></i> Sakinler Listesi</h2>
           <button class="btn btn-primary btn-sm" id="openImportExcelBtn"><i class="fa-solid fa-file-import"></i> Excel'den Aktar</button>
         </div>
         <div class="table-wrap">
@@ -1074,7 +1074,7 @@ function enterResidentView() {
 
 async function checkSession() { 
     showLoading('Sistem Yükleniyor...'); 
-    setTimeout(() => { hideLoading(); }, 1000);
+    setTimeout(() => { hideLoading(); }, 1200);
     populateYearSelects();
     populateMonthSelects();
     populateApartmentNoSelects();
@@ -1271,8 +1271,6 @@ function renderDuesTable() {
     filtered.forEach((a, index) => {
         const aidatState = getDueState(a, activeYear, activeMonth);
         const unpaidAidat = getSafAidatDebt(a);
-        const demDebt = getDemirbasDebt(a).total;
-        const totalNet = unpaidAidat + demDebt;
         
         let aidatPill = '<span class="status-pill red">Ödenmedi</span>';
         if (aidatState.status === 'Ödendi') aidatPill = '<span class="status-pill green">Ödendi</span>';
@@ -1295,9 +1293,10 @@ function renderDuesTable() {
                 </div>
             </div>
             <div class="mobile-card-footer">
-                <span style="font-weight:800;font-size:10px;color:var(--danger);margin-right:2px;">Toplam: ${money(totalNet)}</span>
+                <span style="font-weight:800;font-size:10px;color:var(--danger);margin-right:2px;">Toplam: ${money(unpaidAidat)}</span>
                 <div style="display:flex;gap:4px;align-items:center;">
                     ${quickPayBtn}
+                    <span style="font-weight:800;font-size:10px;color:var(--primary);margin-left:4px;margin-right:4px;">${money(unpaidAidat)}</span>
                     ${waBtn}
                     <button class="btn btn-outline btn-sm" onclick="toggleDuesAccordion(${index})"><i class="fa-solid fa-chevron-down" id="chevron-${index}" style="${openAccordionIndex === index ? 'transform:rotate(180deg);' : ''}"></i> Detay</button>
                 </div>
@@ -1319,9 +1318,6 @@ function renderDuesTable() {
 }
 
 function renderDuesDetailsContent(apt, activeYear, index) {
-    const unpaidMonths = getUnpaidMonths(apt);
-    const aidatDebtTotal = unpaidMonths.reduce((s, u) => s + u.amount, 0);
-
     let html = '<div style="margin-bottom:5px;background:#fff;padding:5px;border-radius:4px;border:1px solid var(--border);">';
     html += '<div style="font-weight:700;color:var(--primary);font-size:9.5px;margin-bottom:4px;"><i class="fa-solid fa-calendar-days" style="color:var(--accent);"></i> ' + activeYear + ' AİDAT MATRİSİ</div>';
     html += '<div class="month-grid">';
@@ -1337,7 +1333,7 @@ function renderDuesDetailsContent(apt, activeYear, index) {
         let displayLabel = mName;
         if (state.paidAmount > 0 && state.paidAmount < Number(apt.feeAmount || 500)) {
             const rem = Math.max(0, Number(apt.feeAmount || 500) - Number(state.paidAmount));
-            displayLabel += ` (Kalan: ${money(rem)})`;
+            displayLabel += ` (${money(state.paidAmount)})`;
         }
 
         html += `<div class="month-cell ${cls}">
@@ -1360,18 +1356,37 @@ function renderDuesDetailsContent(apt, activeYear, index) {
     if (paymentsLog.length === 0) {
         historyHtml += '<div style="color:var(--secondary);font-style:italic;">Kayıtlı hareket bulunmuyor.</div>';
     } else {
-        historyHtml += '<ul style="margin:0;padding-left:12px;">';
-        paymentsLog.slice(-5).reverse().forEach(log => {
-            historyHtml += `<li><b>${log.date}:</b> ${money(log.amount)} tahsil edildi (${log.type})</li>`;
+        historyHtml += '<ul style="margin:0;padding-left:12px;list-style:none;">';
+        paymentsLog.forEach((log, logIdx) => {
+            historyHtml += `<li style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #e2e8f0;"><span><b>${log.date}:</b> ${money(log.amount)} (${log.type})</span> <button class="btn btn-danger btn-sm" style="padding:1px 4px;font-size:8px;" onclick="window.deletePaymentLog('${apt.id}', ${logIdx}, ${index})"><i class="fa-solid fa-trash"></i></button></li>`;
         });
         historyHtml += '</ul>';
     }
     historyHtml += '</div>';
 
     html += historyHtml;
-    html += '<div style="margin-top:5px;padding:5px 6px;background:#0f172a;color:#fff;border-radius:4px;display:flex;justify-content:space-between;align-items:center;font-size:9.5px;"><span style="font-weight:700;">TOPLAM SAF AİDAT BORCU:</span><span style="font-size:.85rem;font-weight:800;color:' + (aidatDebtTotal > 0 ? '#fca5a5' : '#86efac') + ';">' + money(aidatDebtTotal) + '</span></div>';
+    const unpaidAidatTotal = getSafAidatDebt(apt);
+    html += '<div style="margin-top:5px;padding:5px 6px;background:#0f172a;color:#fff;border-radius:4px;display:flex;justify-content:space-between;align-items:center;font-size:9.5px;"><span style="font-weight:700;">TOPLAM SAF AİDAT BORCU:</span><span style="font-size:.85rem;font-weight:800;color:' + (unpaidAidatTotal > 0 ? '#fca5a5' : '#86efac') + ';">' + money(unpaidAidatTotal) + '</span></div>';
     return html;
 }
+
+window.deletePaymentLog = async function(aptId, logIdx, index) {
+    openAccordionIndex = index;
+    const apt = APARTMENTS.find(a => a.id === aptId);
+    if (!apt) return;
+    askConfirm('Bu ödeme hareketini kayıttan silmek istediğinize emin misiniz? (Not: Sakinin daha önce ödediği bakiyeler kasada kalmaya devam edecektir, sadece bu log satırı temizlenir)', async () => {
+        showLoading('Siliniyor...');
+        try {
+            const logs = [...(apt.paymentsLog || [])];
+            logs.splice(logIdx, 1);
+            
+            try { await updateDoc(doc(db, "daireler", apt.id), { paymentsLog: logs }); }
+            catch(e) { await updateDoc(doc(db, "apartments", apt.id), { paymentsLog: logs }); }
+
+            toast('Ödeme hareketi temizlendi.', 'success');
+        } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
+    });
+};
 
 window.setMonthState = async function(aptId, year, month, newStatus, index) {
     openAccordionIndex = index;
