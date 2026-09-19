@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr" class="notranslate">
 <head>
@@ -105,6 +104,7 @@
   .status-pill{display:inline-flex;align-items:center;gap:2px;padding:2px 4px;border-radius:3px;font-size:9.5px;font-weight:700;white-space:nowrap}
   .status-pill.green{background:#dcfce7;color:#166534;border:1px solid #86efac}
   .status-pill.red{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+  .status-pill.warning{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
   .matter-row{display:flex;gap:4px;align-items:center;padding:4px;background:#f8fafc;border-radius:4px;margin-bottom:4px;border:1px solid var(--border)}
   .matter-row input{flex:1;padding:4px 6px}
   .matter-row .matter-amount{flex:0 0 80px}
@@ -117,6 +117,7 @@
   .month-cell{display:flex;flex-direction:column;gap:2px;padding:4px;border-radius:4px;font-size:9.5px;font-weight:700;border:1px solid transparent}
   .month-cell.paid{background:#dcfce7;color:#166534;border-color:#86efac}
   .month-cell.unpaid{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+  .month-cell.warning{background:#fef3c7;color:#92400e;border-color:#fde68a}
   .month-cell.frozen-tenant{background:#fef3c7;color:#92400e;border-color:#fde68a}
   .month-cell.frozen-host{background:#f3e8ff;color:#6b21a8;border-color:#e9d5ff}
   .month-cell select{width:100%;padding:2px;font-size:8.5px;border-radius:3px;border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1e293b;font-weight:700}
@@ -155,7 +156,7 @@
     <div class="field">
       <label>Tahsil Edilen Aidat Tutarı (₺)</label>
       <input type="number" id="payModalTotalAmount" placeholder="0" style="font-size:.95rem;font-weight:700;color:var(--success);">
-      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Girilen tutar öncelikle saf aidat borçlarından düşülür; artarsa kalan tutar varsa aktif demirbaş borcundan düşülür.</span>
+      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Girilen tutar öncelikle ödenmemiş/eksik aidat borçlarından düşülür.</span>
     </div>
 
     <div id="payModalDistributionPreview" class="info-box" style="margin-bottom:6px;"></div>
@@ -416,7 +417,7 @@
       </select>
     </div>
 
-    <!-- 1. AİDAT & BORÇ (SAF AİDAT) -->
+    <!-- 1. AİDAT & BORÇ -->
     <div id="tabDues" class="tab-panel active">
       <div class="card" style="border-left:3px solid #059669;">
         <h2><i class="fa-solid fa-money-bill-wave" style="color:#059669;"></i> Toplu Aidat Güncelleme</h2>
@@ -442,7 +443,7 @@
       </div>
     </div>
 
-    <!-- 2. DEMİRBAŞ İŞLEMLERİ (AYRI SEKME) -->
+    <!-- 2. DEMİRBAŞ İŞLEMLERİ -->
     <div id="tabDemirbas" class="tab-panel">
       <div class="card">
         <h2><i class="fa-solid fa-file-invoice-dollar"></i> Toplu Demirbaş Borçlandırma</h2>
@@ -609,12 +610,12 @@
     <div id="tabExcel" class="tab-panel">
       <div class="card">
         <h2><i class="fa-solid fa-file-excel" style="color:#059669;"></i> Detaylı Excel Raporları</h2>
-        <p style="color:var(--secondary);font-size:9.5px;margin-bottom:8px;">Tüm site verilerini; aylık aidat matrisi, daire bazlı demirbaş kalemleri (madde madde ödenen tutarlar ve kalan borçlar), giderler ve mülkler dahil çok sayfalı Excel olarak indirebilirsiniz.</p>
+        <p style="color:var(--secondary);font-size:9.5px;margin-bottom:8px;">Tüm site verilerini; aylık aidat matrisi, sütun bazlı demirbaş ödemeleri, giderler ve mülkler dahil çok sayfalı Excel olarak indirebilirsiniz.</p>
         <button class="btn btn-success" id="exportExcelBtn" style="font-size:10.5px;padding:8px 12px;"><i class="fa-solid fa-download"></i> Tüm Sistemi Detaylı Excel Olarak İndir (.xlsx)</button>
       </div>
     </div>
 
-    <!-- 9. SAKİNLER LİSTESİ (EN SONDA) -->
+    <!-- 9. SAKİNLER LİSTESİ -->
     <div id="tabOverview" class="tab-panel">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
@@ -652,7 +653,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const ADMIN_PASSWORD = "0000";
+const ADMIN_PASSWORD = "2026+-";
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
 const DEFAULT_WA_TEMPLATE = `Sayın {isim},
@@ -976,7 +977,8 @@ function processApartments(snap) {
             dues: d.dues || {}, 
             demirbasPayments: d.demirbasPayments || {},
             frozenTenantDebts: d.frozenTenantDebts || [],
-            frozenHostDebts: d.frozenHostDebts || []
+            frozenHostDebts: d.frozenHostDebts || [],
+            paymentsLog: d.paymentsLog || []
         });
     });
 
@@ -1072,7 +1074,7 @@ function enterResidentView() {
 
 async function checkSession() { 
     showLoading('Sistem Yükleniyor...'); 
-    setTimeout(() => { hideLoading(); }, 1200);
+    setTimeout(() => { hideLoading(); }, 1000);
     populateYearSelects();
     populateMonthSelects();
     populateApartmentNoSelects();
@@ -1269,6 +1271,8 @@ function renderDuesTable() {
     filtered.forEach((a, index) => {
         const aidatState = getDueState(a, activeYear, activeMonth);
         const unpaidAidat = getSafAidatDebt(a);
+        const demDebt = getDemirbasDebt(a).total;
+        const totalNet = unpaidAidat + demDebt;
         
         let aidatPill = '<span class="status-pill red">Ödenmedi</span>';
         if (aidatState.status === 'Ödendi') aidatPill = '<span class="status-pill green">Ödendi</span>';
@@ -1291,10 +1295,9 @@ function renderDuesTable() {
                 </div>
             </div>
             <div class="mobile-card-footer">
-                <span style="font-weight:800;font-size:10px;color:var(--primary);">Saf Aidat: ${money(unpaidAidat)}</span>
+                <span style="font-weight:800;font-size:10px;color:var(--danger);margin-right:2px;">Toplam: ${money(totalNet)}</span>
                 <div style="display:flex;gap:4px;align-items:center;">
                     ${quickPayBtn}
-                    <span style="font-weight:800;font-size:10px;color:var(--danger);margin-left:2px;">Toplam: ${money(unpaidAidat)}</span>
                     ${waBtn}
                     <button class="btn btn-outline btn-sm" onclick="toggleDuesAccordion(${index})"><i class="fa-solid fa-chevron-down" id="chevron-${index}" style="${openAccordionIndex === index ? 'transform:rotate(180deg);' : ''}"></i> Detay</button>
                 </div>
@@ -1327,15 +1330,22 @@ function renderDuesDetailsContent(apt, activeYear, index) {
         const st = state.status || 'Ödenmedi';
         let cls = 'unpaid';
         if (st === 'Ödendi') cls = 'paid';
+        else if (state.paidAmount > 0) cls = 'warning';
         else if (st === 'Eski Kiracı Borcu') cls = 'frozen-tenant';
         else if (st === 'Eski Ev Sahibi Borcu') cls = 'frozen-host';
 
+        let displayLabel = mName;
+        if (state.paidAmount > 0 && state.paidAmount < Number(apt.feeAmount || 500)) {
+            const rem = Math.max(0, Number(apt.feeAmount || 500) - Number(state.paidAmount));
+            displayLabel += ` (Kalan: ${money(rem)})`;
+        }
+
         html += `<div class="month-cell ${cls}">
             <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span>${mName}</span>
+                <span>${displayLabel}</span>
             </div>
             <select onchange="window.setMonthState('${apt.id}', '${activeYear}', '${mName}', this.value, ${index})" onclick="event.stopPropagation();">
-                <option value="Ödenmedi" ${st === 'Ödenmedi' ? 'selected' : ''}>🔴 Ödenmedi</option>
+                <option value="Ödenmedi" ${st === 'Ödenmedi' && !state.paidAmount ? 'selected' : ''}>🔴 Ödenmedi</option>
                 <option value="Ödendi" ${st === 'Ödendi' ? 'selected' : ''}>🟢 Ödendi</option>
                 <option value="Eski Ev Sahibi Borcu" ${st === 'Eski Ev Sahibi Borcu' ? 'selected' : ''}>🟣 Eski Malik</option>
                 <option value="Eski Kiracı Borcu" ${st === 'Eski Kiracı Borcu' ? 'selected' : ''}>🟡 Eski Kiracı</option>
@@ -1343,7 +1353,23 @@ function renderDuesDetailsContent(apt, activeYear, index) {
         </div>`;
     });
     html += '</div></div>';
-    html += '<div style="padding:5px 6px;background:#0f172a;color:#fff;border-radius:4px;display:flex;justify-content:space-between;align-items:center;font-size:9.5px;"><span style="font-weight:700;">TOPLAM SAF AİDAT BORCU:</span><span style="font-size:.85rem;font-weight:800;color:' + (aidatDebtTotal > 0 ? '#fca5a5' : '#86efac') + ';">' + money(aidatDebtTotal) + '</span></div>';
+
+    let historyHtml = '<div style="margin-top:5px;background:#f8fafc;padding:5px;border-radius:4px;border:1px solid var(--border);font-size:9.5px;">';
+    historyHtml += '<div style="font-weight:700;color:var(--primary);margin-bottom:3px;"><i class="fa-solid fa-clock-rotate-left"></i> Kısmi Ödeme Hareketleri</div>';
+    const paymentsLog = apt.paymentsLog || [];
+    if (paymentsLog.length === 0) {
+        historyHtml += '<div style="color:var(--secondary);font-style:italic;">Kayıtlı hareket bulunmuyor.</div>';
+    } else {
+        historyHtml += '<ul style="margin:0;padding-left:12px;">';
+        paymentsLog.slice(-5).reverse().forEach(log => {
+            historyHtml += `<li><b>${log.date}:</b> ${money(log.amount)} tahsil edildi (${log.type})</li>`;
+        });
+        historyHtml += '</ul>';
+    }
+    historyHtml += '</div>';
+
+    html += historyHtml;
+    html += '<div style="margin-top:5px;padding:5px 6px;background:#0f172a;color:#fff;border-radius:4px;display:flex;justify-content:space-between;align-items:center;font-size:9.5px;"><span style="font-weight:700;">TOPLAM SAF AİDAT BORCU:</span><span style="font-size:.85rem;font-weight:800;color:' + (aidatDebtTotal > 0 ? '#fca5a5' : '#86efac') + ';">' + money(aidatDebtTotal) + '</span></div>';
     return html;
 }
 
@@ -1354,11 +1380,15 @@ window.setMonthState = async function(aptId, year, month, newStatus, index) {
     const key = year + '_' + month;
     const duesMap = apt.dues || {};
     let dateStr = '-';
-    let paidAmt = 0;
+    let paidAmt = duesMap[key] ? duesMap[key].paidAmount : 0;
+    
     if (newStatus === 'Ödendi') {
         dateStr = new Date().toLocaleDateString('tr-TR');
         paidAmt = Number(apt.feeAmount || 500);
+    } else if (newStatus === 'Ödenmedi') {
+        paidAmt = 0;
     }
+
     duesMap[key] = { status: newStatus, date: dateStr, paidAmount: paidAmt };
     try {
         try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap }); }
@@ -1451,20 +1481,11 @@ function updatePayModalPreview() {
     }
 
     if(rem > 0) {
-        const dem = getDemirbasDebt(apt);
-        if(dem.total > 0) {
-            const demTake = Math.min(rem, dem.total);
-            rem -= demTake;
-            descLines.push(`• Artan tutardan aktif demirbaş borcuna <b>${money(demTake)}</b> aktarılacak.`);
-        }
-    }
-
-    if(rem > 0) {
         descLines.push(`⚠️ Artan bakiye avans olarak <b>${money(rem)}</b> kaydedilecek.`);
     }
 
     if(descLines.length === 0) {
-        descLines.push('ℹ️ Saf aidat ve demirbaş borcu bulunmuyor.');
+        descLines.push('ℹ️ Saf aidat borcu bulunmuyor.');
     }
     
     document.getElementById('payModalDistributionPreview').innerHTML = `<b>Ödeme Dağılım Önizlemesi:</b><br>` + descLines.join('<br>');
@@ -1501,36 +1522,17 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
                 const totalPaid = already + take;
                 duesMap[key] = {
                     status: totalPaid >= u.fullAmount ? 'Ödendi' : 'Ödenmedi',
-                    date: totalPaid >= u.fullAmount ? new Date().toLocaleDateString('tr-TR') : '-',
+                    date: new Date().toLocaleDateString('tr-TR'),
                     paidAmount: totalPaid
                 };
             }
         }
 
-        let payments = apt.demirbasPayments || {};
-        if (rem > 0) {
-            const dem = getDemirbasDebt(apt);
-            for(const it of dem.items) {
-                if(rem <= 0) break;
-                const paidKey = it.id + '_' + apt.id;
-                const existingPay = payments[paidKey] || { amount: 0, status: 'Ödenmedi' };
-                const alreadyPaid = Number(existingPay.amount || 0);
-                const needed = Math.max(0, it.fullAmount - alreadyPaid);
-                const take = Math.min(rem, needed);
-                if(take > 0) {
-                    rem -= take;
-                    const totalPaid = alreadyPaid + take;
-                    payments[paidKey] = {
-                        date: new Date().toLocaleDateString('tr-TR'),
-                        amount: totalPaid,
-                        status: totalPaid >= it.fullAmount ? 'Ödendi' : 'Ödenmedi'
-                    };
-                }
-            }
-        }
+        const paymentsLog = apt.paymentsLog || [];
+        paymentsLog.push({ date: new Date().toLocaleDateString('tr-TR'), amount: inputAmt, type: 'Aidat Ödemesi' });
 
-        try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap, demirbasPayments: payments }); }
-        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { dues: duesMap, demirbasPayments: payments }); }
+        try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap, paymentsLog }); }
+        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { dues: duesMap, paymentsLog }); }
 
         toast('Ödeme başarıyla işlendi.', 'success');
         document.getElementById('payModal').classList.add('hidden');
@@ -1601,8 +1603,11 @@ document.getElementById('demirbasPayModalSubmitBtn').onclick = async () => {
                 };
             }
         }
-        try { await updateDoc(doc(db, "daireler", apt.id), { demirbasPayments: payments }); }
-        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { demirbasPayments: payments }); }
+        const paymentsLog = apt.paymentsLog || [];
+        paymentsLog.push({ date: new Date().toLocaleDateString('tr-TR'), amount: inputAmt, type: 'Demirbaş Ödemesi' });
+
+        try { await updateDoc(doc(db, "daireler", apt.id), { demirbasPayments: payments, paymentsLog }); }
+        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { demirbasPayments: payments, paymentsLog }); }
 
         toast('Demirbaş ödemesi işlendi.', 'success');
         document.getElementById('demirbasPayModal').classList.add('hidden');
@@ -2196,7 +2201,10 @@ document.getElementById('exportExcelBtn').onclick = function() {
                     const mName = MONTH_NAMES[m];
                     const state = getDueState(a, String(y), mName);
                     const st = state.status || 'Ödenmedi';
-                    rowData.push(st);
+                    if (st === 'Ödendi') rowData.push('Ödendi');
+                    else if (state.paidAmount > 0) rowData.push('Kalan: ' + money(Math.max(0, Number(a.feeAmount || 500) - state.paidAmount)));
+                    else rowData.push(st);
+
                     if (st !== 'Ödendi' && st !== 'Eski Kiracı Borcu' && st !== 'Eski Ev Sahibi Borcu') {
                         unpaidTotal += Math.max(0, Number(a.feeAmount || 500) - Number(state.paidAmount || 0));
                     }
@@ -2208,14 +2216,7 @@ document.getElementById('exportExcelBtn').onclick = function() {
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(matrixRows), "Aidat Matrisi");
 
         let demHeader = ["Blok", "Daire", "Ad Soyad"];
-        let matterKeyMap = [];
-        BULK_DEBTS.forEach(b => {
-            (b.matters || []).forEach((m, idx) => {
-                const colTitle = `${b.title} - ${m.desc}`;
-                demHeader.push(colTitle);
-                matterKeyMap.push({ bulkId: b.id, matterIndex: idx, fullPer: Number(b.perApartmentTotal || 0) });
-            });
-        });
+        BULK_DEBTS.forEach(b => { demHeader.push(b.title); });
         demHeader.push("Kalan Toplam Demirbaş Borcu (₺)");
 
         const demRows = [demHeader];
@@ -2224,27 +2225,17 @@ document.getElementById('exportExcelBtn').onclick = function() {
             let aptTotalRem = 0;
             BULK_DEBTS.forEach(b => {
                 const paidKeyMap = a.demirbasPayments || {};
-                const payInfo = paidKeyMap[b.id + '_' + a.id] || { amount: 0 };
-                let paidSoFar = Number(payInfo.amount || 0);
+                const payInfo = paidKeyMap[b.id + '_' + a.id] || { amount: 0, status: 'Ödenmedi' };
+                const per = Number(b.perApartmentTotal || 0);
+                const paidSoFar = Number(payInfo.amount || 0);
+                const rem = Math.max(0, per - paidSoFar);
+                aptTotalRem += rem;
 
-                (b.matters || []).forEach(m => {
-                    let partPaid = 0;
-                    if (paidSoFar >= m.amount) {
-                        partPaid = m.amount;
-                        paidSoFar -= m.amount;
-                    } else {
-                        partPaid = paidSoFar;
-                        paidSoFar = 0;
-                    }
-                    const partRem = Math.max(0, m.amount - partPaid);
-                    aptTotalRem += partRem;
-                    
-                    if (partPaid > 0) {
-                        rowData.push(partPaid);
-                    } else {
-                        rowData.push("Ödenmedi");
-                    }
-                });
+                if (paidSoFar > 0) {
+                    rowData.push(paidSoFar);
+                } else {
+                    rowData.push("Ödenmedi");
+                }
             });
             rowData.push(aptTotalRem);
             demRows.push(rowData);
