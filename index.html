@@ -279,7 +279,7 @@
 <div id="pastTenantWaModal" class="modal-overlay hidden">
   <div class="modal-card" style="border-top:4px solid #22c55e;">
     <button class="close-modal" id="closePastTenantWaBtn">&times;</button>
-    <h3><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Eski Sakin Borç Yönetimi</h3>
+    <h3><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Geçmiş Sakin Borç Yönetimi</h3>
     <input type="hidden" id="ptWaAptId">
     <input type="hidden" id="ptWaIndex">
     <div class="row">
@@ -700,7 +700,7 @@
     <div id="tabExcel" class="tab-panel">
       <div class="card">
         <h2><i class="fa-solid fa-file-excel" style="color:#059669;"></i> Detaylı Excel Raporları</h2>
-        <p style="color:var(--secondary);font-size:9.5px;margin-bottom:8px;">Tüm site verilerini; aylık aidat matrisi, tek sütunlu demirbaş ödemeleri, giderler ve mülkler dahil çok sayfalı Excel olarak indirebilirsiniz.</p>
+        <p style="color:var(--secondary);font-size:9.5px;margin-bottom:8px;">Tüm site verilerini; aylık aidat matrisi (tutar detaylı), demirbaş ödemeleri, giderler ve mülkler dahil çok sayfalı Excel olarak indirebilirsiniz.</p>
         <button class="btn btn-success" id="exportExcelBtn" style="font-size:10.5px;padding:8px 12px;"><i class="fa-solid fa-download"></i> Tüm Sistemi Detaylı Excel Olarak İndir (.xlsx)</button>
       </div>
     </div>
@@ -972,7 +972,7 @@ function openWhatsApp(apt) {
 
 function openPastTenantWhatsApp(tenant, apt) {
     const phone = cleanPhone(tenant.phone);
-    if (!phone) { toast('Eski sakinin telefonu kayıtlı değil. Lütfen önce düzenle butonundan telefon ekleyin.', 'danger'); return; }
+    if (!phone) { toast('Geçmiş sakinin telefonu kayıtlı değil. Lütfen "Düzenle" butonundan telefon ekleyin.', 'danger'); return; }
     
     const periodStr = (tenant.startDate && tenant.endDate) ? `(${tenant.startDate} - ${tenant.endDate} tarihleri arası)` : '';
     let details = (tenant.unpaidMonths || []).map(u => `${u.month} ${u.year} (${money(u.amount)})`).join(', ');
@@ -1618,10 +1618,15 @@ window.deletePastTenant = async function(aptId, ptIdx, index) {
     askConfirm('Bu geçmiş sakin kaydını tamamen silmek istediğinize emin misiniz?', async () => {
         showLoading('Siliniyor...');
         try {
-            let list = [...(apt.frozenTenantDebts || []), ...(apt.frozenHostDebts || [])];
-            list.splice(ptIdx, 1);
-            try { await updateDoc(doc(db, "daireler", apt.id), { frozenTenantDebts: list, frozenHostDebts: [] }); }
-            catch(e) { await updateDoc(doc(db, "apartments", apt.id), { frozenTenantDebts: list, frozenHostDebts: [] }); }
+            let tenantList = [...(apt.frozenTenantDebts || [])];
+            let hostList = [...(apt.frozenHostDebts || [])];
+            if(ptIdx < tenantList.length) {
+                tenantList.splice(ptIdx, 1);
+            } else {
+                hostList.splice(ptIdx - tenantList.length, 1);
+            }
+            try { await updateDoc(doc(db, "daireler", apt.id), { frozenTenantDebts: tenantList, frozenHostDebts: hostList }); }
+            catch(e) { await updateDoc(doc(db, "apartments", apt.id), { frozenTenantDebts: tenantList, frozenHostDebts: hostList }); }
             toast('Kayıt silindi.', 'success');
         } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
     });
@@ -1630,8 +1635,10 @@ window.deletePastTenant = async function(aptId, ptIdx, index) {
 window.editPastTenantModal = function(aptId, ptIdx) {
     const apt = APARTMENTS.find(a => a.id === aptId);
     if(!apt) return;
-    const list = [...(apt.frozenTenantDebts || []), ...(apt.frozenHostDebts || [])];
-    const tenant = list[ptIdx];
+    const tenantList = apt.frozenTenantDebts || [];
+    const hostList = apt.frozenHostDebts || [];
+    const combined = [...tenantList, ...hostList];
+    const tenant = combined[ptIdx];
     if(!tenant) return;
 
     document.getElementById('ptWaAptId').value = aptId;
@@ -1666,18 +1673,26 @@ document.getElementById('savePastTenantInfoBtn').onclick = async () => {
     const ptIdx = parseInt(document.getElementById('ptWaIndex').value);
     const apt = APARTMENTS.find(a => a.id === aptId);
     if(!apt) return;
-    let list = [...(apt.frozenTenantDebts || [])];
-    if(!list[ptIdx]) return;
-
-    list[ptIdx].name = document.getElementById('ptEditName').value.trim();
-    list[ptIdx].phone = document.getElementById('ptEditPhone').value.trim();
-    list[ptIdx].startDate = document.getElementById('ptEditStart').value;
-    list[ptIdx].endDate = document.getElementById('ptEditEnd').value;
+    let tenantList = [...(apt.frozenTenantDebts || [])];
+    let hostList = [...(apt.frozenHostDebts || [])];
+    
+    if(ptIdx < tenantList.length) {
+        tenantList[ptIdx].name = document.getElementById('ptEditName').value.trim();
+        tenantList[ptIdx].phone = document.getElementById('ptEditPhone').value.trim();
+        tenantList[ptIdx].startDate = document.getElementById('ptEditStart').value;
+        tenantList[ptIdx].endDate = document.getElementById('ptEditEnd').value;
+    } else {
+        const hIdx = ptIdx - tenantList.length;
+        hostList[hIdx].name = document.getElementById('ptEditName').value.trim();
+        hostList[hIdx].phone = document.getElementById('ptEditPhone').value.trim();
+        hostList[hIdx].startDate = document.getElementById('ptEditStart').value;
+        hostList[hIdx].endDate = document.getElementById('ptEditEnd').value;
+    }
 
     showLoading('Kaydediliyor...');
     try {
-        try { await updateDoc(doc(db, "daireler", apt.id), { frozenTenantDebts: list }); }
-        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { frozenTenantDebts: list }); }
+        try { await updateDoc(doc(db, "daireler", apt.id), { frozenTenantDebts: tenantList, frozenHostDebts: hostList }); }
+        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { frozenTenantDebts: tenantList, frozenHostDebts: hostList }); }
         toast('Geçmiş sakin bilgileri güncellendi.', 'success');
         document.getElementById('pastTenantWaModal').classList.add('hidden');
     } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
@@ -1692,11 +1707,13 @@ document.getElementById('sendPastTenantWaBtn').onclick = () => {
     const ptIdx = parseInt(document.getElementById('ptWaIndex').value);
     const apt = APARTMENTS.find(a => a.id === aptId);
     if(!apt) return;
-    const list = [...(apt.frozenTenantDebts || []), ...(apt.frozenHostDebts || [])];
-    const tenant = list[ptIdx];
+    const tenantList = apt.frozenTenantDebts || [];
+    const hostList = apt.frozenHostDebts || [];
+    const combined = [...tenantList, ...hostList];
+    const tenant = combined[ptIdx];
     if(!tenant) return;
     const phone = cleanPhone(tenant.phone);
-    if(!phone) { toast('Eski sakinin telefonu kayıtlı değil. Lütfen düzenle butonu ile telefon ekleyin.', 'danger'); return; }
+    if(!phone) { toast('Geçmiş sakinin telefonu kayıtlı değil. Lütfen düzenle butonu ile telefon ekleyin.', 'danger'); return; }
     const msg = document.getElementById('ptWaText').value;
     window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
     document.getElementById('pastTenantWaModal').classList.add('hidden');
@@ -2061,17 +2078,18 @@ document.getElementById('submitOcBtn').onclick = async () => {
         });
 
         const effectiveEndDate = startDate;
+        const oldEntryDate = apt.entryDate || '-';
 
         if (apt.occupantType === 'Kiracı') {
             const frozenList = apt.frozenTenantDebts || [];
-            frozenList.push({ name: apt.fullName, phone: apt.phone, startDate: apt.entryDate || '-', endDate: effectiveEndDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
+            frozenList.push({ type: 'Eski Kiracı', name: apt.fullName, phone: apt.phone, startDate: oldEntryDate, endDate: effectiveEndDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
             
             const payload = { fullName: newName, name: newName, phone: newPhone, plate: newPlate, fee: newFee, occupantType: newType, hostName: newType === 'Kiracı' ? hostName : '', hostPhone: newType === 'Kiracı' ? hostPhone : '', entryDate: startDate, dues: duesMap, frozenTenantDebts: frozenList };
             try { await updateDoc(doc(db, "daireler", apt.id), payload); }
             catch(e) { await updateDoc(doc(db, "apartments", apt.id), payload); }
         } else {
             const frozenHosts = apt.frozenHostDebts || [];
-            frozenHosts.push({ name: apt.fullName, phone: apt.phone, startDate: apt.entryDate || '-', endDate: effectiveEndDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
+            frozenHosts.push({ type: 'Eski Ev Sahibi', name: apt.fullName, phone: apt.phone, startDate: oldEntryDate, endDate: effectiveEndDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
 
             const payload = { fullName: newName, name: newName, phone: newPhone, plate: newPlate, fee: newFee, occupantType: newType, hostName: newType === 'Kiracı' ? hostName : '', hostPhone: newType === 'Kiracı' ? hostPhone : '', entryDate: startDate, dues: duesMap, frozenHostDebts: frozenHosts };
             try { await updateDoc(doc(db, "daireler", apt.id), payload); }
@@ -2287,7 +2305,7 @@ function renderApartmentsTable() {
             pastHtml += '<div style="font-weight:700;color:#92400e;margin-bottom:2px;"><i class="fa-solid fa-id-card-clip"></i> Geçmiş Sakinler & Borçları</div>';
             pastList.forEach((pt, ptIdx) => {
                 pastHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px dashed #fde68a;gap:4px;">
-                    <div style="flex:1;"><b>${pt.name}</b> (${pt.startDate || '-'} / ${pt.endDate || '-'})<br><span style="color:#b45309;">Borç: ${money(pt.totalDebt || 0)} | Tel: ${pt.phone || 'Yok'}</span></div>
+                    <div style="flex:1;"><b>${pt.name}</b> (${pt.type || 'Eski Sakin'}) - (${pt.startDate || '-'} / ${pt.endDate || '-'})<br><span style="color:#b45309;">Borç: ${money(pt.totalDebt || 0)} | Tel: ${pt.phone || 'Yok'}</span></div>
                     <div style="display:flex;gap:3px;align-items:center;">
                         <button class="whatsapp-btn" onclick="window.openPastTenantWA('${a.id}', ${ptIdx})"><i class="fa-brands fa-whatsapp"></i> Hatırlat</button>
                         <button class="btn btn-outline btn-sm" style="padding:2px 5px;" onclick="window.editPastTenantModal('${a.id}', ${ptIdx})"><i class="fa-solid fa-pen"></i> Düzenle</button>
@@ -2560,7 +2578,7 @@ document.getElementById('exportExcelBtn').onclick = function() {
 
         const currentYearNum = new Date().getFullYear();
         const currentMonthIdx = new Date().getMonth();
-        let matrixHeader = ["Blok", "Daire", "Ad Soyad"];
+        let matrixHeader = ["Blok", "Daire", "Güncel Sakin", "Tip"];
         for (let y = 2026; y <= currentYearNum; y++) {
             const mStart = (y === 2026) ? 0 : 0;
             const mEnd = (y === currentYearNum) ? currentMonthIdx : 11;
@@ -2572,7 +2590,7 @@ document.getElementById('exportExcelBtn').onclick = function() {
 
         const matrixRows = [matrixHeader];
         APARTMENTS.forEach(a => {
-            let rowData = [a.block, a.apartment, a.fullName || ''];
+            let rowData = [a.block, a.apartment, a.fullName || '', a.occupantType || ''];
             let unpaidTotal = 0;
             for (let y = 2026; y <= currentYearNum; y++) {
                 const mStart = (y === 2026) ? 0 : 0;
@@ -2581,9 +2599,17 @@ document.getElementById('exportExcelBtn').onclick = function() {
                     const mName = MONTH_NAMES[m];
                     const state = getDueState(a, String(y), mName);
                     const st = state.status || 'Ödenmedi';
-                    if (st === 'Ödendi') rowData.push('Ödendi');
-                    else if (state.paidAmount > 0) rowData.push('Kalan: ' + money(Math.max(0, Number(a.feeAmount || 500) - state.paidAmount)));
-                    else rowData.push(st);
+                    
+                    if (st === 'Ödendi') {
+                        const paidVal = Number(state.paidAmount || a.feeAmount || 500);
+                        rowData.push(paidVal + ' ₺ (Ödendi)');
+                    } else if (state.paidAmount > 0) {
+                        rowData.push(Number(state.paidAmount) + ' ₺ (Kısmi)');
+                    } else if (st === 'Eski Kiracı Borcu' || st === 'Eski Ev Sahibi Borcu') {
+                        rowData.push('Ödenmedi (' + st + ')');
+                    } else {
+                        rowData.push('Ödenmedi');
+                    }
 
                     if (st !== 'Ödendi' && st !== 'Eski Kiracı Borcu' && st !== 'Eski Ev Sahibi Borcu') {
                         unpaidTotal += Math.max(0, Number(a.feeAmount || 500) - Number(state.paidAmount || 0));
@@ -2612,7 +2638,7 @@ document.getElementById('exportExcelBtn').onclick = function() {
                 aptTotalRem += rem;
 
                 if (paidSoFar > 0) {
-                    rowData.push(paidSoFar);
+                    rowData.push(paidSoFar + ' ₺');
                 } else {
                     rowData.push("Ödenmedi");
                 }
@@ -2622,13 +2648,18 @@ document.getElementById('exportExcelBtn').onclick = function() {
         });
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(demRows), "Demirbaşlar");
 
+        let pastRows = [["Blok", "Daire", "Geçmiş Sakin Adı", "Tipi", "Telefon", "Başlangıç Tarihi", "Bitiş Tarihi", "Kalan Borç (₺)"]];
+        APARTMENTS.forEach(a => {
+            let list = [...(a.frozenTenantDebts || []), ...(a.frozenHostDebts || [])];
+            list.forEach(pt => {
+                pastRows.push([a.block, a.apartment, pt.name || '', pt.type || 'Eski Sakin', pt.phone || '-', pt.startDate || '-', pt.endDate || '-', Number(pt.totalDebt || 0)]);
+            });
+        });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pastRows), "Geçmiş Sakinler");
+
         const expRows = [["Açıklama", "Ait Olduğu Ay", "Tutar (₺)", "Tarih", "Ödeme Durumu"]];
         EXPENSES.forEach(e => { expRows.push([e.description, e.targetMonth, Number(e.amount || 0), e.date, e.paidStatus]); });
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(expRows), "Giderler");
-
-        const annRows = [["Duyuru Metni", "Tarih"]];
-        ANNOUNCEMENTS.forEach(an => { annRows.push([an.text, an.timestamp]); });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(annRows), "Duyurular");
 
         const filename = 'Rojbin_Sitesi_Detayli_Rapor_' + new Date().toISOString().slice(0,10) + '.xlsx';
         XLSX.writeFile(wb, filename);
