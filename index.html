@@ -275,15 +275,67 @@
   </div>
 </div>
 
-<!-- ESKİ SAKİN WHATSAPP BİLGİ MODALI -->
+<!-- ESKİ SAKİN DÜZENLEME & WHATSAPP MODALI -->
 <div id="pastTenantWaModal" class="modal-overlay hidden">
   <div class="modal-card" style="border-top:4px solid #22c55e;">
     <button class="close-modal" id="closePastTenantWaBtn">&times;</button>
-    <h3><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Eski Sakin Borç Hatırlatması</h3>
+    <h3><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Eski Sakin Borç Yönetimi</h3>
     <input type="hidden" id="ptWaAptId">
     <input type="hidden" id="ptWaIndex">
-    <div class="field"><label>Mesaj Önizlemesi</label><textarea id="ptWaText" rows="6" class="template-area"></textarea></div>
-    <button class="btn btn-success" id="sendPastTenantWaBtn" style="width:100%;"><i class="fa-brands fa-whatsapp"></i> WhatsApp ile Gönder</button>
+    <div class="row">
+      <div class="field"><label>Ad Soyad</label><input type="text" id="ptEditName"></div>
+      <div class="field"><label>Telefon</label><input type="text" id="ptEditPhone" placeholder="05xx"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Giriş Tarihi</label><input type="date" id="ptEditStart"></div>
+      <div class="field"><label>Çıkış Tarihi</label><input type="date" id="ptEditEnd"></div>
+    </div>
+    <div class="field" style="margin-top:6px;"><label>Mesaj Önizlemesi</label><textarea id="ptWaText" rows="5" class="template-area"></textarea></div>
+    <div style="display:flex;gap:4px;">
+      <button class="btn btn-primary" id="savePastTenantInfoBtn" style="flex:1;"><i class="fa-solid fa-floppy-disk"></i> Bilgileri Güncelle</button>
+      <button class="btn btn-success" id="sendPastTenantWaBtn" style="flex:1;"><i class="fa-brands fa-whatsapp"></i> WhatsApp ile Gönder</button>
+    </div>
+  </div>
+</div>
+
+<!-- OTURAN DEĞİŞTİR & BORÇ DONDUR MODALI -->
+<div id="occupantChangeModal" class="modal-overlay hidden">
+  <div class="modal-card" style="border-top:4px solid #d97706;">
+    <button class="close-modal" id="closeOccupantChangeModalBtn">&times;</button>
+    <h3><i class="fa-solid fa-people-arrows" style="color:#d97706;"></i> Oturan Değişimi & Borç Dondur</h3>
+    <input type="hidden" id="ocAptId">
+    <div style="background:#fffbe2;border:1px solid #fde68a;padding:6px;border-radius:4px;margin-bottom:6px;font-size:9.5px;">
+      <div style="font-weight:700;color:#92400e;" id="ocOldTitle">Eski Sakin: -</div>
+      <div style="color:#b45309;margin-top:2px;" id="ocOldSummary">Taranıyor...</div>
+    </div>
+    <div class="field">
+      <label>Yeni Oturan Tipi</label>
+      <select id="ocNewOccupantType">
+        <option value="Ev Sahibi">Ev Sahibi (Ev Sahibi Oturuyor)</option>
+        <option value="Kiracı">Kiracı (Kiracı Var)</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="field"><label>Yeni Ad Soyad</label><input type="text" id="ocNewName" placeholder="Ad Soyad"></div>
+      <div class="field"><label>Telefon</label><input type="text" id="ocNewPhone" placeholder="05xx"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Plaka</label><input type="text" id="ocNewPlate" placeholder="01XX"></div>
+      <div class="field"><label>Aylık Aidat (₺)</label><input type="number" id="ocNewFee" value="500"></div>
+    </div>
+    <div class="row hidden" id="ocHostRow">
+      <div class="field"><label>Ev Sahibi Ad</label><input type="text" id="ocHostName" placeholder="Ev sahibi adı"></div>
+      <div class="field"><label>Ev Sahibi Tel</label><input type="text" id="ocHostPhone" placeholder="05xx"></div>
+    </div>
+    <div class="field">
+      <label>Yeni Sakin Giriş (Katılım) Tarihi</label>
+      <input type="date" id="ocStartDate" style="font-weight:700;">
+      <span style="font-size:8px;color:var(--secondary);display:block;margin-top:2px;">💡 Bu tarih girildiğinde, önceki sakinin çıkış tarihi otomatik olarak bu tarih olacak ve önceki borçlar o sakine kilitlenecektir.</span>
+    </div>
+    <div style="display:flex;gap:5px;margin-top:6px;">
+      <button class="btn btn-secondary" id="cancelOcBtn" style="flex:1;">İptal</button>
+      <button class="btn btn-warning" id="submitOcBtn" style="flex:2;background:#d97706;color:#fff;">Borçları Dondur ve Kaydet</button>
+    </div>
   </div>
 </div>
 
@@ -581,8 +633,7 @@
         <div class="row">
           <div class="field" style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">
             <button class="btn btn-success" id="addApartmentBtn" style="flex:1;"><i class="fa-solid fa-floppy-disk"></i> Kaydet / Güncelle</button>
-            <button class="btn btn-warning hidden" id="tenantChangeBtn" type="button" style="background:#d97706;color:#fff;"><i class="fa-solid fa-people-arrows"></i> Kiracı Değiştir</button>
-            <button class="btn btn-purple hidden" id="hostChangeBtn" type="button"><i class="fa-solid fa-house-chimney-window"></i> Ev Sahibi Değiştir</button>
+            <button class="btn btn-warning hidden" id="occupantChangeBtn" type="button" style="background:#d97706;color:#fff;"><i class="fa-solid fa-people-arrows"></i> Oturan Değiştir</button>
           </div>
         </div>
       </div>
@@ -671,62 +722,6 @@
     </div>
   </section>
 </main>
-
-<div id="tenantChangeModal" class="modal-overlay hidden">
-  <div class="modal-card" style="border-top:4px solid #d97706;">
-    <button class="close-modal" id="closeTenantChangeModalBtn">&times;</button>
-    <h3><i class="fa-solid fa-people-arrows" style="color:#d97706;"></i> Kiracı Değişimi & Borç Dondur</h3>
-    <input type="hidden" id="tcAptId">
-    <div style="background:#fffbe2;border:1px solid #fde68a;padding:6px;border-radius:4px;margin-bottom:6px;font-size:9.5px;">
-      <div style="font-weight:700;color:#92400e;" id="tcOldTenantTitle">Eski Kiracı: -</div>
-      <div style="color:#b45309;margin-top:2px;" id="tcOldTenantSummary">Taranıyor...</div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Yeni Kiracı Ad Soyad</label><input type="text" id="tcNewName" placeholder="Ad Soyad"></div>
-      <div class="field"><label>Telefon</label><input type="text" id="tcNewPhone" placeholder="05xx"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Plaka</label><input type="text" id="tcNewPlate" placeholder="01XX"></div>
-      <div class="field"><label>Aylık Aidat (₺)</label><input type="number" id="tcNewFee" value="500"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Eski Kiracı Başlangıç Tarihi</label><input type="date" id="tcStartDate"></div>
-      <div class="field"><label>Eski Kiracı Bitiş Tarihi</label><input type="date" id="tcEndDate"></div>
-    </div>
-    <div style="display:flex;gap:5px;margin-top:6px;">
-      <button class="btn btn-secondary" id="cancelTcBtn" style="flex:1;">İptal</button>
-      <button class="btn btn-warning" id="submitTcBtn" style="flex:2;background:#d97706;color:#fff;">Borçları Dondur ve Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<div id="hostChangeModal" class="modal-overlay hidden">
-  <div class="modal-card" style="border-top:4px solid #7e22ce;">
-    <button class="close-modal" id="closeHostChangeModalBtn">&times;</button>
-    <h3><i class="fa-solid fa-house-chimney-window" style="color:#7e22ce;"></i> Ev Sahibi Değişimi & Borç Devri</h3>
-    <input type="hidden" id="hcAptId">
-    <div style="background:#f3e8ff;border:1px solid #e9d5ff;padding:6px;border-radius:4px;margin-bottom:6px;font-size:9.5px;">
-      <div style="font-weight:700;color:#6b21a8;" id="hcOldHostTitle">Eski Malik: -</div>
-      <div style="color:#7e22ce;margin-top:2px;" id="hcOldHostSummary">Taranıyor...</div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Yeni Ev Sahibi Ad Soyad</label><input type="text" id="hcNewName" placeholder="Ad Soyad"></div>
-      <div class="field"><label>Telefon</label><input type="text" id="hcNewPhone" placeholder="05xx"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Kullanım Şekli</label><select id="hcOccupantType"><option value="Ev Sahibi">Ev Sahibi Oturuyor</option><option value="Kiracı">Kiracı Var</option></select></div>
-      <div class="field"><label>Plaka</label><input type="text" id="hcNewPlate" placeholder="01XX"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Eski Malik Başlangıç Tarihi</label><input type="date" id="hcStartDate"></div>
-      <div class="field"><label>Eski Malik Bitiş Tarihi</label><input type="date" id="hcEndDate"></div>
-    </div>
-    <div style="display:flex;gap:5px;margin-top:6px;">
-      <button class="btn btn-secondary" id="cancelHcBtn" style="flex:1;">İptal</button>
-      <button class="btn btn-purple" id="submitHcBtn" style="flex:2;">Borçları Dondur ve Kaydet</button>
-    </div>
-  </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -977,7 +972,7 @@ function openWhatsApp(apt) {
 
 function openPastTenantWhatsApp(tenant, apt) {
     const phone = cleanPhone(tenant.phone);
-    if (!phone) { toast('Eski sakinin telefonu kayıtlı değil.', 'danger'); return; }
+    if (!phone) { toast('Eski sakinin telefonu kayıtlı değil. Lütfen önce düzenle butonundan telefon ekleyin.', 'danger'); return; }
     
     const periodStr = (tenant.startDate && tenant.endDate) ? `(${tenant.startDate} - ${tenant.endDate} tarihleri arası)` : '';
     let details = (tenant.unpaidMonths || []).map(u => `${u.month} ${u.year} (${money(u.amount)})`).join(', ');
@@ -1031,8 +1026,6 @@ function initRealtimeListeners() {
     }, (err) => { console.warn("Request listener:", err.message); });
 }
 
-function initDemirbasListener() {}
-
 function initBulkDebtsListener() {
     onSnapshot(query(collection(db, "toplu_borclar")), (snap) => {
         processBulkDebts(snap);
@@ -1076,6 +1069,7 @@ function processApartments(snap) {
             occupantType: d.occupantType || 'Ev Sahibi', 
             hostName: d.hostName || '', 
             hostPhone: d.hostPhone || '',
+            entryDate: d.entryDate || '',
             dues: d.dues || {}, 
             demirbasPayments: d.demirbasPayments || {},
             demirbasPaymentsLog: d.demirbasPaymentsLog || [],
@@ -1166,7 +1160,6 @@ function enterAdminView() {
     document.getElementById('openAdminModalBtn').classList.add('hidden'); 
     document.getElementById('userLabel').textContent = 'Yönetici'; 
     renderAdminPanel(); 
-    updateHeaderButtonsVisibility();
 }
 function enterResidentView() { 
     document.getElementById('loginView').classList.add('hidden'); 
@@ -1190,9 +1183,7 @@ async function checkSession() {
         if (resId) { session = { role: 'resident', id: resId, apt: '', phone: '' }; enterResidentView(); } 
     } 
     initRealtimeListeners(); 
-    initDemirbasListener();
     initBulkDebtsListener();
-    updateHeaderButtonsVisibility();
 }
 
 function renderPublicDashboard() {
@@ -1577,11 +1568,15 @@ function renderDuesDetailsContent(apt, activeYear, index) {
     let pastList = [...(apt.frozenTenantDebts || []), ...(apt.frozenHostDebts || [])];
     if (pastList.length > 0) {
         let pastHtml = '<div style="margin-top:5px;background:#fffbe2;padding:5px;border-radius:4px;border:1px solid #fde68a;font-size:9.5px;">';
-        pastHtml += '<div style="font-weight:700;color:#92400e;margin-bottom:3px;"><i class="fa-solid id-card-clip"></i> Geçmiş Dönem Sakinleri & Borçları</div>';
+        pastHtml += '<div style="font-weight:700;color:#92400e;margin-bottom:3px;"><i class="fa-solid fa-id-card-clip"></i> Geçmiş Dönem Sakinleri & Borçları</div>';
         pastList.forEach((pt, ptIdx) => {
-            pastHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px dashed #fde68a;">
-                <div><b>${pt.name}</b> (${pt.startDate || '-'} / ${pt.endDate || '-'})<br><span style="color:#b45309;">Borç: ${money(pt.totalDebt || 0)}</span></div>
-                <button class="whatsapp-btn" onclick="window.openPastTenantWA('${apt.id}', ${ptIdx})"><i class="fa-brands fa-whatsapp"></i> Hatırlat</button>
+            pastHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed #fde68a;gap:4px;">
+                <div style="flex:1;"><b>${pt.name}</b> (${pt.startDate || '-'} / ${pt.endDate || '-'})<br><span style="color:#b45309;">Borç: ${money(pt.totalDebt || 0)} | Tel: ${pt.phone || 'Yok'}</span></div>
+                <div style="display:flex;gap:3px;align-items:center;">
+                    <button class="whatsapp-btn" onclick="window.openPastTenantWA('${apt.id}', ${ptIdx})"><i class="fa-brands fa-whatsapp"></i> Hatırlat</button>
+                    <button class="btn btn-outline btn-sm" style="padding:2px 5px;" onclick="window.editPastTenantModal('${apt.id}', ${ptIdx})"><i class="fa-solid fa-pen"></i> Düzenle</button>
+                    <button class="btn btn-danger btn-sm" style="padding:2px 5px;" onclick="window.deletePastTenant('${apt.id}', ${ptIdx}, ${index})"><i class="fa-solid fa-trash"></i></button>
+                </div>
             </div>`;
         });
         pastHtml += '</div>';
@@ -1616,16 +1611,36 @@ window.deletePaymentLog = async function(aptId, logIdx, index) {
     });
 };
 
-window.openPastTenantWA = function(aptId, ptIdx) {
+window.deletePastTenant = async function(aptId, ptIdx, index) {
+    openAccordionIndex = index;
+    const apt = APARTMENTS.find(a => a.id === aptId);
+    if(!apt) return;
+    askConfirm('Bu geçmiş sakin kaydını tamamen silmek istediğinize emin misiniz?', async () => {
+        showLoading('Siliniyor...');
+        try {
+            let list = [...(apt.frozenTenantDebts || []), ...(apt.frozenHostDebts || [])];
+            list.splice(ptIdx, 1);
+            try { await updateDoc(doc(db, "daireler", apt.id), { frozenTenantDebts: list, frozenHostDebts: [] }); }
+            catch(e) { await updateDoc(doc(db, "apartments", apt.id), { frozenTenantDebts: list, frozenHostDebts: [] }); }
+            toast('Kayıt silindi.', 'success');
+        } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
+    });
+};
+
+window.editPastTenantModal = function(aptId, ptIdx) {
     const apt = APARTMENTS.find(a => a.id === aptId);
     if(!apt) return;
     const list = [...(apt.frozenTenantDebts || []), ...(apt.frozenHostDebts || [])];
     const tenant = list[ptIdx];
     if(!tenant) return;
-    
+
     document.getElementById('ptWaAptId').value = aptId;
     document.getElementById('ptWaIndex').value = ptIdx;
-    
+    document.getElementById('ptEditName').value = tenant.name || '';
+    document.getElementById('ptEditPhone').value = tenant.phone || '';
+    document.getElementById('ptEditStart').value = tenant.startDate || '';
+    document.getElementById('ptEditEnd').value = tenant.endDate || '';
+
     const periodStr = (tenant.startDate && tenant.endDate) ? `(${tenant.startDate} - ${tenant.endDate} tarihleri arası)` : '';
     let details = (tenant.unpaidMonths || []).map(u => `${u.month} ${u.year} (${money(u.amount)})`).join(', ');
     if (!details) details = 'Borç dökümü bulunmuyor.';
@@ -1645,6 +1660,33 @@ Tahiroğulları Rojbin Sitesi Yönetimi`;
 };
 
 document.getElementById('closePastTenantWaBtn').onclick = () => document.getElementById('pastTenantWaModal').classList.add('hidden');
+
+document.getElementById('savePastTenantInfoBtn').onclick = async () => {
+    const aptId = document.getElementById('ptWaAptId').value;
+    const ptIdx = parseInt(document.getElementById('ptWaIndex').value);
+    const apt = APARTMENTS.find(a => a.id === aptId);
+    if(!apt) return;
+    let list = [...(apt.frozenTenantDebts || [])];
+    if(!list[ptIdx]) return;
+
+    list[ptIdx].name = document.getElementById('ptEditName').value.trim();
+    list[ptIdx].phone = document.getElementById('ptEditPhone').value.trim();
+    list[ptIdx].startDate = document.getElementById('ptEditStart').value;
+    list[ptIdx].endDate = document.getElementById('ptEditEnd').value;
+
+    showLoading('Kaydediliyor...');
+    try {
+        try { await updateDoc(doc(db, "daireler", apt.id), { frozenTenantDebts: list }); }
+        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { frozenTenantDebts: list }); }
+        toast('Geçmiş sakin bilgileri güncellendi.', 'success');
+        document.getElementById('pastTenantWaModal').classList.add('hidden');
+    } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
+};
+
+window.openPastTenantWA = function(aptId, ptIdx) {
+    window.editPastTenantModal(aptId, ptIdx);
+};
+
 document.getElementById('sendPastTenantWaBtn').onclick = () => {
     const aptId = document.getElementById('ptWaAptId').value;
     const ptIdx = parseInt(document.getElementById('ptWaIndex').value);
@@ -1654,7 +1696,7 @@ document.getElementById('sendPastTenantWaBtn').onclick = () => {
     const tenant = list[ptIdx];
     if(!tenant) return;
     const phone = cleanPhone(tenant.phone);
-    if(!phone) { toast('Eski sakinin telefonu kayıtlı değil.', 'danger'); return; }
+    if(!phone) { toast('Eski sakinin telefonu kayıtlı değil. Lütfen düzenle butonu ile telefon ekleyin.', 'danger'); return; }
     const msg = document.getElementById('ptWaText').value;
     window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
     document.getElementById('pastTenantWaModal').classList.add('hidden');
@@ -1964,107 +2006,85 @@ document.getElementById('demirbasPayModalSubmitBtn').onclick = async () => {
     } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
 
-function openTenantChangeModal(aptId) {
+function openOccupantChangeModal(aptId) {
     const apt = APARTMENTS.find(a => a.id === aptId);
     if (!apt) return;
-    document.getElementById('tcAptId').value = apt.id;
-    document.getElementById('tcOldTenantTitle').textContent = `Eski Kiracı: ${apt.fullName || '-'}`;
+    document.getElementById('ocAptId').value = apt.id;
+    document.getElementById('ocOldTitle').textContent = `Mevcut/Eski Sakin: ${apt.fullName || '-'}`;
     const unpaid = getUnpaidMonths(apt);
     const total = unpaid.reduce((s,u) => s + u.amount, 0);
-    document.getElementById('tcOldTenantSummary').textContent = `Dondurulacak Borç: ${money(total)}`;
-    document.getElementById('tenantChangeModal').classList.remove('hidden');
+    document.getElementById('ocOldSummary').textContent = `Dondurulacak Borç: ${money(total)}`;
+    document.getElementById('ocNewOccupantType').value = 'Ev Sahibi';
+    document.getElementById('ocNewName').value = '';
+    document.getElementById('ocNewPhone').value = '';
+    document.getElementById('ocNewPlate').value = '';
+    document.getElementById('ocStartDate').value = new Date().toISOString().slice(0, 10);
+    toggleOcHostFields();
+    document.getElementById('occupantChangeModal').classList.remove('hidden');
 }
 
-document.getElementById('closeTenantChangeModalBtn').onclick = () => document.getElementById('tenantChangeModal').classList.add('hidden');
-document.getElementById('cancelTcBtn').onclick = () => document.getElementById('tenantChangeModal').classList.add('hidden');
+function toggleOcHostFields() {
+    const val = document.getElementById('ocNewOccupantType').value;
+    document.getElementById('ocHostRow').classList.toggle('hidden', val !== 'Kiracı');
+}
+document.getElementById('ocNewOccupantType').onchange = toggleOcHostFields;
 
-document.getElementById('submitTcBtn').onclick = async () => {
-    const aptId = document.getElementById('tcAptId').value;
+document.getElementById('closeOccupantChangeModalBtn').onclick = () => document.getElementById('occupantChangeModal').classList.add('hidden');
+document.getElementById('cancelOcBtn').onclick = () => document.getElementById('occupantChangeModal').classList.add('hidden');
+
+document.getElementById('submitOcBtn').onclick = async () => {
+    const aptId = document.getElementById('ocAptId').value;
     const apt = APARTMENTS.find(a => a.id === aptId);
     if (!apt) return;
-    const newName = document.getElementById('tcNewName').value.trim();
-    const newPhone = document.getElementById('tcNewPhone').value.trim();
-    const newPlate = document.getElementById('tcNewPlate').value.trim();
-    const newFee = parseFloat(document.getElementById('tcNewFee').value) || 500;
-    const startDate = document.getElementById('tcStartDate').value;
-    const endDate = document.getElementById('tcEndDate').value;
-    if (!newName || !newPhone) { toast('Ad ve telefon zorunludur.', 'danger'); return; }
+    const newType = document.getElementById('ocNewOccupantType').value;
+    const newName = document.getElementById('ocNewName').value.trim();
+    const newPhone = document.getElementById('ocNewPhone').value.trim();
+    const newPlate = document.getElementById('ocNewPlate').value.trim();
+    const newFee = parseFloat(document.getElementById('ocNewFee').value) || 500;
+    const hostName = document.getElementById('ocHostName').value.trim();
+    const hostPhone = document.getElementById('ocHostPhone').value.trim();
+    const startDate = document.getElementById('ocStartDate').value;
+    if (!newName || !newPhone || !startDate) { toast('Ad, telefon ve yeni sakinin katılım tarihi zorunludur.', 'danger'); return; }
 
     showLoading('İşleniyor...');
     try {
         const unpaid = getUnpaidMonths(apt);
         const total = unpaid.reduce((s,u) => s + u.amount, 0);
-        const frozenList = apt.frozenTenantDebts || [];
-        frozenList.push({ name: apt.fullName, phone: apt.phone, startDate, endDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
-
+        
         const duesMap = apt.dues || {};
-        unpaid.forEach(u => { duesMap[u.year + '_' + u.month] = { status: 'Eski Kiracı Borcu', date: '-', paidAmount: 0 }; });
+        unpaid.forEach(u => { 
+            duesMap[u.year + '_' + u.month] = { 
+                status: apt.occupantType === 'Kiracı' ? 'Eski Kiracı Borcu' : 'Eski Ev Sahibi Borcu', 
+                date: '-', 
+                paidAmount: 0 
+            }; 
+        });
 
-        const payload = { fullName: newName, name: newName, phone: newPhone, plate: newPlate, fee: newFee, dues: duesMap, frozenTenantDebts: frozenList };
-        try { await updateDoc(doc(db, "daireler", apt.id), payload); }
-        catch(e) { await updateDoc(doc(db, "apartments", apt.id), payload); }
+        const effectiveEndDate = startDate;
 
-        toast('Kiracı değiştirildi.', 'success');
-        document.getElementById('tenantChangeModal').classList.add('hidden');
-        resetApartmentForm();
-    } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
-};
-
-function openHostChangeModal(aptId) {
-    const apt = APARTMENTS.find(a => a.id === aptId);
-    if (!apt) return;
-    document.getElementById('hcAptId').value = apt.id;
-    document.getElementById('hcOldHostTitle').textContent = `Eski Malik: ${apt.hostName || apt.fullName || '-'}`;
-    const unpaid = getUnpaidMonths(apt);
-    const total = unpaid.reduce((s,u) => s + u.amount, 0);
-    document.getElementById('hcOldHostSummary').textContent = `Dondurulacak Borç: ${money(total)}`;
-    document.getElementById('hostChangeModal').classList.remove('hidden');
-}
-
-document.getElementById('closeHostChangeModalBtn').onclick = () => document.getElementById('hostChangeModal').classList.add('hidden');
-document.getElementById('cancelHcBtn').onclick = () => document.getElementById('hostChangeModal').classList.add('hidden');
-
-document.getElementById('submitHcBtn').onclick = async () => {
-    const aptId = document.getElementById('hcAptId').value;
-    const apt = APARTMENTS.find(a => a.id === aptId);
-    if (!apt) return;
-    const newName = document.getElementById('hcNewName').value.trim();
-    const newPhone = document.getElementById('hcNewPhone').value.trim();
-    const occType = document.getElementById('hcOccupantType').value;
-    const newPlate = document.getElementById('hcNewPlate').value.trim();
-    const startDate = document.getElementById('hcStartDate').value;
-    const endDate = document.getElementById('hcEndDate').value;
-    if (!newName || !newPhone) { toast('İsim ve telefon zorunludur.', 'danger'); return; }
-
-    showLoading('İşleniyor...');
-    try {
-        const unpaid = getUnpaidMonths(apt);
-        const total = unpaid.reduce((s,u) => s + u.amount, 0);
-        const frozenHosts = apt.frozenHostDebts || [];
-        frozenHosts.push({ name: apt.hostName || apt.fullName, phone: apt.hostPhone || apt.phone, startDate, endDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
-
-        const duesMap = apt.dues || {};
-        unpaid.forEach(u => { duesMap[u.year + '_' + u.month] = { status: 'Eski Ev Sahibi Borcu', date: '-', paidAmount: 0 }; });
-
-        let payload = { dues: duesMap, frozenHostDebts: frozenHosts, occupantType: occType, plate: newPlate };
-        if (occType === 'Ev Sahibi') {
-            payload.fullName = newName; payload.name = newName; payload.phone = newPhone;
-            payload.hostName = ''; payload.hostPhone = '';
+        if (apt.occupantType === 'Kiracı') {
+            const frozenList = apt.frozenTenantDebts || [];
+            frozenList.push({ name: apt.fullName, phone: apt.phone, startDate: apt.entryDate || '-', endDate: effectiveEndDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
+            
+            const payload = { fullName: newName, name: newName, phone: newPhone, plate: newPlate, fee: newFee, occupantType: newType, hostName: newType === 'Kiracı' ? hostName : '', hostPhone: newType === 'Kiracı' ? hostPhone : '', entryDate: startDate, dues: duesMap, frozenTenantDebts: frozenList };
+            try { await updateDoc(doc(db, "daireler", apt.id), payload); }
+            catch(e) { await updateDoc(doc(db, "apartments", apt.id), payload); }
         } else {
-            payload.hostName = newName; payload.hostPhone = newPhone;
+            const frozenHosts = apt.frozenHostDebts || [];
+            frozenHosts.push({ name: apt.fullName, phone: apt.phone, startDate: apt.entryDate || '-', endDate: effectiveEndDate, date: new Date().toISOString().slice(0,10), unpaidMonths: unpaid, totalDebt: total });
+
+            const payload = { fullName: newName, name: newName, phone: newPhone, plate: newPlate, fee: newFee, occupantType: newType, hostName: newType === 'Kiracı' ? hostName : '', hostPhone: newType === 'Kiracı' ? hostPhone : '', entryDate: startDate, dues: duesMap, frozenHostDebts: frozenHosts };
+            try { await updateDoc(doc(db, "daireler", apt.id), payload); }
+            catch(e) { await updateDoc(doc(db, "apartments", apt.id), payload); }
         }
 
-        try { await updateDoc(doc(db, "daireler", apt.id), payload); }
-        catch(e) { await updateDoc(doc(db, "apartments", apt.id), payload); }
-
-        toast('Ev sahibi değiştirildi.', 'success');
-        document.getElementById('hostChangeModal').classList.add('hidden');
+        toast('Oturan değiştirildi ve borçlar eski sakine kilitlendi.', 'success');
+        document.getElementById('occupantChangeModal').classList.add('hidden');
         resetApartmentForm();
     } catch(err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
 
-document.getElementById('tenantChangeBtn').onclick = () => { const id = document.getElementById('aptId').value; if (id) openTenantChangeModal(id); };
-document.getElementById('hostChangeBtn').onclick = () => { const id = document.getElementById('aptId').value; if (id) openHostChangeModal(id); };
+document.getElementById('occupantChangeBtn').onclick = () => { const id = document.getElementById('aptId').value; if (id) openOccupantChangeModal(id); };
 
 let matterCounter = 0;
 function addMatterRow(desc = '', amount = '') {
@@ -2260,6 +2280,24 @@ function renderApartmentsTable() {
     if (filtered.length === 0) { container.innerHTML = '<div class="empty-note">Kayıt bulunamadı</div>'; return; }
     
     filtered.forEach(a => {
+        let pastList = [...(a.frozenTenantDebts || []), ...(a.frozenHostDebts || [])];
+        let pastHtml = '';
+        if(pastList.length > 0) {
+            pastHtml += '<div style="margin-top:4px;background:#fffbe2;padding:4px;border-radius:4px;border:1px solid #fde68a;font-size:9.5px;">';
+            pastHtml += '<div style="font-weight:700;color:#92400e;margin-bottom:2px;"><i class="fa-solid fa-id-card-clip"></i> Geçmiş Sakinler & Borçları</div>';
+            pastList.forEach((pt, ptIdx) => {
+                pastHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px dashed #fde68a;gap:4px;">
+                    <div style="flex:1;"><b>${pt.name}</b> (${pt.startDate || '-'} / ${pt.endDate || '-'})<br><span style="color:#b45309;">Borç: ${money(pt.totalDebt || 0)} | Tel: ${pt.phone || 'Yok'}</span></div>
+                    <div style="display:flex;gap:3px;align-items:center;">
+                        <button class="whatsapp-btn" onclick="window.openPastTenantWA('${a.id}', ${ptIdx})"><i class="fa-brands fa-whatsapp"></i> Hatırlat</button>
+                        <button class="btn btn-outline btn-sm" style="padding:2px 5px;" onclick="window.editPastTenantModal('${a.id}', ${ptIdx})"><i class="fa-solid fa-pen"></i> Düzenle</button>
+                        <button class="btn btn-danger btn-sm" style="padding:2px 5px;" onclick="window.deletePastTenant('${a.id}', ${ptIdx}, 0)"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>`;
+            });
+            pastHtml += '</div>';
+        }
+
         html += `<div class="mobile-card-item">
             <div class="mobile-card-header">
                 <div style="display:flex;align-items:center;gap:6px;">
@@ -2273,6 +2311,7 @@ function renderApartmentsTable() {
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
                     <div><b>Aylık Aidat:</b> ${money(a.feeAmount)}</div>
                 </div>
+                ${pastHtml}
             </div>
             <div class="mobile-card-footer">
                 <div style="display:flex;gap:4px;align-items:center;width:100%;justify-content:flex-end;">
@@ -2280,7 +2319,7 @@ function renderApartmentsTable() {
                     <button class="btn btn-danger btn-sm del-apt-btn" data-id="${a.id}"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
-        </div>`;
+        `;
     });
     container.innerHTML = html;
 
@@ -2298,8 +2337,7 @@ function renderApartmentsTable() {
             document.getElementById('newHostName').value = a.hostName || '';
             document.getElementById('newHostPhone').value = a.hostPhone || '';
             document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Güncelle';
-            document.getElementById('tenantChangeBtn').classList.toggle('hidden', a.occupantType !== 'Kiracı');
-            document.getElementById('hostChangeBtn').classList.remove('hidden');
+            document.getElementById('occupantChangeBtn').classList.remove('hidden');
             toggleHostFields();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
@@ -2363,8 +2401,7 @@ function resetApartmentForm() {
     document.getElementById('newApartmentPlate').value = ''; document.getElementById('newApartmentFee').value = 500;
     document.getElementById('newHostName').value = ''; document.getElementById('newHostPhone').value = '';
     document.getElementById('addApartmentBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Kaydet / Güncelle';
-    document.getElementById('tenantChangeBtn').classList.add('hidden');
-    document.getElementById('hostChangeBtn').classList.add('hidden');
+    document.getElementById('occupantChangeBtn').classList.add('hidden');
     toggleHostFields();
 }
 
