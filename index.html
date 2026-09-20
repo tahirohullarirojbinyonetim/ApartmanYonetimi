@@ -154,9 +154,14 @@
     <input type="hidden" id="payModalAptId">
 
     <div class="field">
+      <label>Ödeme Tarihi</label>
+      <input type="date" id="payModalDate" style="font-weight:700;">
+    </div>
+
+    <div class="field">
       <label>Tahsil Edilen Aidat Tutarı (₺)</label>
       <input type="number" id="payModalTotalAmount" placeholder="0" style="font-size:.95rem;font-weight:700;color:var(--success);">
-      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Girilen tutar öncelikle ödenmemiş aidatlardan düşülür. Fazla tutar avans olarak sonraki aya aktarılır.</span>
+      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Girilen tutar öncelikle ödenmemiş aidatlardan düşülür. <b>Ağustos 2026 ve sonrası tarihler</b> otomatik olarak kasaya eklenir.</span>
     </div>
 
     <div id="payModalDistributionPreview" class="info-box" style="margin-bottom:6px;"></div>
@@ -181,9 +186,14 @@
     <input type="hidden" id="demirbasPayModalAptId">
 
     <div class="field">
+      <label>Ödeme Tarihi</label>
+      <input type="date" id="demirbasPayModalDate" style="font-weight:700;">
+    </div>
+
+    <div class="field">
       <label>Tahsil Edilen Demirbaş Tutarı (₺)</label>
       <input type="number" id="demirbasPayModalAmount" placeholder="0" style="font-size:.95rem;font-weight:700;color:#7e22ce;">
-      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Girilen tutar aktif demirbaş borçlarından düşülür.</span>
+      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Ağustos 2026 ve sonrası ödemeler kasaya yansır.</span>
     </div>
 
     <div id="demirbasPayModalDistributionPreview" class="info-box" style="margin-bottom:6px;"></div>
@@ -301,12 +311,12 @@
 <main>
   <section id="loginView">
     <div class="grid grid-3">
-      <div class="stat-card collected"><i class="fa-solid fa-hand-holding-dollar"></i><span class="label">Cari Ay Toplanan</span><span class="value" id="pubCollected">₺0</span></div>
-      <div class="stat-card expenses"><i class="fa-solid fa-money-bill-transfer"></i><span class="label">Toplam Gider</span><span class="value" id="pubExpenses">₺0</span></div>
+      <div class="stat-card collected"><i class="fa-solid fa-hand-holding-dollar"></i><span class="label">Ağustos Sonrası Toplanan</span><span class="value" id="pubCollected">₺0</span></div>
+      <div class="stat-card expenses"><i class="fa-solid fa-money-bill-transfer"></i><span class="label">Ödenen Gider</span><span class="value" id="pubExpenses">₺0</span></div>
       <div class="stat-card balance"><i class="fa-solid fa-vault"></i><span class="label">Kasa Net Bakiye</span><span class="value" id="pubBalance">₺0</span></div>
     </div>
     
-    <!-- AÇIKLAMA UYARI ALANI (MAL SAKİNLER İÇİN ÖDENMEYEN GİDERLER) -->
+    <!-- MAL SAKİNLER İÇİN ÖDENMEYEN GİDERLER UYARI ALANI -->
     <div id="publicUnpaidExpensesAlert" class="hidden" style="margin-top:8px;background:#fef2f2;border:2px solid #ef4444;padding:8px;border-radius:8px;">
       <div style="font-weight:800;color:#991b1b;font-size:10.5px;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
         <i class="fa-solid fa-triangle-exclamation" style="font-size:1.2rem;"></i> KASADAN HENÜZ ÖDENMEMİŞ (BEKLEYEN) GİDERLER VAR!
@@ -466,7 +476,7 @@
         <div class="row">
           <div class="field"><label>Açıklama</label><input type="text" id="expDesc" placeholder="Örn: Asansör bakım"></div>
           <div class="field"><label>Tutar (₺)</label><input type="number" id="expAmount" placeholder="0"></div>
-          <div class="field"><label>Fatura / Gider Tarihi</label><input type="date" id="expDate"></div>
+          <div class="field"><label>Fatura / Kayıt Tarihi</label><input type="date" id="expDate"></div>
         </div>
         <div class="row">
           <div class="field">
@@ -985,6 +995,10 @@ function initRealtimeListeners() {
     }, (err) => { console.warn("Request listener:", err.message); });
 }
 
+function initDemirbasListener() {
+    // Toplu demirbaş dinleyicisi initBulkDebtsListener içinde yönetiliyor
+}
+
 function initBulkDebtsListener() {
     onSnapshot(query(collection(db, "toplu_borclar")), (snap) => {
         processBulkDebts(snap);
@@ -1149,14 +1163,30 @@ async function checkSession() {
 
 function renderPublicDashboard() {
     let totalCollected = 0, totalPaidExpenses = 0;
-    const cMonth = getCurrentMonthName(), cYear = getCurrentYearStr();
-    APARTMENTS.forEach(a => { if(getDueState(a, cYear, cMonth).status === 'Ödendi') totalCollected += Number(a.feeAmount || 500); });
     
+    // Ağustos 2026 ve sonrası yapılan ödemeler kasaya eklenir
+    APARTMENTS.forEach(a => {
+        if (a.paymentsLog && Array.isArray(a.paymentsLog)) {
+            a.paymentsLog.forEach(log => {
+                if (!log.date || log.date >= "2026-08-01") {
+                    totalCollected += (Number(log.amount) || 0);
+                }
+            });
+        }
+        if (a.demirbasPaymentsLog && Array.isArray(a.demirbasPaymentsLog)) {
+            a.demirbasPaymentsLog.forEach(log => {
+                if (!log.date || log.date >= "2026-08-01") {
+                    totalCollected += (Number(log.amount) || 0);
+                }
+            });
+        }
+    });
+
     let unpaidExpenses = [];
     EXPENSES.forEach(e => { 
-        if (e.paidStatus === 'Ödendi') {
+        if (e.paidStatus === 'Ödendi' && (!e.paymentDate || e.paymentDate >= "2026-08-01")) {
             totalPaidExpenses += Number(e.amount || 0);
-        } else {
+        } else if (e.paidStatus !== 'Ödendi') {
             unpaidExpenses.push(e);
         }
     });
@@ -1172,7 +1202,7 @@ function renderPublicDashboard() {
         alertList.innerHTML = unpaidExpenses.map(u => `
             <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;padding:4px 6px;border-radius:4px;border:1px solid #fca5a5;">
                 <span><b>${u.description}</b> (Ait Ay: ${u.targetMonth})</span>
-                <span style="color:#dc2626;font-weight:800;">${money(u.amount)} - 🔴 Ödenmedi (Bekliyor)</span>
+                <span style="color:#dc2626;font-weight:800;">${money(u.amount)} - 🔴 Ödenmedi / Bekliyor</span>
             </div>
         `).join('');
     } else {
@@ -1544,20 +1574,26 @@ window.setMonthState = async function(aptId, year, month, newStatus, index) {
     if (!apt) return;
     const key = year + '_' + month;
     const duesMap = apt.dues || {};
-    let dateStr = '-';
+    let dateStr = new Date().toISOString().slice(0, 10);
     let paidAmt = duesMap[key] ? duesMap[key].paidAmount : 0;
     
     if (newStatus === 'Ödendi') {
-        dateStr = new Date().toLocaleDateString('tr-TR');
         paidAmt = Number(apt.feeAmount || 500);
     } else if (newStatus === 'Ödenmedi') {
         paidAmt = 0;
     }
 
     duesMap[key] = { status: newStatus, date: dateStr, paidAmount: paidAmt };
+    
+    if (newStatus === 'Ödendi') {
+        const paymentsLog = apt.paymentsLog || [];
+        paymentsLog.push({ date: dateStr, amount: paidAmt, type: `${month} ${year} Aidatı` });
+        apt.paymentsLog = paymentsLog;
+    }
+
     try {
-        try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap }); }
-        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { dues: duesMap }); }
+        try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap, paymentsLog: apt.paymentsLog || [] }); }
+        catch(e) { await updateDoc(doc(db, "apartments", apt.id), { dues: duesMap, paymentsLog: apt.paymentsLog || [] }); }
         toast(`${month} ${year}: ${newStatus}`, 'success');
     } catch(err) { toast('Hata: ' + err.message, 'danger'); }
 };
@@ -1670,6 +1706,7 @@ function openPayModal(aptId) {
     document.getElementById('payModalAptId').value = apt.id;
     document.getElementById('payModalAptTitle').textContent = `${apt.block} - Daire ${apt.apartment}`;
     document.getElementById('payModalAptSub').textContent = `Sakin: ${apt.fullName || '-'}`;
+    document.getElementById('payModalDate').value = new Date().toISOString().slice(0, 10);
     const safDebt = getSafAidatDebt(apt);
     document.getElementById('payModalTotalAmount').value = safDebt > 0 ? safDebt : 500;
     updatePayModalPreview();
@@ -1713,6 +1750,7 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
     if (!apt) return;
 
     const inputAmt = parseFloat(document.getElementById('payModalTotalAmount').value) || 0;
+    const payDate = document.getElementById('payModalDate').value || new Date().toISOString().slice(0, 10);
     if (inputAmt <= 0) { toast('Geçerli bir tutar giriniz.', 'danger'); return; }
 
     showLoading('İşleniyor...');
@@ -1735,7 +1773,7 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
                 const totalPaid = already + take;
                 duesMap[key] = {
                     status: totalPaid >= u.fullAmount ? 'Ödendi' : 'Ödenmedi',
-                    date: new Date().toLocaleDateString('tr-TR'),
+                    date: payDate,
                     paidAmount: totalPaid
                 };
             }
@@ -1747,7 +1785,7 @@ document.getElementById('payModalSubmitBtn').onclick = async () => {
         }
 
         const paymentsLog = apt.paymentsLog || [];
-        paymentsLog.push({ date: new Date().toLocaleDateString('tr-TR'), amount: inputAmt, type: 'Aidat Ödemesi' });
+        paymentsLog.push({ date: payDate, amount: inputAmt, type: 'Aidat Ödemesi' });
 
         try { await updateDoc(doc(db, "daireler", apt.id), { dues: duesMap, advanceBalance: currentAdvance, paymentsLog }); }
         catch(e) { await updateDoc(doc(db, "apartments", apt.id), { dues: duesMap, advanceBalance: currentAdvance, paymentsLog }); }
@@ -1764,6 +1802,7 @@ function openDemirbasPayModal(aptId) {
     document.getElementById('demirbasPayModalAptId').value = apt.id;
     document.getElementById('demirbasPayModalAptTitle').textContent = `${apt.block} - Daire ${apt.apartment}`;
     document.getElementById('demirbasPayModalAptSub').textContent = `Sakin: ${apt.fullName || '-'}`;
+    document.getElementById('demirbasPayModalDate').value = new Date().toISOString().slice(0, 10);
     const dem = getDemirbasDebt(apt);
     document.getElementById('demirbasPayModalAmount').value = dem.total > 0 ? dem.total : 0;
     updateDemirbasPayModalPreview();
@@ -1797,6 +1836,7 @@ document.getElementById('demirbasPayModalSubmitBtn').onclick = async () => {
     const apt = APARTMENTS.find(a => a.id === aptId);
     if (!apt) return;
     const inputAmt = parseFloat(document.getElementById('demirbasPayModalAmount').value) || 0;
+    const payDate = document.getElementById('demirbasPayModalDate').value || new Date().toISOString().slice(0, 10);
     if (inputAmt <= 0) { toast('Tutar giriniz.', 'danger'); return; }
 
     showLoading('İşleniyor...');
@@ -1815,14 +1855,14 @@ document.getElementById('demirbasPayModalSubmitBtn').onclick = async () => {
                 rem -= take;
                 const totalPaid = alreadyPaid + take;
                 payments[paidKey] = {
-                    date: new Date().toLocaleDateString('tr-TR'),
+                    date: payDate,
                     amount: totalPaid,
                     status: totalPaid >= it.fullAmount ? 'Ödendi' : 'Ödenmedi'
                 };
             }
         }
         const demirbasPaymentsLog = apt.demirbasPaymentsLog || [];
-        demirbasPaymentsLog.push({ date: new Date().toLocaleDateString('tr-TR'), amount: inputAmt, type: 'Demirbaş Ödemesi' });
+        demirbasPaymentsLog.push({ date: payDate, amount: inputAmt, type: 'Demirbaş Ödemesi' });
 
         try { await updateDoc(doc(db, "daireler", apt.id), { demirbasPayments: payments, demirbasPaymentsLog }); }
         catch(e) { await updateDoc(doc(db, "apartments", apt.id), { demirbasPayments: payments, demirbasPaymentsLog }); }
