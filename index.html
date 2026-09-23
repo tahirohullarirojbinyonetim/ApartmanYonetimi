@@ -97,7 +97,7 @@
   .block-badge{display:inline-block;padding:2px 4px;border-radius:3px;font-size:.55rem;font-weight:800}
   .block-badge.a{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
   .block-badge.b{background:#fdf2f8;color:#9d174d;border:1px solid #fbcfe8}
-  .whatsapp-btn{display:inline-flex;align-items:center;gap:2px;background:#22c55e;color:#fff;padding:3px 6px;border-radius:4px;font-size:9.5px;text-decoration:none;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
+  .whatsapp-btn{display:inline-flex;align-items:center;gap:2px;background:#22c55e;color:#fff;padding:3px 6px;border-radius:4px;font-size:9.5px;text-decoration:none;font-weight:600;cursor:border;none;white-space:nowrap}
   .pay-btn{display:inline-flex;align-items:center;gap:2px;background:#059669;color:#fff;padding:3px 6px;border-radius:4px;font-size:9.5px;text-decoration:none;font-weight:700;cursor:pointer;border:none;white-space:nowrap}
   .unpaid-alert-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:8px;margin-top:6px}
   .unpaid-alert-box h4{margin:0 0 4px 0;color:var(--danger);font-size:10.5px;display:flex;align-items:center;gap:4px}
@@ -149,6 +149,24 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- GÜVENLİ YÖNETİCİ GİRİŞ MODALI (FIREBASE AUTH - E-POSTA & ŞİFRE) -->
+<div id="adminPasswordModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button class="close-modal" id="closeAdminModalBtn">&times;</button>
+    <h3><i class="fa-solid fa-shield-halved" style="color:var(--accent);"></i> Güvenli Yönetim Girişi</h3>
+    <p style="font-size:9px;color:var(--secondary);margin-bottom:8px;">Firebase Authentication sunucu doğrulaması ile tam korumalı giriş.</p>
+    <div class="field">
+      <label>Yönetici E-Posta</label>
+      <input type="email" id="adminEmail" placeholder="yonetim@rojbin.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Şifre</label>
+      <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="adminLoginBtn" style="width:100%;margin-top:4px;"><i class="fa-solid fa-key"></i> Giriş Yap</button>
+  </div>
+</div>
+
 <!-- DAİRE NOT MODALI -->
 <div id="aptNoteModal" class="modal-overlay hidden">
   <div class="modal-card" style="border-top:4px solid var(--accent);">
@@ -158,7 +176,7 @@
     <div style="font-weight:700;margin-bottom:6px;color:var(--primary);" id="noteAptTitle">-</div>
     <div class="field">
       <label>Not İçeriği</label>
-      <textarea id="aptNoteText" rows="4" placeholder="Bu daire için özel not giriniz... (Örn: Ödemeyi kardeşi yapıyor, kiracı çıkacak vs.)"></textarea>
+      <textarea id="aptNoteText" rows="4" placeholder="Bu daire için özel not giriniz..."></textarea>
     </div>
     <div style="display:flex;gap:4px;margin-top:6px;">
       <button class="btn btn-danger" id="deleteAptNoteBtn" style="flex:1;"><i class="fa-solid fa-trash"></i> Notu Sil</button>
@@ -262,15 +280,6 @@
   </div>
 </div>
 
-<div id="adminPasswordModal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <button class="close-modal" id="closeAdminModalBtn">&times;</button>
-    <h3><i class="fa-solid fa-shield-halved" style="color:var(--accent);"></i> Yönetim Girişi</h3>
-    <div class="field"><label>Erişim Şifresi</label><input type="password" id="adminPassword" placeholder="••••" autocomplete="off" style="text-align:center;font-size:.95rem;letter-spacing:3px;"></div>
-    <button class="btn btn-primary" id="adminLoginBtn" style="width:100%;"><i class="fa-solid fa-key"></i> Giriş Yap</button>
-  </div>
-</div>
-
 <div id="confirmModal" class="modal-overlay hidden">
   <div class="modal-card" style="border-top:4px solid var(--danger);">
     <h3 id="confirmTitle"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);"></i> Onay Gerekiyor</h3>
@@ -339,19 +348,9 @@
     <h3><i class="fa-solid fa-user-pen" style="color:#3b82f6;"></i> Geçmiş Sakin Bilgilerini Düzenle</h3>
     <input type="hidden" id="ptWaAptId">
     <input type="hidden" id="ptWaIndex">
-    <div class="field">
-      <label>Ad Soyad</label>
-      <input type="text" id="ptEditName" placeholder="Örn: Mustafa Güzel">
-    </div>
-    <div class="field">
-      <label>Telefon Numarası</label>
-      <input type="text" id="ptEditPhone" placeholder="05xx...">
-    </div>
-    <div class="field">
-      <label>Kalan Borç Tutarı (₺)</label>
-      <input type="number" id="ptEditDebt" placeholder="0" style="font-weight:700;color:var(--danger);">
-      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Bu tutar matristen otomatik hesaplanır. İsterseniz elle değiştirebilirsiniz.</span>
-    </div>
+    <div class="field"><label>Ad Soyad</label><input type="text" id="ptEditName" placeholder="Örn: Mustafa Güzel"></div>
+    <div class="field"><label>Telefon Numarası</label><input type="text" id="ptEditPhone" placeholder="05xx..."></div>
+    <div class="field"><label>Kalan Borç Tutarı (₺)</label><input type="number" id="ptEditDebt" placeholder="0" style="font-weight:700;color:var(--danger);"></div>
     <button class="btn btn-primary" id="savePastTenantInfoBtn" style="width:100%;margin-top:8px;padding:8px;"><i class="fa-solid fa-floppy-disk"></i> Bilgileri Kaydet</button>
   </div>
 </div>
@@ -376,14 +375,8 @@
       <div class="field"><label>Giriş Tarihi</label><input type="date" id="addPtStart"></div>
       <div class="field"><label>Çıkış Tarihi</label><input type="date" id="addPtEnd"></div>
     </div>
-    <div class="field">
-      <label>Borçlu Olduğu Aylar / Toplam Borç (₺)</label>
-      <input type="number" id="addPtTotalDebt" placeholder="Örn: 1500" style="font-weight:700;color:var(--danger);">
-      <span style="font-size:8.5px;color:var(--secondary);display:block;margin-top:2px;">💡 Bu geçmiş sakinin kalan toplam borcunu yazın.</span>
-    </div>
-    <button class="btn btn-primary" id="saveNewPastTenantBtn" style="width:100%;margin-top:6px;">
-      <i class="fa-solid fa-plus"></i> Geçmiş Sakini Ekle
-    </button>
+    <div class="field"><label>Kalan Toplam Borç (₺)</label><input type="number" id="addPtTotalDebt" placeholder="Örn: 1500" style="font-weight:700;color:var(--danger);"></div>
+    <button class="btn btn-primary" id="saveNewPastTenantBtn" style="width:100%;margin-top:6px;"><i class="fa-solid fa-plus"></i> Geçmiş Sakini Ekle</button>
   </div>
 </div>
 
@@ -411,14 +404,13 @@
       <div class="field"><label>Plaka</label><input type="text" id="ocNewPlate" placeholder="01XX"></div>
       <div class="field"><label>Aylık Aidat (₺)</label><input type="number" id="ocNewFee" value="500"></div>
     </div>
-    <div class="row hidden" id="hostInfoRow">
+    <div class="row hidden" id="ocHostRow">
       <div class="field"><label>Ev Sahibi Ad</label><input type="text" id="ocHostName" placeholder="Ev sahibi adı"></div>
       <div class="field"><label>Ev Sahibi Tel</label><input type="text" id="ocHostPhone" placeholder="05xx"></div>
     </div>
     <div class="field">
       <label>Yeni Sakin Giriş (Katılım) Tarihi</label>
       <input type="date" id="ocStartDate" style="font-weight:700;">
-      <span style="font-size:8px;color:var(--secondary);display:block;margin-top:2px;">💡 Bu tarih girildiğinde, önceki sakinin çıkış tarihi otomatik olarak bu tarih olacak ve önceki borçlar o sakine kilitlenecektir.</span>
     </div>
     <div style="display:flex;gap:5px;margin-top:6px;">
       <button class="btn btn-secondary" id="cancelOcBtn" style="flex:1;">İptal</button>
@@ -461,7 +453,7 @@
         <i class="fa-solid fa-triangle-exclamation" style="font-size:1.2rem;"></i> KASADAN HENÜZ ÖDENMEMİŞ (BEKLEYEN) GİDERLER VAR!
       </div>
       <div style="font-size:9.5px;color:#7f1d1d;line-height:1.3;margin-bottom:4px;">
-        Aşağıda listelenen faturalar/giderler sisteme girilmiş ancak kasadan henüz ödenmedi. Ödeme yapılmadığı sürece bu tutarlar bakiye hesaplamasından düşülmez:
+        Aşağıda listelenen faturalar/giderler sisteme girilmiş ancak kasadan henüz ödenmedi:
       </div>
       <div id="publicUnpaidExpensesList" style="display:flex;flex-direction:column;gap:3px;"></div>
     </div>
@@ -547,8 +539,6 @@
 
     <!-- 0. GENEL DURUM & ÖZET -->
     <div id="tabSummary" class="tab-panel active">
-      
-      <!-- HIZLI DAİRE RÖNTGENİ (ARAMA MOTORU) -->
       <div class="card" style="border-left:4px solid #3b82f6;background:#f8fafc;">
         <h2><i class="fa-solid fa-magnifying-glass-chart" style="color:#3b82f6;"></i> Hızlı Daire Arama & Durum Özeti</h2>
         <div class="field" style="margin-bottom:4px;">
@@ -559,7 +549,6 @@
 
       <div class="card" style="border-left:3px solid var(--accent);">
         <h2><i class="fa-solid fa-chart-pie" style="color:var(--accent);"></i> Genel Finansal Özet</h2>
-        
         <div class="grid grid-3" style="margin-bottom:10px;">
           <div class="stat-card collected"><i class="fa-solid fa-hand-holding-dollar"></i><span class="label">Toplanan Gelirler</span><span class="value" id="adminSummaryCollected">₺0</span></div>
           <div class="stat-card expenses"><i class="fa-solid fa-money-bill-transfer"></i><span class="label">Ödenen Giderler</span><span class="value" id="adminSummaryExpenses">₺0</span></div>
@@ -624,7 +613,7 @@
       <div class="card" style="border-left:3px solid var(--accent);">
         <h2><i class="fa-solid fa-user-clock" style="color:var(--accent);"></i> Eski Malik & Kiracı Borç Yönetim Paneli</h2>
         <p style="font-size:9.5px;color:var(--secondary);margin-bottom:8px;">
-          Burada dondurulmuş veya geçmiş dönemlere ait borcu olan tüm eski malik ve kiracılar listelenir. İşlem yapmak veya hatırlatma göndermek için ilgili butonları kullanabilirsiniz.
+          Burada dondurulmuş veya geçmiş dönemlere ait borcu olan tüm eski malik ve kiracılar listelenir.
         </p>
         <div id="pastDebtsContainer"><div class="empty-note">Yükleniyor...</div></div>
       </div>
@@ -681,7 +670,7 @@
         </div>
         <div class="row">
           <div class="field">
-            <label>Ait Olduğu Ay (Hangi Ayın Gideri?)</label>
+            <label>Ait Olduğu Ay</label>
             <select id="expTargetMonth">
               <option value="Ocak 2026">Ocak 2026</option><option value="Şubat 2026">Şubat 2026</option><option value="Mart 2026">Mart 2026</option><option value="Nisan 2026">Nisan 2026</option><option value="Mayıs 2026">Mayıs 2026</option><option value="Haziran 2026">Haziran 2026</option><option value="Temmuz 2026">Temmuz 2026</option><option value="Ağustos 2026">Ağustos 2026</option><option value="Eylül 2026" selected>Eylül 2026</option><option value="Ekim 2026">Ekim 2026</option><option value="Kasım 2026">Kasım 2026</option><option value="Aralık 2026">Aralık 2026</option>
             </select>
@@ -811,7 +800,7 @@
     <div id="tabExcel" class="tab-panel">
       <div class="card">
         <h2><i class="fa-solid fa-file-excel" style="color:#059669;"></i> Detaylı Excel Raporları</h2>
-        <p style="color:var(--secondary);font-size:9.5px;margin-bottom:8px;">Tüm site verilerini; aylık aidat matrisi (tutar ve o dönemin sakini detaylı), eski oturan borç listesi, demirbaş ödemeleri, giderler ve mülkler dahil çok sayfalı Excel olarak indirebilirsiniz.</p>
+        <p style="color:var(--secondary);font-size:9.5px;margin-bottom:8px;">Tüm site verilerini; aylık aidat matrisi, eski oturan borç listesi, demirbaş ödemeleri, giderler ve mülkler dahil çok sayfalı Excel olarak indirebilirsiniz.</p>
         <button class="btn btn-success" id="exportExcelBtn" style="font-size:10.5px;padding:8px 12px;"><i class="fa-solid fa-download"></i> Tüm Sistemi Detaylı Excel Olarak İndir (.xlsx)</button>
       </div>
     </div>
@@ -837,23 +826,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// FIREBASE ORİJİNAL VE DOĞRULANMIŞ BAĞLANTI AYARLARI
 const firebaseConfig = {
-    apiKey: "AIzaSyDqZSuQjsq3vgs0cnx9ZF4EWJk-WkWfJ1U",
-    authDomain: "apartmanyonetimi-34c5b.firebaseapp.com",
-    projectId: "apartmanyonetimi-34c5b",
-    storageBucket: "apartmanyonetimi-34c5b.firebasestorage.app",
-    messagingSenderId: "60356494355",
-    appId: "1:60356494355:web:ca88119460a566edd2be6",
-    measurementId: "G-561MPPZJET"
+  apiKey: "AIzaSyDqZSuQjsq3vgsOcnx9ZF4EWJk-WkWfJ1U",
+  authDomain: "apartmanyonetimi-34c5b.firebaseapp.com",
+  projectId: "apartmanyonetimi-34c5b",
+  storageBucket: "apartmanyonetimi-34c5b.firebasestorage.app",
+  messagingSenderId: "60356494355",
+  appId: "1:60356494355:web:ca88119460a566eddd2be6",
+  measurementId: "G-561MPPZJET"
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const ADMIN_PASSWORD = "2026+-";
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
 // 23 EYLÜL 2026 İTİBARİYLE SABİT BANKA BAZ BAKİYESİ
@@ -880,6 +869,14 @@ let WA_TEMPLATE = localStorage.getItem('wa_template') || DEFAULT_WA_TEMPLATE;
 let BANK_TRANSACTIONS = [], IMPORT_ROWS = [];
 let openAccordionIndex = null;
 let openDemirbasAccordionIndex = null;
+
+// A 5 VE B 8 YÖNETİCİ MUAFİYET KONTROLÜ
+function isExemptManager(apt) {
+    if (!apt) return false;
+    const b = normalizeBlockName(apt.block);
+    const no = String(apt.apartment).trim();
+    return (b === 'A Blok' && no === '5') || (b === 'B Blok' && no === '8');
+}
 
 function normalizeBlockName(b) {
     if (!b) return 'A Blok';
@@ -931,6 +928,7 @@ function getPastTenantCalculatedDebt(apt, pt) {
 }
 
 function getUnpaidMonths(apt) {
+    if (isExemptManager(apt)) return [];
     const now = new Date();
     const currentYear = now.getFullYear(), currentMonthIdx = now.getMonth();
     const unpaid = [];
@@ -979,6 +977,7 @@ function getDemirbasDebt(apt) {
 }
 
 function getSafAidatDebt(apt) {
+    if (isExemptManager(apt)) return 0;
     let totalDebt = getUnpaidMonths(apt).reduce((s, u) => s + u.amount, 0);
     const advance = Number(apt.advanceBalance || 0);
     return Math.max(0, totalDebt - advance);
@@ -1157,23 +1156,16 @@ function openWhatsApp(apt) {
 
 function openPastTenantWhatsApp(tenant, apt) {
     const phone = cleanPhone(tenant.phone);
-    if (!phone) { toast('Geçmiş sakinin telefonu kayıtlı değil. Lütfen "Düzenle" butonundan telefon ekleyin.', 'danger'); return; }
-    
+    if (!phone) { toast('Geçmiş sakinin telefonu kayıtlı değil.', 'danger'); return; }
     const calculatedDebt = getPastTenantCalculatedDebt(apt, tenant);
-    
-    let msg = `Sayın ${tenant.name},
-
-Tahiroğulları Rojbin Sitesi ${apt.block} Daire ${apt.apartment} için geçmiş döneme ait bakiye dökümünüz:
-
-• Toplam Kalan Borç: ${money(calculatedDebt)}
-
-Anlayışınız için teşekkür ederiz.
-Tahiroğulları Rojbin Sitesi Yönetimi`;
-
+    let msg = `Sayın ${tenant.name},\n\nTahiroğulları Rojbin Sitesi ${apt.block} Daire ${apt.apartment} için geçmiş döneme ait bakiye dökümünüz:\n\n• Toplam Kalan Borç: ${money(calculatedDebt)}\n\nAnlayışınız için teşekkür ederiz.\nTahiroğulları Rojbin Sitesi Yönetimi`;
     window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function getOccupantBadge(type) {
+function getOccupantBadge(type, apt) {
+    if (apt && isExemptManager(apt)) {
+        return '<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;"><i class="fa-solid fa-crown"></i> YÖNETİCİ (MUAF)</span>';
+    }
     if (type === 'Kiracı') return '<span class="occupant-badge tenant">KİRACI</span>';
     return '<span class="occupant-badge host">EV SAHİBİ</span>';
 }
@@ -1299,23 +1291,34 @@ function checkNewRequests() {
     else { if(dot) dot.textContent = ''; }
 }
 
+// FIREBASE AUTH GİRİŞ YÖNETİMİ
 document.getElementById('openAdminModalBtn').onclick = () => {
+    document.getElementById('adminEmail').value = 'yonetim@rojbin.com';
     document.getElementById('adminPassword').value = '';
     document.getElementById('adminPasswordModal').classList.remove('hidden');
     document.getElementById('adminPassword').focus();
 };
 document.getElementById('closeAdminModalBtn').onclick = () => document.getElementById('adminPasswordModal').classList.add('hidden');
-document.getElementById('adminLoginBtn').onclick = () => {
+
+document.getElementById('adminLoginBtn').onclick = async () => {
+    var email = document.getElementById('adminEmail').value.trim();
     var pw = document.getElementById('adminPassword').value;
-    if (pw === ADMIN_PASSWORD) {
+    if(!email || !pw) { toast('E-posta ve şifrenizi giriniz.', 'danger'); return; }
+    
+    showLoading('Kimlik doğrulanıyor...');
+    try {
+        await signInWithEmailAndPassword(auth, email, pw);
         session = { role: 'admin', apt: null, phone: null };
         document.getElementById('adminPasswordModal').classList.add('hidden');
         enterAdminView();
-    } else { toast('Hatalı Şifre!', 'danger'); }
+        toast('Giriş başarılı!', 'success');
+    } catch(err) {
+        console.error("Giriş Hatası:", err);
+        toast('Giriş başarısız: ' + (err.code || err.message), 'danger');
+    } finally {
+        hideLoading();
+    }
 };
-document.getElementById('adminPassword').addEventListener('keyup', function(event) {
-    if (event.key === 'Enter') document.getElementById('adminLoginBtn').click();
-});
 
 document.getElementById('residentLoginBtn').onclick = () => {
     var selBlock = document.getElementById('residentBlockSelect').value;
@@ -1333,7 +1336,13 @@ document.getElementById('residentLoginBtn').onclick = () => {
     } else { errorDiv.textContent = selBlock + ' Daire ' + selNo + ' için telefon eşleşmedi.'; errorDiv.style.display = 'block'; }
 };
 
-document.getElementById('logoutBtn').onclick = () => { session = { role: null, apt: null, phone: null }; localStorage.clear(); location.reload(); };
+document.getElementById('logoutBtn').onclick = async () => { 
+    showLoading('Çıkış yapılıyor...');
+    try { await signOut(auth); } catch(e){}
+    session = { role: null, apt: null, phone: null }; 
+    localStorage.clear(); 
+    location.reload(); 
+};
 
 function enterAdminView() { 
     document.getElementById('loginView').classList.add('hidden'); 
@@ -1341,6 +1350,8 @@ function enterAdminView() {
     document.getElementById('adminView').classList.remove('hidden'); 
     document.getElementById('logoutBtn').classList.remove('hidden'); 
     document.getElementById('openAdminModalBtn').classList.add('hidden'); 
+    document.getElementById('openApiKeyBtn').classList.remove('hidden');
+    document.getElementById('openWaTemplateBtn').classList.remove('hidden');
     document.getElementById('userLabel').textContent = 'Yönetici'; 
     renderAdminPanel(); 
 }
@@ -1360,24 +1371,26 @@ async function checkSession() {
     populateMonthSelects();    
     populateApartmentNoSelects();    
     
-    try { 
-        await signInAnonymously(auth); 
-    } catch(e) { 
-        console.warn("Anonim giriş pas geçildi:", e.message); 
-    }
-
-    const role = localStorage.getItem('session_role');     
-    if (role === 'resident') {         
-        const resId = localStorage.getItem('session_res_id');         
-        if (resId) { 
-            session = { role: 'resident', id: resId, apt: '', phone: '' }; 
-            enterResidentView(); 
-        }     
-    }     
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.email) {
+            session = { role: 'admin', apt: null, phone: null };
+            enterAdminView();
+        } else {
+            const role = localStorage.getItem('session_role');     
+            if (role === 'resident') {         
+                const resId = localStorage.getItem('session_res_id');         
+                if (resId) { 
+                    session = { role: 'resident', id: resId, apt: '', phone: '' }; 
+                    enterResidentView(); 
+                }     
+            } else if (!user) {
+                signInAnonymously(auth).catch(e => console.warn(e.message));
+            }
+        }
+    });
     
     initRealtimeListeners();     
     initBulkDebtsListener();
-    
     hideLoading();
 }
 
@@ -1529,7 +1542,6 @@ function renderAdminPanel() {
     updateBulkFeePreview();
 }
 
-// GENEL DURUM ÖZETİNDEKİ HIZLI DAİRE RÖNTGENİ
 function executeQuickSearch() {
     const input = document.getElementById('quickAptSearchInput');
     const container = document.getElementById('quickAptSearchResultArea');
@@ -1569,7 +1581,7 @@ function executeQuickSearch() {
         html += `<div style="background:#fff;border:2px solid #3b82f6;border-radius:8px;padding:8px;margin-bottom:6px;box-shadow:var(--shadow-sm);">
             <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-bottom:6px;">
                 <div style="font-size:11px;font-weight:800;color:var(--primary);">
-                    ${getBlockBadge(a.block)} Daire ${a.apartment} — <span style="color:#2563eb;">${a.fullName || 'İsimsiz'}</span> ${getOccupantBadge(a.occupantType)}
+                    ${getBlockBadge(a.block)} Daire ${a.apartment} — <span style="color:#2563eb;">${a.fullName || 'İsimsiz'}</span> ${getOccupantBadge(a.occupantType, a)}
                 </div>
                 <button class="whatsapp-btn" onclick="openWhatsApp(APARTMENTS.find(x => x.id === '${a.id}'))"><i class="fa-brands fa-whatsapp"></i> WhatsApp Dökümü</button>
             </div>
@@ -1647,7 +1659,7 @@ function renderOverviewTable() {
     var body = document.getElementById('overviewBody'); if(!body) return; var html = '';
     if (APARTMENTS.length === 0) { html = '<tr><td colspan="6" class="empty-note">Kayıt yok</td></tr>'; } else {
         APARTMENTS.forEach(a => {
-            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + getOccupantBadge(a.occupantType) + '</td><td>' + (a.phone || '-') + '</td><td>' + (a.hostName ? a.hostName : '-') + '</td></tr>';
+            html += '<tr><td>' + getBlockBadge(a.block) + '</td><td><b>' + a.apartment + '</b></td><td>' + (a.fullName || '-') + '</td><td>' + getOccupantBadge(a.occupantType, a) + '</td><td>' + (a.phone || '-') + '</td><td>' + (a.hostName ? a.hostName : '-') + '</td></tr>';
         });
     }
     body.innerHTML = html;
@@ -1716,7 +1728,8 @@ function renderDuesTable() {
         const advance = Number(a.advanceBalance || 0);
         
         let aidatPill = '<span class="status-pill red">Ödenmedi</span>';
-        if (aidatState.status === 'Ödendi') aidatPill = '<span class="status-pill green">Ödendi</span>';
+        if (isExemptManager(a)) aidatPill = '<span class="status-pill green">Muaf</span>';
+        else if (aidatState.status === 'Ödendi') aidatPill = '<span class="status-pill green">Ödendi</span>';
         else if (aidatState.paidAmount > 0) aidatPill = `<span class="status-pill warning">Kısmi</span>`;
 
         const waBtn = '<button class="whatsapp-btn wa-btn" data-id="' + a.id + '"><i class="fa-brands fa-whatsapp"></i></button>';
@@ -1772,7 +1785,7 @@ function renderDuesDetailsContent(apt, activeYear, index) {
         const state = getDueState(apt, activeYear, mName);
         const st = state.status || 'Ödenmedi';
         let cls = 'unpaid';
-        if (st === 'Ödendi') cls = 'paid';
+        if (isExemptManager(apt) || st === 'Ödendi') cls = 'paid';
         else if (state.paidAmount > 0) cls = 'warning';
         else if (st === 'Eski Kiracı Borcu') cls = 'frozen-tenant';
         else if (st === 'Eski Ev Sahibi Borcu') cls = 'frozen-host';
@@ -2430,7 +2443,6 @@ document.getElementById('demirbasPayModalSubmitBtn').onclick = async () => {
             }
         }
 
-        // Artan fazla ödemeyi doğrudan demirbasAdvanceBalance alanına ekle
         let currentDemirbasAdvance = Number(apt.demirbasAdvanceBalance || 0);
         if (rem > 0) {
             currentDemirbasAdvance += rem;
@@ -2806,7 +2818,7 @@ function renderApartmentsTable() {
                 <div style="display:flex;align-items:center;gap:6px;">
                     ${getBlockBadge(a.block)} <b>Daire ${a.apartment}</b>
                 </div>
-                <div>${getOccupantBadge(a.occupantType)}</div>
+                <div>${getOccupantBadge(a.occupantType, a)}</div>
             </div>
             <div class="mobile-card-body">
                 <div><b>Ad Soyad:</b> ${a.fullName || '-'}</div>
@@ -3093,7 +3105,9 @@ document.getElementById('exportExcelBtn').onclick = function() {
                     const st = state.status || 'Ödenmedi';
                     const occ = getOccupantAtPeriod(a, String(y), mName);
                     
-                    if (st === 'Ödendi') {
+                    if (isExemptManager(a)) {
+                        rowData.push('Muaf (Yönetici)');
+                    } else if (st === 'Ödendi') {
                         const paidVal = Number(state.paidAmount || a.feeAmount || 500);
                         rowData.push(paidVal + ' ₺ (Ödendi - ' + occ.name + ')');
                     } else if (state.paidAmount > 0) {
@@ -3104,7 +3118,7 @@ document.getElementById('exportExcelBtn').onclick = function() {
                         rowData.push('Ödenmedi (' + occ.name + ')');
                     }
 
-                    if (st !== 'Ödendi' && st !== 'Eski Kiracı Borcu' && st !== 'Eski Ev Sahibi Borcu') {
+                    if (!isExemptManager(a) && st !== 'Ödendi' && st !== 'Eski Kiracı Borcu' && st !== 'Eski Ev Sahibi Borcu') {
                         unpaidTotal += Math.max(0, Number(a.feeAmount || 500) - Number(state.paidAmount || 0));
                     }
                 }
@@ -3324,7 +3338,7 @@ document.getElementById('analyzeBankBtn').onclick = async () => {
         renderBankResults(parsed);
         toast('Analiz tamamlandı.', 'success');
         document.getElementById('bankResultCard').scrollIntoView({ behavior: 'smooth' });
-    } catch (err) { toast('Hata', 'danger'); } finally { hideLoading(); }
+    } catch (err) { toast('Hata: ' + err.message, 'danger'); } finally { hideLoading(); }
 };
 
 function renderBankResults(results) {
