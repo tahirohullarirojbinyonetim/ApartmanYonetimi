@@ -199,7 +199,6 @@ tr:last-child td{border-bottom:none}
 .uyari.red{background:#ffebee;border-color:#ef9a9a;color:#b71c1c}
 .uyari.green{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20}
 
-/* Giriş ekranı */
 .login-wrap{max-width:400px;margin:40px auto;padding:24px;background:#fff;
   border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
 .login-wrap h2{text-align:center;color:var(--primary-dark);margin-bottom:6px;font-size:1.1rem}
@@ -231,9 +230,9 @@ tr:last-child td{border-bottom:none}
 
 <script>
 /* =========================================================
-   VERİTABANI - Firebase + localStorage
+   VERİTABANI
    ========================================================= */
-const STORAGE_KEY = 'rojbin_db_v11';
+const STORAGE_KEY = 'rojbin_db_v12';
 const FIRESTORE_COLLECTION = 'rojbin_data';
 const FIRESTORE_DOC = 'state';
 const KASA_BASLANGIC_VARSAYILAN = 76735.79;
@@ -368,8 +367,7 @@ function seedDB(){
     auditLogs: [],
     bildirimGecmisi: [],
     fazlaOdemeler: {},
-    kasaBaslangic: KASA_BASLANGIC_VARSAYILAN,
-    kasaHareketleri: [],
+    bankaBakiyesi: KASA_BASLANGIC_VARSAYILAN,
     sablonlar: JSON.parse(JSON.stringify(DEFAULT_SABLONLAR)),
     settings:{ aidatTutar: AIDAT_TUTAR, toplamBekle: TOPLAM_BEKLE },
     _seeded: true
@@ -385,9 +383,14 @@ if(!db.giderler) db.giderler = [];
 if(!db.duyurular) db.duyurular = [];
 if(!db.bildirimGecmisi) db.bildirimGecmisi = [];
 if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
-if(!db.kasaHareketleri) db.kasaHareketleri = [];
-if(db.kasaBaslangic === undefined || db.kasaBaslangic === 0){
-  db.kasaBaslangic = KASA_BASLANGIC_VARSAYILAN;
+// Eski kasaBaslangic varsa bankaBakiyesi'ne taşı
+if(db.kasaBaslangic !== undefined && db.bankaBakiyesi === undefined){
+  db.bankaBakiyesi = db.kasaBaslangic;
+  delete db.kasaBaslangic;
+}
+if(db.kasaHareketleri){ delete db.kasaHareketleri; }
+if(db.bankaBakiyesi === undefined || db.bankaBakiyesi === 0){
+  db.bankaBakiyesi = KASA_BASLANGIC_VARSAYILAN;
 }
 if(!db.sablonlar) db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
 if(!db.settings) db.settings = { aidatTutar:AIDAT_TUTAR, toplamBekle:TOPLAM_BEKLE };
@@ -456,34 +459,14 @@ function demirbasToplamBorc(k){
   return t;
 }
 
-/* ============ DİNAMİK KASA ============ */
-function toplamTahsilatHareketleri(){
-  return db.kasaHareketleri.filter(h=>h.tip==='tahsilat').reduce((s,h)=>s+(Number(h.tutar)||0),0);
-}
-function toplamGiderHareketleri(){
-  return db.kasaHareketleri.filter(h=>h.tip==='gider').reduce((s,h)=>s+(Number(h.tutar)||0),0);
-}
-function kasaBaki(){
-  return (db.kasaBaslangic || 0) + toplamTahsilatHareketleri() - toplamGiderHareketleri();
-}
+/* ============ BASİT KASA ============ */
+// Banka bakiyesi = db.bankaBakiyesi (senin girdiğin sayı + otomatik ekleme/düşme)
+// Tahsilatlar +, giderler -
+function bankaBaki(){ return Number(db.bankaBakiyesi)||0; }
+function bankaBakiEkle(tutar){ db.bankaBakiyesi = (Number(db.bankaBakiyesi)||0) + (Number(tutar)||0); }
+function bankaBakiDus(tutar){ db.bankaBakiyesi = (Number(db.bankaBakiyesi)||0) - (Number(tutar)||0); }
+
 function toplamGider(){ return db.giderler.reduce((s,g)=>s+(Number(g.tutar)||0),0); }
-
-function kasaHareketEkle(tip, tutar, aciklama, daire){
-  db.kasaHareketleri.push({
-    id: Date.now()+'_'+Math.random(),
-    tarih: bugun(),
-    tip: tip,
-    tutar: Number(tutar)||0,
-    aciklama: aciklama||'',
-    daire: daire||null
-  });
-}
-function kasaHareketSilByRef(aciklama, daire, tutar){
-  const idx = db.kasaHareketleri.findIndex(h=>h.aciklama===aciklama && h.daire===daire && Math.abs(h.tutar-tutar)<0.01);
-  if(idx > -1){ db.kasaHareketleri.splice(idx, 1); return true; }
-  return false;
-}
-
 function toplamAidatBorc(){ let t=0; db.apartments.forEach(a=>t+=aidatKalan(aptKey(a))); return t; }
 function toplamDemirbasBorc(){ let t=0; db.apartments.forEach(a=>t+=demirbasToplamBorc(aptKey(a))); return t; }
 function toplamAidatOdenen(){ let t=0; Object.keys(db.aidat).forEach(k=>t+=aidatOdenen(k)); return t; }
@@ -608,9 +591,14 @@ async function loadFromCloud(){
       if(cloudData && cloudData.apartments && cloudData.apartments.length){
         db = cloudData;
         if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
-        if(!db.kasaHareketleri) db.kasaHareketleri = [];
-        if(db.kasaBaslangic === undefined || db.kasaBaslangic === 0){
-          db.kasaBaslangic = KASA_BASLANGIC_VARSAYILAN;
+        // Eski kasaBaslangic varsa bankaBakiyesi'ne taşı
+        if(db.kasaBaslangic !== undefined && db.bankaBakiyesi === undefined){
+          db.bankaBakiyesi = db.kasaBaslangic;
+          delete db.kasaBaslangic;
+        }
+        if(db.kasaHareketleri){ delete db.kasaHareketleri; }
+        if(db.bankaBakiyesi === undefined || db.bankaBakiyesi === 0){
+          db.bankaBakiyesi = KASA_BASLANGIC_VARSAYILAN;
         }
         if(!db.sablonlar) db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
         if(!db.bildirimGecmisi) db.bildirimGecmisi = [];
@@ -678,7 +666,6 @@ async function initFirebase(){
     _onAuthStateChanged = authMod.onAuthStateChanged;
     _fbReady = true;
 
-    // Auth durumunu dinle
     _onAuthStateChanged(_auth, async function(user){
       _currentUser = user;
       if(user && user.email === YETKILI_EMAIL){
@@ -688,7 +675,6 @@ async function initFirebase(){
         render();
         startRealtimeSync();
       } else if(user && user.email !== YETKILI_EMAIL){
-        // Yetkisiz kullanıcı → çıkış
         console.warn('Yetkisiz kullanıcı: '+user.email);
         await _signOut(_auth);
         isAdmin = false;
@@ -707,11 +693,9 @@ async function initFirebase(){
   }
 }
 
-/* Auth - Giriş / Çıkış */
 async function adminLogin(email, pass){
   try{
     await _signInWithEmailAndPassword(_auth, email, pass);
-    // onAuthStateChanged tetiklenir → giriş yapar
     return { ok: true };
   }catch(e){
     console.error('Login error:', e);
@@ -719,7 +703,7 @@ async function adminLogin(email, pass){
     if(e.code === 'auth/wrong-password') msg = 'Şifre hatalı.';
     else if(e.code === 'auth/user-not-found') msg = 'Bu e-posta ile kayıtlı kullanıcı yok.';
     else if(e.code === 'auth/invalid-email') msg = 'Geçersiz e-posta adresi.';
-    else if(e.code === 'auth/too-many-requests') msg = 'Çok fazla deneme. Lütfen biraz bekleyin.';
+    else if(e.code === 'auth/too-many-requests') msg = 'Çok fazla deneme. Lütfen bekleyin.';
     else if(e.code === 'auth/invalid-credential') msg = 'E-posta veya şifre hatalı.';
     return { ok: false, msg: msg };
   }
@@ -731,9 +715,7 @@ async function adminCikis(){
     currentPage = 'home';
     renderNav();
     render();
-  }catch(e){
-    console.error(e);
-  }
+  }catch(e){ console.error(e); }
 }
 
 /* ============ NAVİGASYON ============ */
@@ -759,6 +741,13 @@ function renderNav(){
   }
 }
 function navTo(page){
+  if(page === 'login'){
+    currentPage = 'login';
+    renderNav();
+    render();
+    window.scrollTo(0,0);
+    return;
+  }
   if(!isAdmin && page!=='home'){ return; }
   currentPage = page;
   renderNav();
@@ -767,6 +756,10 @@ function navTo(page){
 }
 function render(){
   const app = document.getElementById('app');
+  if(currentPage === 'login'){
+    app.innerHTML = viewLogin();
+    return;
+  }
   switch(currentPage){
     case 'home': app.innerHTML = viewHome(); break;
     case 'apartments': app.innerHTML = viewApartments(); break;
@@ -802,7 +795,6 @@ function viewLogin(){
     + '</div>';
   return html;
 }
-
 async function loginSubmit(){
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value;
@@ -829,14 +821,12 @@ async function loginSubmit(){
   if(!res.ok){
     errEl.innerHTML = '<div class="login-err">'+res.msg+'</div>';
   }
-  // Başarılıysa onAuthStateChanged tetiklenir ve render() çağrılır
 }
 
 /* ============ ANA SAYFA ============ */
 function viewHome(){
-  const kasa = kasaBaki();
+  const bakiye = bankaBaki();
   const gider = toplamGider();
-  const duyurular = db.duyurular.slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,3);
   const sonGiderler = db.giderler.slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,5);
 
   let rightBtn = '';
@@ -847,7 +837,7 @@ function viewHome(){
 
   html += '<div class="big-stat balance">'
     + '<div class="lbl">💰 Toplam Banka Bakiyesi</div>'
-    + '<div class="val">'+fmtMoney(kasa)+'</div>'
+    + '<div class="val">'+fmtMoney(bakiye)+'</div>'
     + '</div>';
 
   html += '<div class="big-stat expense">'
@@ -855,17 +845,7 @@ function viewHome(){
     + '<div class="val">'+fmtMoney(gider)+'</div>'
     + '</div>';
 
-  html += '<div class="card"><div class="card-title">📢 Duyurular <span class="badge-cnt">'+db.duyurular.length+'</span></div>';
-  if(duyurular.length){
-    duyurular.forEach(function(d){
-      html += '<div class="li"><div style="flex:1"><div class="li-t">'+(d.onemli?'🔴 ':'')+d.baslik+'</div><div class="li-d">'+fmtDate(d.tarih)+'</div><div class="li-d" style="margin-top:4px;color:var(--text)">'+d.icerik.slice(0,90)+(d.icerik.length>90?'...':'')+'</div></div></div>';
-    });
-  } else {
-    html += '<div class="empty">Henüz duyuru yok.</div>';
-  }
-  html += '</div>';
-
-  html += '<div class="card"><div class="card-title">🧾 Son Giderler <span class="badge-cnt">'+db.giderler.length+'</span></div>';
+  html += '<div class="card"><div class="card-title">🧾 Son 5 Gider <span class="badge-cnt">'+db.giderler.length+'</span></div>';
   if(sonGiderler.length){
     sonGiderler.forEach(function(g){
       html += '<div class="li"><div style="flex:1"><div class="li-t">'+g.aciklama+'</div><div class="li-d">'+(g.ay||'')+' · '+fmtDate(g.tarih)+'</div></div><div class="li-v red">-'+fmtMoney(g.tutar)+'</div></div>';
@@ -883,8 +863,7 @@ function viewHome(){
       + '<div class="more-item" onclick="navTo(\'duyurular\')"><span class="ic">📢</span>Duyurular</div>'
       + '<div class="more-item" onclick="navTo(\'sablonlar\')"><span class="ic">✏️</span>Mesaj Şablonları</div>'
       + '<div class="more-item" onclick="excelCikar()"><span class="ic">📥</span>Excel\'e Çıkar</div>'
-      + '<div class="more-item" onclick="kasaDuzenle()"><span class="ic">💵</span>Banka Bakiyesi Ayarla</div>'
-      + '<div class="more-item" onclick="hareketGecmisi()"><span class="ic">📊</span>Kasa Hareketleri</div>'
+      + '<div class="more-item" onclick="bankaBakiyeDuzenle()"><span class="ic">💵</span>Banka Bakiyesi Ayarla</div>'
       + '</div></div>';
   } else {
     html += '<div class="login-btn-wrap"><button class="btn btn-primary" style="width:100%" onclick="navTo(\'login\')">🔐 Yönetim Girişi</button></div>';
@@ -894,55 +873,27 @@ function viewHome(){
   return html;
 }
 
-/* ============ YÖNETİCİ ============ */
-function kasaDuzenle(){
+/* ============ BANKA BAKİYESİ AYARLA ============ */
+function bankaBakiyeDuzenle(){
   if(!isAdmin) return;
   const body = '<h2>💵 Banka Bakiyesi Ayarla</h2>'
-    + '<div class="muted" style="margin-bottom:10px">Başlangıç değeri. Bundan sonraki tahsilatlar eklenir, giderler düşülür.</div>'
-    + '<div class="li"><div class="li-t">Şu anki başlangıç</div><div class="li-v">'+fmtMoney(db.kasaBaslangic||0)+'</div></div>'
-    + '<div class="li"><div class="li-t">Bundan sonraki tahsilatlar</div><div class="li-v green">+'+fmtMoney(toplamTahsilatHareketleri())+'</div></div>'
-    + '<div class="li"><div class="li-t">Bundan sonraki giderler</div><div class="li-v red">-'+fmtMoney(toplamGiderHareketleri())+'</div></div>'
-    + '<div class="li"><div class="li-t"><b>Güncel Bakiye</b></div><div class="li-v"><b>'+fmtMoney(kasaBaki())+'</b></div></div>'
-    + '<div class="fg" style="margin-top:12px"><label>Yeni başlangıç değeri (₺)</label>'
-    + '<input type="number" step="0.01" class="fc" id="kasaVal" value="'+(db.kasaBaslangic||0)+'"></div>'
-    + '<button class="btn btn-primary btn-block" onclick="kasaKaydet()">Kaydet</button>';
+    + '<div class="uyari">⚠️ <b>Dikkat:</b> Bu butona bastığında bankadaki <b>gerçek tutarı</b> gir. O andan itibaren bakiye bu değerden devam eder. <b>Aidat, demirbaş ve gider kayıtların SİLİNMEZ</b>, sadece bakiye bu değerden başlar.</div>'
+    + '<div class="li"><div class="li-t">Şu anki bakiye</div><div class="li-v">'+fmtMoney(bankaBaki())+'</div></div>'
+    + '<div class="fg" style="margin-top:12px"><label>Bankadaki gerçek tutar (₺)</label>'
+    + '<input type="number" step="0.01" class="fc" id="bankaVal" value="'+bankaBaki()+'"></div>'
+    + '<button class="btn btn-primary btn-block" onclick="bankaBakiyeKaydet()">Kaydet</button>';
   openModal(body);
 }
-function kasaKaydet(){
+function bankaBakiyeKaydet(){
   if(!isAdmin) return;
-  const v = Number(document.getElementById('kasaVal').value)||0;
-  db.kasaBaslangic = v;
+  const v = Number(document.getElementById('bankaVal').value);
+  if(isNaN(v)){ alert('Geçerli bir tutar girin'); return; }
+  if(!confirm('Banka bakiyesi '+fmtMoney(v)+' olarak ayarlanacak. Emin misiniz?\n\nAidat, demirbaş ve gider kayıtlarınız silinmez.')) return;
+  db.bankaBakiyesi = v;
   saveDB();
   closeModal();
   render();
-  alert('Banka başlangıç değeri güncellendi: '+fmtMoney(v));
-}
-
-function hareketGecmisi(){
-  if(!isAdmin) return;
-  let body = '<h2>📊 Kasa Hareketleri</h2>'
-    + '<div class="li"><div class="li-t">Başlangıç</div><div class="li-v">'+fmtMoney(db.kasaBaslangic||0)+'</div></div>'
-    + '<div class="li"><div class="li-t">Toplam Tahsilat</div><div class="li-v green">+'+fmtMoney(toplamTahsilatHareketleri())+'</div></div>'
-    + '<div class="li"><div class="li-t">Toplam Gider</div><div class="li-v red">-'+fmtMoney(toplamGiderHareketleri())+'</div></div>'
-    + '<div class="li"><div class="li-t"><b>Güncel Bakiye</b></div><div class="li-v"><b>'+fmtMoney(kasaBaki())+'</b></div></div>'
-    + '<div class="divider"></div>'
-    + '<div class="sec-title">Son 100 Hareket</div>';
-
-  const son = db.kasaHareketleri.slice().reverse().slice(0, 100);
-  if(!son.length){
-    body += '<div class="empty">Henüz hareket yok.</div>';
-  } else {
-    son.forEach(function(h){
-      body += '<div class="li"><div style="flex:1">'
-        + '<div class="li-t">'+(h.daire?h.daire+' - ':'')+(h.aciklama||'')+'</div>'
-        + '<div class="li-d">'+fmtDate(h.tarih)+'</div>'
-        + '</div>'
-        + '<div class="li-v '+(h.tip==='tahsilat'?'green':'red')+'">'+(h.tip==='tahsilat'?'+':'-')+fmtMoney(h.tutar)+'</div>'
-        + '</div>';
-    });
-  }
-  body += '<button class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeModal()">Kapat</button>';
-  openModal(body);
+  alert('Banka bakiyesi güncellendi: '+fmtMoney(v));
 }
 
 /* ============ DAİRELER ============ */
@@ -1064,9 +1015,8 @@ function kaydetApt(k){
     const eskiOdenen = db.demirbas[k].odenen || 0;
     const yeniOdenen = Number(dO.value)||0;
     const fark = yeniOdenen - eskiOdenen;
-    if(fark > 0){
-      kasaHareketEkle('tahsilat', fark, 'Demirbaş ödemesi (manuel)', k);
-    }
+    if(fark > 0){ bankaBakiEkle(fark); }
+    else if(fark < 0){ bankaBakiDus(-fark); }
     db.demirbas[k].odenen = yeniOdenen;
   }
   saveDB();
@@ -1090,9 +1040,8 @@ function kaydetVeWhatsapp(k){
     const eskiOdenen = db.demirbas[k].odenen || 0;
     const yeniOdenen = Number(dO.value)||0;
     const fark = yeniOdenen - eskiOdenen;
-    if(fark > 0){
-      kasaHareketEkle('tahsilat', fark, 'Demirbaş ödemesi (manuel)', k);
-    }
+    if(fark > 0){ bankaBakiEkle(fark); }
+    else if(fark < 0){ bankaBakiDus(-fark); }
     db.demirbas[k].odenen = yeniOdenen;
   }
   saveDB();
@@ -1199,12 +1148,10 @@ function saveAidat(k, ayIndex){
   else if(tip === 'eski'){ val = document.getElementById('eskiTip').value; }
   else { val = ''; }
 
+  // Banka bakiyesini güncelle: yeni - eski fark
   const fark = yeniTutar - eskiTutar;
-  if(fark > 0){
-    kasaHareketEkle('tahsilat', fark, AY_ADLARI[ayIndex]+' aidat ödemesi', k);
-  } else if(fark < 0){
-    kasaHareketEkle('gider', Math.abs(fark), AY_ADLARI[ayIndex]+' aidat düzeltmesi', k);
-  }
+  if(fark > 0){ bankaBakiEkle(fark); }
+  else if(fark < 0){ bankaBakiDus(-fark); }
 
   db.aidat[k][ayIndex] = val;
   saveDB();
@@ -1352,7 +1299,7 @@ function demirbasOdemeKaydet(k){
   if(!db.demirbas[k]) db.demirbas[k] = {nefestenKalan:4250, odenen:0};
   const kalan = Math.max(0, db.demirbas[k].nefestenKalan - db.demirbas[k].odenen);
   db.demirbas[k].odenen = (db.demirbas[k].odenen||0) + tutar;
-  kasaHareketEkle('tahsilat', tutar, 'Demirbaş ödemesi', k);
+  bankaBakiEkle(tutar);
   if(tutar > kalan){
     const fazlaTutar = tutar - kalan;
     db.fazlaOdemeler[k] = (db.fazlaOdemeler[k]||0) + fazlaTutar;
@@ -1575,7 +1522,7 @@ function odemeKaydetProje(projeId, k){
   if(tutar <= 0){ alert('Tutar girin'); return; }
   const kalan = Math.max(0, p.daireBasi - (p.odemeler[k]||0));
   p.odemeler[k] = (p.odemeler[k]||0) + tutar;
-  kasaHareketEkle('tahsilat', tutar, p.baslik+' ödemesi', k);
+  bankaBakiEkle(tutar);
   if(tutar > kalan){
     const fazlaTutar = tutar - kalan;
     db.fazlaOdemeler[k] = (db.fazlaOdemeler[k]||0) + fazlaTutar;
@@ -1907,12 +1854,8 @@ function eskiOdemeKaydet(id){
   const gercekTutar = Math.min(tutar, kalan);
   e.kalan = Math.max(0, kalan - gercekTutar);
   e.odenen = (Number(e.odenen)||0) + gercekTutar;
-  kasaHareketEkle('tahsilat', gercekTutar, 'Eski oturan ödemesi: '+(e.isim||''), (e.blok||'')+(e.daire||''));
-  if(tutar > kalan){
-    alert('✓ '+fmtMoney(gercekTutar)+' kasaya eklendi.\n\nKalan borç: '+fmtMoney(e.kalan)+'');
-  } else {
-    alert('✓ '+fmtMoney(gercekTutar)+' kasaya eklendi.\n\nKalan borç: '+fmtMoney(e.kalan)+'');
-  }
+  bankaBakiEkle(gercekTutar);
+  alert('✓ '+fmtMoney(gercekTutar)+' kasaya eklendi.\n\nKalan borç: '+fmtMoney(e.kalan)+'');
   saveDB();
   closeModal();
   render();
@@ -1971,7 +1914,7 @@ function giderEkle(){
   if(!rec.aciklama){ alert('Açıklama gerekli'); return; }
   if(rec.tutar <= 0){ alert('Geçerli tutar girin'); return; }
   db.giderler.push(rec);
-  kasaHareketEkle('gider', rec.tutar, rec.aciklama, null);
+  bankaBakiDus(rec.tutar);
   saveDB();
   render();
   alert('Gider kaydedildi ve kasadan düşüldü: -'+fmtMoney(rec.tutar));
@@ -1997,15 +1940,14 @@ function giderGuncelle(id){
   if(!g) return;
   const eskiTutar = g.tutar;
   const yeniTutar = Number(document.getElementById('g_tutar').value)||0;
-  kasaHareketSilByRef(g.aciklama, null, eskiTutar);
+  // Bakiyeyi düzelt: eski tutar geri eklenir, yeni tutar düşülür
+  bankaBakiEkle(eskiTutar);
+  bankaBakiDus(yeniTutar);
   g.aciklama = document.getElementById('g_aciklama').value.trim();
   g.ay = document.getElementById('g_ay').value.trim();
   g.tutar = yeniTutar;
   g.tarih = document.getElementById('g_tarih').value;
   g.durum = document.getElementById('g_durum').value;
-  if(yeniTutar > 0){
-    kasaHareketEkle('gider', yeniTutar, g.aciklama, null);
-  }
   saveDB();
   closeModal();
   render();
@@ -2015,7 +1957,7 @@ function giderSil(id){
   if(!confirm('Silinsin mi?\n\nKasadan düşülen tutar geri eklenecek.')) return;
   const g = db.giderler.find(function(x){ return x.id===id; });
   if(g){
-    kasaHareketSilByRef(g.aciklama, null, g.tutar);
+    bankaBakiEkle(g.tutar);
   }
   db.giderler = db.giderler.filter(function(x){ return x.id!==id; });
   saveDB();
@@ -2114,10 +2056,8 @@ function excelCikar(){
       ['Aidat Borcu Olan', db.apartments.filter(a=>aidatKalan(aptKey(a))>0).length],
       ['Demirbaş Borcu Olan', db.apartments.filter(a=>demirbasToplamBorc(aptKey(a))>0).length],
       [],
-      ['Banka Başlangıç', db.kasaBaslangic||0],
-      ['Bundan Sonraki Tahsilatlar', toplamTahsilatHareketleri()],
-      ['Bundan Sonraki Giderler', toplamGiderHareketleri()],
-      ['GÜNCEL BANKA BAKİYESİ', kasaBaki()],
+      ['GÜNCEL BANKA BAKİYESİ', bankaBaki()],
+      ['Toplam Gider', toplamGider()],
       [],
       ['Toplam Aidat Alacağı', toplamAidatBorc()],
       ['Toplam Demirbaş Alacağı', toplamDemirbasBorc()]
@@ -2210,28 +2150,6 @@ document.getElementById('mov').addEventListener('click', function(e){
 });
 
 /* ============ BAŞLAT ============ */
-// Login sayfası özel durumu (currentPage='login' olduğunda)
-const _origRender = render;
-render = function(){
-  if(currentPage === 'login'){
-    document.getElementById('app').innerHTML = viewLogin();
-    return;
-  }
-  _origRender();
-};
-// navTo içinde login kontrolü
-const _origNavTo = navTo;
-navTo = function(page){
-  if(page === 'login'){
-    currentPage = 'login';
-    renderNav();
-    render();
-    window.scrollTo(0,0);
-    return;
-  }
-  _origNavTo(page);
-};
-
 renderNav();
 render();
 initFirebase();
@@ -2262,9 +2180,8 @@ window.duyuruGuncelle = duyuruGuncelle;
 window.duyuruSil = duyuruSil;
 window.adminCikis = adminCikis;
 window.loginSubmit = loginSubmit;
-window.kasaDuzenle = kasaDuzenle;
-window.kasaKaydet = kasaKaydet;
-window.hareketGecmisi = hareketGecmisi;
+window.bankaBakiyeDuzenle = bankaBakiyeDuzenle;
+window.bankaBakiyeKaydet = bankaBakiyeKaydet;
 window.excelCikar = excelCikar;
 window.closeModal = closeModal;
 window.yeniProjeForm = yeniProjeForm;
