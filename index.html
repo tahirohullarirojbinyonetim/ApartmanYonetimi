@@ -43,6 +43,16 @@ body{background:var(--bg);color:var(--text);padding-bottom:80px;font-size:14.5px
 .stat.blue{border-left:4px solid var(--info)}
 .stat.teal{border-left:4px solid #00897b}
 
+.big-stat{background:#fff;border-radius:var(--radius);padding:20px 16px;
+  box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:12px;text-align:center}
+.big-stat .lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--text-soft);margin-bottom:8px;font-weight:700}
+.big-stat .val{font-size:1.9rem;font-weight:800;letter-spacing:-.02em}
+.big-stat.balance{border-top:4px solid var(--success)}
+.big-stat.balance .val{color:var(--success)}
+.big-stat.expense{border-top:4px solid var(--danger)}
+.big-stat.expense .val{color:var(--danger)}
+
 .li{display:flex;justify-content:space-between;align-items:center;
   padding:10px 0;border-bottom:1px solid var(--border);gap:10px}
 .li:last-child{border-bottom:none}
@@ -214,9 +224,10 @@ tr:last-child td{border-bottom:none}
 /* =========================================================
    VERİTABANI - Firebase + localStorage yedekli
    ========================================================= */
-const STORAGE_KEY = 'rojbin_db_v7';
+const STORAGE_KEY = 'rojbin_db_v8';
 const FIRESTORE_COLLECTION = 'rojbin_data';
 const FIRESTORE_DOC = 'state';
+const KASA_BASLANGIC = 76735.79; // Senin dediğin başlangıç (giderler düşülmüş hâli)
 
 const SEED_APARTMENTS = [
   {blok:'A',daire:1,isim:'MUHAMMED CAN KARAKOÇ',telefon:'0554 121 1460',plaka:'34 HSH 605',evsahibi:'',evTel:''},
@@ -326,7 +337,6 @@ const DEFAULT_SABLONLAR = {
 
 const AIDAT_TUTAR = 750;
 const TOPLAM_BEKLE = 6750;
-const KASA_BASLANGIC = 67000;
 
 function loadLocalDB(){
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -364,7 +374,10 @@ if(!db.giderler) db.giderler = [];
 if(!db.duyurular) db.duyurular = [];
 if(!db.bildirimGecmisi) db.bildirimGecmisi = [];
 if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
-if(db.kasaBaslangic === undefined) db.kasaBaslangic = KASA_BASLANGIC;
+// Kasa başlangıç: eğer 67000 ise (eski değer) 76735.79'a güncelle
+if(db.kasaBaslangic === undefined || db.kasaBaslangic === 67000 || db.kasaBaslangic === 0){
+  db.kasaBaslangic = KASA_BASLANGIC;
+}
 if(!db.sablonlar) db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
 if(!db.settings) db.settings = { aidatTutar:AIDAT_TUTAR, toplamBekle:TOPLAM_BEKLE };
 saveLocalDB(db);
@@ -450,7 +463,6 @@ function kasaBaki(){
 }
 function toplamAidatBorc(){ let t=0; db.apartments.forEach(a=>t+=aidatKalan(aptKey(a))); return t; }
 function toplamDemirbasBorc(){ let t=0; db.apartments.forEach(a=>t+=demirbasToplamBorc(aptKey(a))); return t; }
-function toplamFazla(){ let t=0; Object.keys(db.fazlaOdemeler).forEach(k=>t+=db.fazlaOdemeler[k]); return t; }
 
 function telToWhatsApp(tel){
   if(!tel) return '';
@@ -477,7 +489,7 @@ function sablonDoldur(sablon, daireKodu){
   const fazla = fazlaOdemesi(daireKodu);
   let alacakSatir = '';
   if(fazla > 0){
-    alacakSatir = "\n✅ Alacaklı olduğunuz tutar: " + fmtMoney(fazla) + " (ödemelerinizden düşebilirsiniz)\n";
+    alacakSatir = "\n✅ Alacaklı olduğunuz tutar: " + fmtMoney(fazla) + "\n";
   }
   return sablon
     .split('{ISIM}').join(a?a.isim||'Sakin':'Sakin')
@@ -523,7 +535,7 @@ function sonBildirimKisa(daireKodu){
   return gun+' gün önce';
 }
 
-/* ============ FIREBASE - DİNAMİK YÜKLEME ============ */
+/* ============ FIREBASE ============ */
 let _fbReady = false;
 let _fbSaveTimer = null;
 let _fs = null, _doc = null, _setDoc = null, _getDoc = null, _onSnapshot = null;
@@ -581,7 +593,10 @@ async function loadFromCloud(){
       if(cloudData && cloudData.apartments && cloudData.apartments.length){
         db = cloudData;
         if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
-        if(db.kasaBaslangic === undefined) db.kasaBaslangic = KASA_BASLANGIC;
+        // Eğer kasa 67000 veya boş ise 76735.79 yap
+        if(db.kasaBaslangic === undefined || db.kasaBaslangic === 67000 || db.kasaBaslangic === 0){
+          db.kasaBaslangic = KASA_BASLANGIC;
+        }
         if(!db.sablonlar) db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
         if(!db.bildirimGecmisi) db.bildirimGecmisi = [];
         saveLocalDB(db);
@@ -623,7 +638,6 @@ function startRealtimeSync(){
   }catch(e){ console.warn('Realtime sync error:', e); }
 }
 
-// Firebase'i dinamik yükle
 async function initFirebase(){
   try{
     const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
@@ -701,17 +715,12 @@ function header(title, sub, rightBtn){
   return '<div class="header"><div class="header-row"><div><h1>'+title+'</h1><div class="sub">'+(sub||'')+'</div></div>'+(rightBtn||'')+'</div></div>';
 }
 
-/* ============ ANA SAYFA ============ */
+/* ============ ANA SAYFA - SADECE 2 BÜYÜK KART ============ */
 function viewHome(){
   const kasa = kasaBaki();
-  const tahsilat = toplamAidatTahsilat() + toplamDemirbasTahsilat();
   const gider = toplamGider();
-  const aidatBorc = toplamAidatBorc();
-  const demirbasBorc = toplamDemirbasBorc();
-  const fazlaToplam = toplamFazla();
   const duyurular = db.duyurular.slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,3);
   const sonGiderler = db.giderler.slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,5);
-  const telefonluSayi = db.apartments.filter(a=>telGecerliMi(a.telefon)).length;
 
   let rightBtn = '';
   if(isAdmin){ rightBtn = '<button class="btn-ghost" onclick="adminCikis()">🚪 Çıkış</button>'; }
@@ -719,25 +728,18 @@ function viewHome(){
   let html = header('TAHİROĞULLARI ROJBİN SİTESİ','Site Yönetim Sistemi', rightBtn);
   html += '<div class="app">';
 
-  html += '<div class="stats">'
-    + '<div class="stat '+(kasa>=0?'green':'red')+'"><div class="lbl">💰 Kasadaki Para</div><div class="val">'+fmtMoney(kasa)+'</div></div>'
-    + '<div class="stat blue"><div class="lbl">📥 Toplam Tahsilat</div><div class="val">'+fmtMoney(tahsilat)+'</div></div>'
-    + '<div class="stat red"><div class="lbl">📤 Toplam Gider</div><div class="val">'+fmtMoney(gider)+'</div></div>'
-    + '<div class="stat yellow"><div class="lbl">⏳ Bekleyen Alacak</div><div class="val">'+fmtMoney(aidatBorc + demirbasBorc)+'</div></div>'
+  // SADECE 2 BÜYÜK KART: Banka Bakiyesi + Toplam Gider
+  html += '<div class="big-stat balance">'
+    + '<div class="lbl">💰 Toplam Banka Bakiyesi</div>'
+    + '<div class="val">'+fmtMoney(kasa)+'</div>'
     + '</div>';
 
-  if(fazlaToplam > 0){
-    html += '<div class="card"><div class="card-title">💚 Fazla Ödemeler (Alacaklılar)</div>'
-      + '<div class="uyari green">Toplam fazla ödeme: <b>'+fmtMoney(fazlaToplam)+'</b></div>';
-    Object.keys(db.fazlaOdemeler).forEach(function(k){
-      const v = db.fazlaOdemeler[k];
-      if(v <= 0) return;
-      const a = getApt(k);
-      html += '<div class="li"><div style="flex:1"><div class="li-t">'+k+' - '+(a?a.isim||'-':'-')+'</div><div class="li-d">Fazla ödeme</div></div><div class="li-v teal">+'+fmtMoney(v)+'</div></div>';
-    });
-    html += '</div>';
-  }
+  html += '<div class="big-stat expense">'
+    + '<div class="lbl">📤 Toplam Gider</div>'
+    + '<div class="val">'+fmtMoney(gider)+'</div>'
+    + '</div>';
 
+  // Duyurular (korundu)
   html += '<div class="card"><div class="card-title">📢 Duyurular <span class="badge-cnt">'+db.duyurular.length+'</span></div>';
   if(duyurular.length){
     duyurular.forEach(function(d){
@@ -749,6 +751,7 @@ function viewHome(){
   if(isAdmin) html += '<button class="btn btn-block" style="margin-top:10px" onclick="navTo(\'duyurular\')">Tüm Duyurular / Ekle</button>';
   html += '</div>';
 
+  // Son giderler
   html += '<div class="card"><div class="card-title">🧾 Son Giderler <span class="badge-cnt">'+db.giderler.length+'</span></div>';
   if(sonGiderler.length){
     sonGiderler.forEach(function(g){
@@ -760,15 +763,7 @@ function viewHome(){
   if(isAdmin) html += '<button class="btn btn-block" style="margin-top:10px" onclick="navTo(\'gider\')">Gider Yönetimi</button>';
   html += '</div>';
 
-  html += '<div class="card"><div class="card-title">📊 Özet Bilgiler</div>'
-    + '<div class="li"><div class="li-t">Toplam Daire</div><div class="li-v">32</div></div>'
-    + '<div class="li"><div class="li-t">Aidat Borcu Olan</div><div class="li-v red">'+db.apartments.filter(a=>aidatKalan(aptKey(a))>0).length+' daire</div></div>'
-    + '<div class="li"><div class="li-t">Demirbaş Borcu Olan</div><div class="li-v red">'+db.apartments.filter(a=>demirbasToplamBorc(aptKey(a))>0).length+' daire</div></div>'
-    + '<div class="li"><div class="li-t">Fazla Ödeme Yapan</div><div class="li-v teal">'+Object.keys(db.fazlaOdemeler).filter(k=>db.fazlaOdemeler[k]>0).length+' daire</div></div>'
-    + '<div class="li"><div class="li-t">Aidat Alacağı</div><div class="li-v">'+fmtMoney(aidatBorc)+'</div></div>'
-    + '<div class="li"><div class="li-t">Demirbaş Alacağı</div><div class="li-v">'+fmtMoney(demirbasBorc)+'</div></div>'
-    + '</div>';
-
+  // Yönetici kısayolları
   if(isAdmin){
     html += '<div class="card"><div class="card-title">⚙️ Yönetici Kısayolları</div>'
       + '<div class="more-grid">'
@@ -776,11 +771,8 @@ function viewHome(){
       + '<div class="more-item" onclick="navTo(\'eski\')"><span class="ic">📜</span>Eski Oturan</div>'
       + '<div class="more-item" onclick="navTo(\'sablonlar\')"><span class="ic">✏️</span>Mesaj Şablonları</div>'
       + '<div class="more-item" onclick="excelCikar()"><span class="ic">📥</span>Excel\'e Çıkar</div>'
-      + '<div class="more-item" onclick="kasaDuzenle()"><span class="ic">💵</span>Kasa Başlangıç</div>'
-      + '<div class="more-item" onclick="sifirla()"><span class="ic">🗑️</span>Sıfırla</div>'
-      + '</div>'
-      + '<div class="muted" style="margin-top:10px;text-align:center">📱 Telefonu kayıtlı daire: <b>'+telefonluSayi+'/32</b></div>'
-      + '</div>';
+      + '<div class="more-item" onclick="kasaDuzenle()"><span class="ic">💵</span>Banka Bakiyesi Ayarla</div>'
+      + '</div></div>';
   } else {
     html += '<div class="login-btn-wrap"><button class="btn btn-primary" style="width:100%" onclick="adminGiris()">⚙️ Yönetim Girişi</button></div>';
   }
@@ -805,12 +797,12 @@ function adminCikis(){
   render();
 }
 function kasaDuzenle(){
-  const body = '<h2>💵 Kasa Başlangıç Değeri</h2>'
-    + '<div class="muted" style="margin-bottom:10px">Bu değer eski dönemden devreden kasadır. Toplam kasa = başlangıç + tahsilat - gider</div>'
+  const body = '<h2>💵 Banka Bakiyesi Ayarla</h2>'
+    + '<div class="muted" style="margin-bottom:10px">Bu değer, sistemin başlangıç banka bakiyesidir. Aidat/demirbaş tahsilatları bu değere eklenir, giderler düşülür.</div>'
     + '<div class="li"><div class="li-t">Şu anki başlangıç</div><div class="li-v">'+fmtMoney(db.kasaBaslangic||0)+'</div></div>'
-    + '<div class="li"><div class="li-t">Şu anki toplam kasa</div><div class="li-v">'+fmtMoney(kasaBaki())+'</div></div>'
+    + '<div class="li"><div class="li-t">Şu anki toplam bakiye</div><div class="li-v">'+fmtMoney(kasaBaki())+'</div></div>'
     + '<div class="fg" style="margin-top:12px"><label>Yeni başlangıç değeri (₺)</label>'
-    + '<input type="number" class="fc" id="kasaVal" value="'+(db.kasaBaslangic||0)+'"></div>'
+    + '<input type="number" step="0.01" class="fc" id="kasaVal" value="'+(db.kasaBaslangic||0)+'"></div>'
     + '<button class="btn btn-primary btn-block" onclick="kasaKaydet()">Kaydet</button>';
   openModal(body);
 }
@@ -820,16 +812,7 @@ function kasaKaydet(){
   saveDB();
   closeModal();
   render();
-  alert('Kasa başlangıç değeri güncellendi: '+fmtMoney(v));
-}
-function sifirla(){
-  if(!confirm('Tüm veriler silinip Excel verileri geri yüklenecek. Emin misiniz?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  db = seedDB();
-  saveDB();
-  currentPage = 'home';
-  renderNav();
-  render();
+  alert('Banka bakiyesi başlangıç değeri güncellendi: '+fmtMoney(v));
 }
 
 /* ============ DAİRELER ============ */
@@ -929,7 +912,7 @@ function aptDetay(k){
 
   body += '</tbody></table></div>'
     + '<div class="fg" style="margin-top:12px"><label>Demirbaş (Excel) Ödenen Tutar</label>'
-    + '<input type="number" class="fc" id="f_demirOdenen" value="'+(demir.odenen||0)+'"></div>'
+    + '<input type="number" step="0.01" class="fc" id="f_demirOdenen" value="'+(demir.odenen||0)+'"></div>'
     + '<button class="btn btn-primary btn-block" style="margin-top:14px" onclick="kaydetApt(\''+k+'\')">Kaydet</button>';
 
   openModal(body);
@@ -1012,7 +995,7 @@ function editAidat(k, ayIndex){
     + '</div>'
     + '<div id="tutarWrap" class="fg" style="'+(sayisal?'':'display:none')+'">'
     + '<label>Ödenen Tutar (₺) — serbest</label>'
-    + '<input type="number" class="fc" id="aidatTutarInput" value="'+(sayisal?curStr:'')+'" placeholder="Örn: 750">'
+    + '<input type="number" step="0.01" class="fc" id="aidatTutarInput" value="'+(sayisal?curStr:'')+'" placeholder="Örn: 750">'
     + '<div class="muted" style="margin-top:4px">Fazla ödeme varsa aidat borcu otomatik düşülür.</div>'
     + '</div>'
     + '<div id="eskiWrap" class="fg" style="'+(isEski?'':'display:none')+'">'
@@ -1066,7 +1049,7 @@ function viewAidat(){
     + '<th class="left sticky-col-1">Daire</th>'
     + '<th class="left sticky-col-2">İsim</th>';
   AY_ADLARI.forEach(function(a){ html += '<th>'+a.slice(0,3)+'</th>'; });
-  html += '<th>Ödenen</th><th>Kalan</th><th>💚</th><th>📱</th></tr></thead><tbody>';
+  html += '<th>Ödenen</th><th>Kalan</th><th>Alacak</th><th>📱</th></tr></thead><tbody>';
 
   list.forEach(function(a){
     const k = aptKey(a);
@@ -1103,7 +1086,7 @@ function viewAidat(){
     + '<span class="muted">Toplam ödenen: <b>'+fmtMoney(toplamAidatTahsilat())+'</b></span>'
     + '<span class="muted">Toplam borç: <b>'+fmtMoney(toplamAidatBorc())+'</b></span>'
     + '</div>'
-    + '<p class="muted" style="margin-top:8px">💡 Hücreye dokun → tutar gir. 💚 = fazla ödeme var.</p>'
+    + '<p class="muted" style="margin-top:8px">💡 Hücreye dokun → tutar gir. Alacak = fazla ödeme.</p>'
     + '</div></div>';
   return html;
 }
@@ -1146,12 +1129,13 @@ function viewDemirbas(){
     const d = db.demirbas[k]||{nefestenKalan:4250,odenen:0};
     const kalan = Math.max(0, d.nefestenKalan - d.odenen);
     const telVar = telGecerliMi(a.telefon);
+    const fazla = fazlaOdemesi(k);
     let cls = 'borc';
     if(kalan === 0) cls = 'odendi';
     else if(d.odenen > 0) cls = 'kismi';
     html += '<div class="odeme-satir '+cls+'">'
       + '<div class="ds-kod">'+k+'</div>'
-      + '<div class="ds-isim">'+(a.isim||'-')+'</div>'
+      + '<div class="ds-isim">'+(a.isim||'-')+(fazla>0?' <span style="color:#00897b;font-size:.7rem">+'+fazla+'₺ alacak</span>':'')+'</div>'
       + '<div class="ds-tutar">'+d.odenen.toLocaleString('tr-TR')+' / '+d.nefestenKalan.toLocaleString('tr-TR')
       + (kalan>0?'<br><span style="color:#c62828">'+kalan.toLocaleString('tr-TR')+' kaldı</span>':'<br><span style="color:#2e7d32">✓ ödendi</span>')
       + '</div>'
@@ -1174,7 +1158,7 @@ function demirbasOdemeAl(k){
     + '<div class="li"><div class="li-t">Şu ana kadar ödenen</div><div class="li-v green">'+fmtMoney(d.odenen)+'</div></div>'
     + '<div class="li"><div class="li-t">Kalan borç</div><div class="li-v red">'+fmtMoney(kalan)+'</div></div>'
     + '<div class="fg" style="margin-top:12px"><label>Alınacak Tutar (₺) — serbest</label>'
-    + '<input type="number" class="fc" id="dmTutar" value="'+kalan+'"></div>'
+    + '<input type="number" step="0.01" class="fc" id="dmTutar" value="'+kalan+'"></div>'
     + '<button class="btn btn-primary btn-block" onclick="demirbasOdemeKaydet(\''+k+'\')">Kaydet</button>';
   openModal(body);
 }
@@ -1215,7 +1199,7 @@ function renderProjeForm(){
   _geciciKalemler.forEach(function(k, i){
     body += '<div class="kalem-row">'
       + '<input class="fc" placeholder="Kalem adı" value="'+(k.ad||'')+'" oninput="_geciciKalemler['+i+'].ad=this.value">'
-      + '<input class="fc" type="number" placeholder="Tutar" value="'+(k.tutar||'')+'" style="max-width:110px" oninput="_geciciKalemler['+i+'].tutar=Number(this.value)||0;renderProjeForm()">'
+      + '<input class="fc" type="number" step="0.01" placeholder="Tutar" value="'+(k.tutar||'')+'" style="max-width:110px" oninput="_geciciKalemler['+i+'].tutar=Number(this.value)||0;renderProjeForm()">'
       + '<button class="btn btn-sm btn-danger" onclick="_geciciKalemler.splice('+i+',1);renderProjeForm()">✕</button>'
       + '</div>';
   });
@@ -1330,12 +1314,13 @@ function projeDetay(id){
     const od = p.odemeler[k]||0;
     const kl = Math.max(0, p.daireBasi - od);
     const telVar = a && telGecerliMi(a.telefon);
+    const fazla = fazlaOdemesi(k);
     let cls = 'borc';
     if(kl === 0) cls = 'odendi';
     else if(od > 0) cls = 'kismi';
     body += '<div class="odeme-satir '+cls+'">'
       + '<div class="ds-kod">'+k+'</div>'
-      + '<div class="ds-isim">'+(a?a.isim||'-':'-')+'</div>'
+      + '<div class="ds-isim">'+(a?a.isim||'-':'-')+(fazla>0?' <span style="color:#00897b;font-size:.7rem">+'+fazla+'₺ alacak</span>':'')+'</div>'
       + '<div class="ds-tutar">'+od.toLocaleString('tr-TR')+' / '+p.daireBasi.toLocaleString('tr-TR')
       + (kl>0?'<br><span style="color:#c62828">'+kl.toLocaleString('tr-TR')+' kaldı</span>':'<br><span style="color:#2e7d32">✓ ödendi</span>')
       + '</div>'
@@ -1358,7 +1343,7 @@ function odemeAlProje(projeId, k){
     + '<div class="li"><div class="li-t">Şu ana kadar ödenen</div><div class="li-v green">'+fmtMoney(mevcut)+'</div></div>'
     + '<div class="li"><div class="li-t">Kalan</div><div class="li-v red">'+fmtMoney(kalan)+'</div></div>'
     + '<div class="fg" style="margin-top:12px"><label>Alınacak Tutar (₺) — serbest</label>'
-    + '<input class="fc" type="number" id="odTutar" value="'+kalan+'"></div>'
+    + '<input class="fc" type="number" step="0.01" id="odTutar" value="'+kalan+'"></div>'
     + '<button class="btn btn-primary btn-block" onclick="odemeKaydetProje('+projeId+',\''+k+'\')">Kaydet</button>'
     + '<button class="btn btn-block" style="margin-top:8px" onclick="projeDetay('+projeId+')">← Geri</button>';
   openModal(body);
@@ -1373,7 +1358,7 @@ function odemeKaydetProje(projeId, k){
   if(tutar > kalan){
     const fazlaTutar = tutar - kalan;
     db.fazlaOdemeler[k] = (db.fazlaOdemeler[k]||0) + fazlaTutar;
-    alert('✓ '+fmtMoney(tutar)+' kaydedildi.\n\n💚 '+fmtMoney(fazlaTutar)+' fazla ödeme olarak kaydedildi (alacaklı).');
+    alert('✓ '+fmtMoney(tutar)+' kaydedildi.\n\n💚 '+fmtMoney(fazlaTutar)+' fazla ödeme olarak kaydedildi.');
   } else {
     alert(fmtMoney(tutar)+' ödeme kaydedildi.');
   }
@@ -1405,7 +1390,7 @@ function bildirimGonder(k){
     + '<div class="li"><div class="li-t">İsim</div><div class="li-v" style="font-size:.82rem">'+(a.isim||'-')+'</div></div>'
     + '<div class="li"><div class="li-t">Telefon</div><div class="li-v" style="font-size:.82rem">'+a.telefon+'</div></div>'
     + '<div class="li"><div class="li-t">Toplam Borç</div><div class="li-v '+(toplamBorc>0?'red':'green')+'">'+fmtMoney(toplamBorc)+'</div></div>';
-  if(fazla>0) body += '<div class="li"><div class="li-t">Fazla Ödeme</div><div class="li-v teal">+'+fmtMoney(fazla)+'</div></div>';
+  if(fazla>0) body += '<div class="li"><div class="li-t">Alacak</div><div class="li-v teal">+'+fmtMoney(fazla)+'</div></div>';
 
   body += '<div class="fg" style="margin-top:12px"><label>Mesaj Önizleme (düzenleyebilirsin)</label>'
     + '<textarea class="fc" id="waMesaj" rows="14">'+mesaj+'</textarea></div>'
@@ -1470,7 +1455,7 @@ function viewBildirimler(){
         + '<input type="checkbox" class="bs-check" id="bchk_'+k+'" value="'+k+'" data-borc="'+toplam+'" '+(toplam>0?'checked':'')+'>'
         + '<div class="bs-info">'
         + '<div class="bs-kod">'+k+' - '+(a.isim||'-')+'</div>'
-        + '<div class="bs-tel">📱 '+a.telefon+(son?' · son: '+son:'')+(fazla>0?' · 💚+'+fazla:'')+'</div>'
+        + '<div class="bs-tel">📱 '+a.telefon+(son?' · son: '+son:'')+(fazla>0?' · +'+fazla+'₺ alacak':'')+'</div>'
         + '</div>'
         + '<div class="bs-borc '+(toplam>0?'':'ok')+'">'+(toplam>0?fmtMoney(toplam):'borç yok')+'</div>'
         + '</label>';
@@ -1612,7 +1597,7 @@ function viewGider(){
   html += '<div class="card"><div class="card-title">➕ Yeni Gider Ekle</div>'
     + '<div class="fg"><label>Açıklama</label><input class="fc" id="g_aciklama"></div>'
     + '<div class="fg"><label>Ait Olduğu Ay</label><input class="fc" id="g_ay" placeholder="Eylül 2026"></div>'
-    + '<div class="fg"><label>Tutar (₺)</label><input type="number" class="fc" id="g_tutar"></div>'
+    + '<div class="fg"><label>Tutar (₺)</label><input type="number" step="0.01" class="fc" id="g_tutar"></div>'
     + '<div class="fg"><label>Tarih</label><input type="date" class="fc" id="g_tarih" value="'+new Date().toISOString().slice(0,10)+'"></div>'
     + '<div class="fg"><label>Ödeme Durumu</label><select class="fc" id="g_durum">'
     + '<option value="Ödendi">Ödendi</option><option value="Bekliyor">Bekliyor</option></select></div>'
@@ -1714,17 +1699,15 @@ function excelCikar(){
       ['Toplam Daire', 32],
       ['Aidat Borcu Olan', db.apartments.filter(a=>aidatKalan(aptKey(a))>0).length],
       ['Demirbaş Borcu Olan', db.apartments.filter(a=>demirbasToplamBorc(aptKey(a))>0).length],
-      ['Fazla Ödeme Yapan', Object.keys(db.fazlaOdemeler).filter(k=>db.fazlaOdemeler[k]>0).length],
       [],
-      ['Kasa Başlangıç', db.kasaBaslangic||0],
+      ['Banka Başlangıç', db.kasaBaslangic||0],
       ['Toplam Aidat Tahsilat', toplamAidatTahsilat()],
       ['Toplam Demirbaş Tahsilat', toplamDemirbasTahsilat()],
       ['Toplam Gider', toplamGider()],
-      ['GÜNCEL KASA', kasaBaki()],
+      ['GÜNCEL BANKA BAKİYESİ', kasaBaki()],
       [],
       ['Toplam Aidat Alacağı', toplamAidatBorc()],
-      ['Toplam Demirbaş Alacağı', toplamDemirbasBorc()],
-      ['Toplam Fazla Ödeme', toplamFazla()]
+      ['Toplam Demirbaş Alacağı', toplamDemirbasBorc()]
     ];
     const wsGenel = XLSX.utils.aoa_to_sheet(genelData);
     wsGenel['!cols'] = [{wch:32},{wch:20}];
@@ -1818,7 +1801,6 @@ renderNav();
 render();
 initFirebase();
 
-/* Global fonksiyonlar */
 window.navTo = navTo;
 window.aptDetay = aptDetay;
 window.kaydetApt = kaydetApt;
@@ -1834,7 +1816,6 @@ window.duyuruEkle = duyuruEkle;
 window.duyuruSil = duyuruSil;
 window.adminGiris = adminGiris;
 window.adminCikis = adminCikis;
-window.sifirla = sifirla;
 window.kasaDuzenle = kasaDuzenle;
 window.kasaKaydet = kasaKaydet;
 window.excelCikar = excelCikar;
