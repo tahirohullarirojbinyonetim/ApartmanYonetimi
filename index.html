@@ -827,6 +827,7 @@ async function loginSubmit(){
 function viewHome(){
   const bakiye = bankaBaki();
   const gider = toplamGider();
+  const duyurular = db.duyurular.slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,3);
   const sonGiderler = db.giderler.slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,5);
 
   let rightBtn = '';
@@ -845,6 +846,22 @@ function viewHome(){
     + '<div class="val">'+fmtMoney(gider)+'</div>'
     + '</div>';
 
+  // DUYURULAR - GERİ GELDİ
+  html += '<div class="card"><div class="card-title">📢 Duyurular <span class="badge-cnt">'+db.duyurular.length+'</span></div>';
+  if(duyurular.length){
+    duyurular.forEach(function(d){
+      html += '<div class="li"><div style="flex:1">'
+        + '<div class="li-t">'+(d.onemli?'🔴 ':'')+d.baslik+'</div>'
+        + '<div class="li-d">'+fmtDate(d.tarih)+'</div>'
+        + '<div class="li-d" style="margin-top:4px;color:var(--text)">'+d.icerik.slice(0,90)+(d.icerik.length>90?'...':'')+'</div>'
+        + '</div></div>';
+    });
+  } else {
+    html += '<div class="empty">Henüz duyuru yok.</div>';
+  }
+  html += '</div>';
+
+  // SON 5 GİDER
   html += '<div class="card"><div class="card-title">🧾 Son 5 Gider <span class="badge-cnt">'+db.giderler.length+'</span></div>';
   if(sonGiderler.length){
     sonGiderler.forEach(function(g){
@@ -872,8 +889,6 @@ function viewHome(){
   html += '</div>';
   return html;
 }
-
-/* ============ BANKA BAKİYESİ AYARLA ============ */
 function bankaBakiyeDuzenle(){
   if(!isAdmin) return;
   const body = '<h2>💵 Banka Bakiyesi Ayarla</h2>'
