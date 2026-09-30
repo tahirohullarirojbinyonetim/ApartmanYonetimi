@@ -199,6 +199,14 @@ tr:last-child td{border-bottom:none}
 .uyari.red{background:#ffebee;border-color:#ef9a9a;color:#b71c1c}
 .uyari.green{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20}
 
+/* Giriş ekranı */
+.login-wrap{max-width:400px;margin:40px auto;padding:24px;background:#fff;
+  border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+.login-wrap h2{text-align:center;color:var(--primary-dark);margin-bottom:6px;font-size:1.1rem}
+.login-wrap .sub{text-align:center;color:var(--text-soft);font-size:.8rem;margin-bottom:20px}
+.login-err{background:var(--danger-bg);color:var(--danger);border:1px solid #ef9a9a;
+  padding:10px 12px;border-radius:10px;font-size:.82rem;margin-bottom:12px;text-align:center}
+
 #syncBar{position:fixed;top:0;left:0;right:0;height:3px;background:transparent;z-index:999;transition:background .3s}
 #syncBar.saving{background:linear-gradient(90deg,#ffc107,#ff9800,#ffc107);background-size:200% 100%;animation:slide 1s linear infinite}
 #syncBar.saved{background:#4caf50}
@@ -225,10 +233,11 @@ tr:last-child td{border-bottom:none}
 /* =========================================================
    VERİTABANI - Firebase + localStorage
    ========================================================= */
-const STORAGE_KEY = 'rojbin_db_v10';
+const STORAGE_KEY = 'rojbin_db_v11';
 const FIRESTORE_COLLECTION = 'rojbin_data';
 const FIRESTORE_DOC = 'state';
 const KASA_BASLANGIC_VARSAYILAN = 76735.79;
+const YETKILI_EMAIL = 'rojbin@yonetimi.com';
 
 const SEED_APARTMENTS = [
   {blok:'A',daire:1,isim:'MUHAMMED CAN KARAKOÇ',telefon:'0554 121 1460',plaka:'34 HSH 605',evsahibi:'',evTel:''},
@@ -470,7 +479,6 @@ function kasaHareketEkle(tip, tutar, aciklama, daire){
   });
 }
 function kasaHareketSilByRef(aciklama, daire, tutar){
-  // Belirtilen hareketi sil (gider silme/düzenleme için)
   const idx = db.kasaHareketleri.findIndex(h=>h.aciklama===aciklama && h.daire===daire && Math.abs(h.tutar-tutar)<0.01);
   if(idx > -1){ db.kasaHareketleri.splice(idx, 1); return true; }
   return false;
@@ -547,10 +555,11 @@ function sonBildirimKisa(daireKodu){
   return gun+' gün önce';
 }
 
-/* ============ FIREBASE ============ */
+/* ============ FIREBASE (Auth + Firestore) ============ */
 let _fbReady = false;
 let _fbSaveTimer = null;
 let _fs = null, _doc = null, _setDoc = null, _getDoc = null, _onSnapshot = null;
+let _auth = null, _signInWithEmailAndPassword = null, _signOut = null, _onAuthStateChanged = null, _currentUser = null;
 
 function setSyncStatus(status, msg){
   const bar = document.getElementById('syncBar');
@@ -569,7 +578,7 @@ function setSyncStatus(status, msg){
 }
 
 function saveToCloud(){
-  if(!_fbReady || !_setDoc) return;
+  if(!_fbReady || !_setDoc || !isAdmin) return;
   setSyncStatus('saving');
   clearTimeout(_fbSaveTimer);
   _fbSaveTimer = setTimeout(async function(){
@@ -607,7 +616,7 @@ async function loadFromCloud(){
         if(!db.bildirimGecmisi) db.bildirimGecmisi = [];
         saveLocalDB(db);
         window.db = db;
-        console.log('✓ Firebase\'den yüklendi');
+        console.log('✓ Firebase Firestore\'dan yüklendi');
       } else {
         await _setDoc(ref, JSON.parse(JSON.stringify(db)));
       }
@@ -648,6 +657,7 @@ async function initFirebase(){
   try{
     const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const fsMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const authMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     const firebaseConfig = {
       apiKey: "AIzaSyCj_gCNVvp7doxukFmkp9v0ncDRevH30Ww",
       authDomain: "rojbinyonetimi.firebaseapp.com",
@@ -662,14 +672,67 @@ async function initFirebase(){
     _setDoc = fsMod.setDoc;
     _getDoc = fsMod.getDoc;
     _onSnapshot = fsMod.onSnapshot;
+    _auth = authMod.getAuth(fbApp);
+    _signInWithEmailAndPassword = authMod.signInWithEmailAndPassword;
+    _signOut = authMod.signOut;
+    _onAuthStateChanged = authMod.onAuthStateChanged;
     _fbReady = true;
-    console.log('✓ Firebase hazır');
-    await loadFromCloud();
-    render();
-    startRealtimeSync();
+
+    // Auth durumunu dinle
+    _onAuthStateChanged(_auth, async function(user){
+      _currentUser = user;
+      if(user && user.email === YETKILI_EMAIL){
+        isAdmin = true;
+        console.log('✓ Oturum açık: '+user.email);
+        await loadFromCloud();
+        render();
+        startRealtimeSync();
+      } else if(user && user.email !== YETKILI_EMAIL){
+        // Yetkisiz kullanıcı → çıkış
+        console.warn('Yetkisiz kullanıcı: '+user.email);
+        await _signOut(_auth);
+        isAdmin = false;
+        alert('Bu hesap yönetici yetkisine sahip değil.');
+        render();
+      } else {
+        isAdmin = false;
+        await loadFromCloud();
+        render();
+      }
+    });
   }catch(e){
     console.error('Firebase init error:', e);
     setSyncStatus('error', 'Bulut bağlantısı kurulamadı');
+    render();
+  }
+}
+
+/* Auth - Giriş / Çıkış */
+async function adminLogin(email, pass){
+  try{
+    await _signInWithEmailAndPassword(_auth, email, pass);
+    // onAuthStateChanged tetiklenir → giriş yapar
+    return { ok: true };
+  }catch(e){
+    console.error('Login error:', e);
+    let msg = 'Giriş başarısız.';
+    if(e.code === 'auth/wrong-password') msg = 'Şifre hatalı.';
+    else if(e.code === 'auth/user-not-found') msg = 'Bu e-posta ile kayıtlı kullanıcı yok.';
+    else if(e.code === 'auth/invalid-email') msg = 'Geçersiz e-posta adresi.';
+    else if(e.code === 'auth/too-many-requests') msg = 'Çok fazla deneme. Lütfen biraz bekleyin.';
+    else if(e.code === 'auth/invalid-credential') msg = 'E-posta veya şifre hatalı.';
+    return { ok: false, msg: msg };
+  }
+}
+async function adminCikis(){
+  try{
+    await _signOut(_auth);
+    isAdmin = false;
+    currentPage = 'home';
+    renderNav();
+    render();
+  }catch(e){
+    console.error(e);
   }
 }
 
@@ -719,6 +782,54 @@ function render(){
 }
 function header(title, sub, rightBtn){
   return '<div class="header"><div class="header-row"><div><h1>'+title+'</h1><div class="sub">'+(sub||'')+'</div></div>'+(rightBtn||'')+'</div></div>';
+}
+
+/* ============ GİRİŞ EKRANI ============ */
+function viewLogin(){
+  let html = header('TAHİROĞULLARI ROJBİN SİTESİ','Yönetici Girişi');
+  html += '<div class="app">'
+    + '<div class="login-wrap">'
+    + '<h2>🔐 Yönetici Girişi</h2>'
+    + '<div class="sub">Sadece yetkili kişi giriş yapabilir</div>'
+    + '<div id="loginErr"></div>'
+    + '<div class="fg"><label>E-posta</label>'
+    + '<input type="email" class="fc" id="loginEmail" placeholder="rojbin@yonetimi.com" autocomplete="username"></div>'
+    + '<div class="fg"><label>Şifre</label>'
+    + '<input type="password" class="fc" id="loginPass" placeholder="••••••••" autocomplete="current-password"></div>'
+    + '<button class="btn btn-primary btn-block" id="loginBtn" onclick="loginSubmit()">Giriş Yap</button>'
+    + '<button class="btn btn-block" style="margin-top:8px" onclick="navTo(\'home\')">← Ana Sayfa</button>'
+    + '</div>'
+    + '</div>';
+  return html;
+}
+
+async function loginSubmit(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  const btn = document.getElementById('loginBtn');
+
+  if(!email || !pass){
+    errEl.innerHTML = '<div class="login-err">E-posta ve şifre gerekli.</div>';
+    return;
+  }
+  if(email !== YETKILI_EMAIL){
+    errEl.innerHTML = '<div class="login-err">Bu e-posta yetkili değil.</div>';
+    return;
+  }
+
+  btn.textContent = 'Giriş yapılıyor...';
+  btn.disabled = true;
+  errEl.innerHTML = '';
+
+  const res = await adminLogin(email, pass);
+  btn.textContent = 'Giriş Yap';
+  btn.disabled = false;
+
+  if(!res.ok){
+    errEl.innerHTML = '<div class="login-err">'+res.msg+'</div>';
+  }
+  // Başarılıysa onAuthStateChanged tetiklenir ve render() çağrılır
 }
 
 /* ============ ANA SAYFA ============ */
@@ -776,7 +887,7 @@ function viewHome(){
       + '<div class="more-item" onclick="hareketGecmisi()"><span class="ic">📊</span>Kasa Hareketleri</div>'
       + '</div></div>';
   } else {
-    html += '<div class="login-btn-wrap"><button class="btn btn-primary" style="width:100%" onclick="adminGiris()">⚙️ Yönetim Girişi</button></div>';
+    html += '<div class="login-btn-wrap"><button class="btn btn-primary" style="width:100%" onclick="navTo(\'login\')">🔐 Yönetim Girişi</button></div>';
   }
 
   html += '</div>';
@@ -784,21 +895,8 @@ function viewHome(){
 }
 
 /* ============ YÖNETİCİ ============ */
-function adminGiris(){
-  isAdmin = true;
-  db.auditLogs.push({ts:new Date().toISOString(),user:'admin',action:'Yönetici girişi'});
-  saveDB();
-  currentPage = 'home';
-  renderNav();
-  render();
-}
-function adminCikis(){
-  isAdmin = false;
-  currentPage = 'home';
-  renderNav();
-  render();
-}
 function kasaDuzenle(){
+  if(!isAdmin) return;
   const body = '<h2>💵 Banka Bakiyesi Ayarla</h2>'
     + '<div class="muted" style="margin-bottom:10px">Başlangıç değeri. Bundan sonraki tahsilatlar eklenir, giderler düşülür.</div>'
     + '<div class="li"><div class="li-t">Şu anki başlangıç</div><div class="li-v">'+fmtMoney(db.kasaBaslangic||0)+'</div></div>'
@@ -811,6 +909,7 @@ function kasaDuzenle(){
   openModal(body);
 }
 function kasaKaydet(){
+  if(!isAdmin) return;
   const v = Number(document.getElementById('kasaVal').value)||0;
   db.kasaBaslangic = v;
   saveDB();
@@ -820,6 +919,7 @@ function kasaKaydet(){
 }
 
 function hareketGecmisi(){
+  if(!isAdmin) return;
   let body = '<h2>📊 Kasa Hareketleri</h2>'
     + '<div class="li"><div class="li-t">Başlangıç</div><div class="li-v">'+fmtMoney(db.kasaBaslangic||0)+'</div></div>'
     + '<div class="li"><div class="li-t">Toplam Tahsilat</div><div class="li-v green">+'+fmtMoney(toplamTahsilatHareketleri())+'</div></div>'
@@ -847,6 +947,7 @@ function hareketGecmisi(){
 
 /* ============ DAİRELER ============ */
 function viewApartments(){
+  if(!isAdmin) return viewHome();
   let html = header('Daireler','A ve B Blok · 32 Daire');
   html += '<div class="app">';
   ['A','B'].forEach(function(blok){
@@ -866,6 +967,7 @@ function viewApartments(){
 }
 
 function aptDetay(k){
+  if(!isAdmin) return;
   const a = getApt(k);
   if(!a) return;
   const aidatRow = db.aidat[k] || [];
@@ -948,6 +1050,7 @@ function aptDetay(k){
 }
 
 function kaydetApt(k){
+  if(!isAdmin) return;
   const a = getApt(k); if(!a) return;
   const t = document.getElementById('f_telefon').value.trim();
   a.isim = document.getElementById('f_isim').value.trim();
@@ -972,6 +1075,7 @@ function kaydetApt(k){
   alert('Kaydedildi.' + (telGecerliMi(t) ? '\n\n📱 Bu daire artık WhatsApp bildirim listesinde.' : ''));
 }
 function kaydetVeWhatsapp(k){
+  if(!isAdmin) return;
   const a = getApt(k); if(!a) return;
   const t = document.getElementById('f_telefon').value.trim();
   if(!telGecerliMi(t)){ alert('Önce geçerli bir telefon numarası girin.'); return; }
@@ -998,6 +1102,7 @@ function kaydetVeWhatsapp(k){
 }
 
 function fazlaDus(k){
+  if(!isAdmin) return;
   const tutar = Number(document.getElementById('f_fazlaDus').value)||0;
   if(tutar <= 0){ alert('Tutar girin'); return; }
   const mevcut = fazlaOdemesi(k);
@@ -1011,6 +1116,7 @@ function fazlaDus(k){
 }
 
 function editAidat(k, ayIndex){
+  if(!isAdmin) return;
   const cur = (db.aidat[k]||[])[ayIndex];
   const curStr = (cur===undefined||cur===null)?'':String(cur);
   const isOdenmedi = curStr === 'ÖDENMEDİ';
@@ -1067,6 +1173,7 @@ function aidatSec(tip){
   }
 }
 function saveAidat(k, ayIndex){
+  if(!isAdmin) return;
   if(!db.aidat[k]) db.aidat[k] = new Array(12).fill('');
   const tip = window._aidatSec;
   const eskiVal = db.aidat[k][ayIndex];
@@ -1107,6 +1214,7 @@ function saveAidat(k, ayIndex){
 
 /* ============ AİDAT TABLOSU ============ */
 function viewAidat(){
+  if(!isAdmin) return viewHome();
   const blok = window._aidatBlok || 'A';
   let html = header('Aidat Takibi','750 ₺ · Tıkla → Ödeme Gir');
   html += '<div class="app">';
@@ -1166,6 +1274,7 @@ function setAidatBlok(b){ window._aidatBlok = b; render(); }
 
 /* ============ DEMİRBAŞ ============ */
 function viewDemirbas(){
+  if(!isAdmin) return viewHome();
   let html = header('Demirbaş','Mevcut + Yeni Projeler');
   html += '<div class="app">';
 
@@ -1222,6 +1331,7 @@ function viewDemirbas(){
 }
 
 function demirbasOdemeAl(k){
+  if(!isAdmin) return;
   const a = getApt(k);
   const d = db.demirbas[k]||{nefestenKalan:4250,odenen:0};
   const kalan = Math.max(0, d.nefestenKalan - d.odenen);
@@ -1236,6 +1346,7 @@ function demirbasOdemeAl(k){
   openModal(body);
 }
 function demirbasOdemeKaydet(k){
+  if(!isAdmin) return;
   const tutar = Number(document.getElementById('dmTutar').value)||0;
   if(tutar <= 0){ alert('Tutar girin'); return; }
   if(!db.demirbas[k]) db.demirbas[k] = {nefestenKalan:4250, odenen:0};
@@ -1254,16 +1365,17 @@ function demirbasOdemeKaydet(k){
   render();
 }
 
-/* Yeni Demirbaş Projesi */
 let _geciciKalemler = [];
 let _duzenlenenProjeId = null;
 
 function yeniProjeForm(){
+  if(!isAdmin) return;
   _geciciKalemler = [{ad:'',tutar:0}];
   _duzenlenenProjeId = null;
   renderProjeForm();
 }
 function projeDuzenleForm(id){
+  if(!isAdmin) return;
   const p = db.demirbasProjeler.find(function(x){ return x.id===id; });
   if(!p) return;
   _geciciKalemler = p.kalemler.map(function(k){ return {ad:k.ad, tutar:k.tutar}; });
@@ -1312,7 +1424,7 @@ function renderProjeForm(mevcutProje){
     });
     body += '</div></div>';
   } else {
-    body += '<div class="muted">Seçili daire sayısı: <b>'+p.secilenDaireler.length+'</b> (düzenlenemez, sadece silip yenisini oluşturabilirsiniz)</div>';
+    body += '<div class="muted">Seçili daire sayısı: <b>'+p.secilenDaireler.length+'</b></div>';
   }
 
   body += '<div class="divider"></div>'
@@ -1361,6 +1473,7 @@ function updateDaireBasi(){
   if(el) el.textContent = fmtMoney(v);
 }
 function projeKaydet(){
+  if(!isAdmin) return;
   const baslik = document.getElementById('p_baslik').value.trim();
   if(!baslik){ alert('Başlık gerekli'); return; }
   const kalemler = _geciciKalemler.filter(function(k){ return k.ad.trim() && k.tutar>0; });
@@ -1369,20 +1482,17 @@ function projeKaydet(){
   kalemler.forEach(function(k){ toplam += Number(k.tutar); });
 
   if(_duzenlenenProjeId){
-    // Düzenleme
     const p = db.demirbasProjeler.find(function(x){ return x.id===_duzenlenenProjeId; });
     if(!p) return;
     p.baslik = baslik;
     p.kalemler = kalemler.map(function(k){ return {ad:k.ad.trim(), tutar:Number(k.tutar)}; });
     p.toplam = toplam;
-    // Daire başı tutar değişti, ödemeler korunur
     p.daireBasi = toplam / p.secilenDaireler.length;
     saveDB();
     closeModal();
     render();
     alert('Proje güncellendi.');
   } else {
-    // Yeni
     const sec = secilenDaireler();
     if(!sec.length){ alert('En az bir daire seçin'); return; }
     const daireBasi = toplam / sec.length;
@@ -1401,6 +1511,7 @@ function projeKaydet(){
   _duzenlenenProjeId = null;
 }
 function projeDetay(id){
+  if(!isAdmin) return;
   const p = db.demirbasProjeler.find(function(x){ return x.id===id; });
   if(!p) return;
 
@@ -1441,6 +1552,7 @@ function projeDetay(id){
   openModal(body);
 }
 function odemeAlProje(projeId, k){
+  if(!isAdmin) return;
   const p = db.demirbasProjeler.find(function(x){ return x.id===projeId; });
   if(!p) return;
   const mevcut = p.odemeler[k]||0;
@@ -1456,6 +1568,7 @@ function odemeAlProje(projeId, k){
   openModal(body);
 }
 function odemeKaydetProje(projeId, k){
+  if(!isAdmin) return;
   const p = db.demirbasProjeler.find(function(x){ return x.id===projeId; });
   if(!p) return;
   const tutar = Number(document.getElementById('odTutar').value)||0;
@@ -1474,6 +1587,7 @@ function odemeKaydetProje(projeId, k){
   projeDetay(projeId);
 }
 function projeSil(id){
+  if(!isAdmin) return;
   if(!confirm('Proje silinsin mi?')) return;
   db.demirbasProjeler = db.demirbasProjeler.filter(function(p){ return p.id!==id; });
   saveDB();
@@ -1482,6 +1596,7 @@ function projeSil(id){
 
 /* ============ WHATSAPP ============ */
 function bildirimGonder(k){
+  if(!isAdmin) return;
   const a = getApt(k);
   if(!a) return;
   if(!telGecerliMi(a.telefon)){
@@ -1507,6 +1622,7 @@ function bildirimGonder(k){
   openModal(body);
 }
 function waGonderOnayli(k){
+  if(!isAdmin) return;
   const mesaj = document.getElementById('waMesaj').value;
   const ok = whatsappGonder(k, mesaj);
   if(ok){
@@ -1518,6 +1634,7 @@ function waGonderOnayli(k){
 }
 
 function viewBildirimler(){
+  if(!isAdmin) return viewHome();
   let html = header('Toplu WhatsApp Bildirim','Mesaj gönderilecek daireleri seç');
   html += '<div class="app">';
 
@@ -1574,6 +1691,7 @@ function viewBildirimler(){
   return html;
 }
 function topluSec(mod){
+  if(!isAdmin) return;
   const kutular = document.querySelectorAll('#bildirimListesi input[type="checkbox"]');
   kutular.forEach(function(c){
     const borc = Number(c.dataset.borc)||0;
@@ -1583,6 +1701,7 @@ function topluSec(mod){
   });
 }
 function topluGonder(){
+  if(!isAdmin) return;
   const secili = Array.from(document.querySelectorAll('#bildirimListesi input[type="checkbox"]:checked')).map(function(c){ return c.value; });
   if(!secili.length){ alert('Hiç daire seçilmedi'); return; }
   if(!confirm(secili.length+' daireye WhatsApp açılacak.')) return;
@@ -1592,6 +1711,7 @@ function topluGonder(){
   alert(secili.length+' daire için WhatsApp penceresi açılıyor.');
 }
 function hizliTelefon(k){
+  if(!isAdmin) return;
   const a = getApt(k);
   if(!a) return;
   const body = '<h2>'+k+' - Telefon Ekle</h2>'
@@ -1602,6 +1722,7 @@ function hizliTelefon(k){
   openModal(body);
 }
 function hizliTelefonKaydet(k){
+  if(!isAdmin) return;
   const t = document.getElementById('htel').value.trim();
   if(!telGecerliMi(t)){ alert('Geçerli bir numara girin'); return; }
   const a = getApt(k);
@@ -1613,6 +1734,7 @@ function hizliTelefonKaydet(k){
 
 /* ============ ŞABLONLAR ============ */
 function viewSablonlar(){
+  if(!isAdmin) return viewHome();
   let html = header('Mesaj Şablonları','WhatsApp bildirimleri için');
   html += '<div class="app"><div class="card">'
     + '<div class="muted" style="margin-bottom:10px">Değişkenler: '
@@ -1634,6 +1756,7 @@ function viewSablonlar(){
   return html;
 }
 function sablonKaydet(){
+  if(!isAdmin) return;
   db.sablonlar.borcHatirlatma = document.getElementById('s_borc').value;
   db.sablonlar.borcYok = document.getElementById('s_yok').value;
   db.sablonlar.ozelDuyuru = document.getElementById('s_ozel').value;
@@ -1641,14 +1764,16 @@ function sablonKaydet(){
   alert('Şablonlar kaydedildi.');
 }
 function sablonSifirla(){
+  if(!isAdmin) return;
   if(!confirm('Varsayılan şablonlara dönülsün mü?')) return;
   db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
   saveDB();
   render();
 }
 
-/* ============ ESKİ OTURAN - Düzenle/Sil/Ödeme Al ============ */
+/* ============ ESKİ OTURAN ============ */
 function viewEski(){
+  if(!isAdmin) return viewHome();
   let html = header('Eski Oturan Borç Listesi','Geçmiş sakinler');
   html += '<div class="app">';
 
@@ -1686,6 +1811,7 @@ function viewEski(){
   return html;
 }
 function eskiYeniForm(){
+  if(!isAdmin) return;
   const body = '<h2>Yeni Eski Oturan Kaydı</h2>'
     + '<div class="fg"><label>Blok</label><input class="fc" id="e_blok" placeholder="A Blok"></div>'
     + '<div class="fg"><label>Daire</label><input type="number" class="fc" id="e_daire"></div>'
@@ -1699,6 +1825,7 @@ function eskiYeniForm(){
   openModal(body);
 }
 function eskiEkle(){
+  if(!isAdmin) return;
   const rec = {
     id: Date.now(),
     blok: document.getElementById('e_blok').value.trim(),
@@ -1717,6 +1844,7 @@ function eskiEkle(){
   render();
 }
 function eskiDuzenle(id){
+  if(!isAdmin) return;
   const e = db.eskiOturan.find(function(x){ return x.id===id; });
   if(!e) return;
   const body = '<h2>Kaydı Düzenle</h2>'
@@ -1734,6 +1862,7 @@ function eskiDuzenle(id){
   openModal(body);
 }
 function eskiGuncelle(id){
+  if(!isAdmin) return;
   const e = db.eskiOturan.find(function(x){ return x.id===id; });
   if(!e) return;
   e.blok = document.getElementById('e_blok').value.trim();
@@ -1748,12 +1877,14 @@ function eskiGuncelle(id){
   render();
 }
 function eskiSil(id){
+  if(!isAdmin) return;
   if(!confirm('Kayıt silinsin mi?')) return;
   db.eskiOturan = db.eskiOturan.filter(function(x){ return x.id!==id; });
   saveDB();
   render();
 }
 function eskiOdemeAl(id){
+  if(!isAdmin) return;
   const e = db.eskiOturan.find(function(x){ return x.id===id; });
   if(!e) return;
   const kalan = Number(e.kalan)||0;
@@ -1767,6 +1898,7 @@ function eskiOdemeAl(id){
   openModal(body);
 }
 function eskiOdemeKaydet(id){
+  if(!isAdmin) return;
   const e = db.eskiOturan.find(function(x){ return x.id===id; });
   if(!e) return;
   const tutar = Number(document.getElementById('e_odTutar').value)||0;
@@ -1777,7 +1909,7 @@ function eskiOdemeKaydet(id){
   e.odenen = (Number(e.odenen)||0) + gercekTutar;
   kasaHareketEkle('tahsilat', gercekTutar, 'Eski oturan ödemesi: '+(e.isim||''), (e.blok||'')+(e.daire||''));
   if(tutar > kalan){
-    alert('✓ '+fmtMoney(gercekTutar)+' kasaya eklendi.\n\nKalan borç: '+fmtMoney(e.kalan)+'\n💡 '+fmtMoney(tutar-gercekTutar)+' fazla girdiniz, yazılmadı.');
+    alert('✓ '+fmtMoney(gercekTutar)+' kasaya eklendi.\n\nKalan borç: '+fmtMoney(e.kalan)+'');
   } else {
     alert('✓ '+fmtMoney(gercekTutar)+' kasaya eklendi.\n\nKalan borç: '+fmtMoney(e.kalan)+'');
   }
@@ -1788,6 +1920,7 @@ function eskiOdemeKaydet(id){
 
 /* ============ GİDER ============ */
 function viewGider(){
+  if(!isAdmin) return viewHome();
   let html = header('Giderler','Site Harcamaları');
   html += '<div class="app">';
   html += '<div class="stats">'
@@ -1826,6 +1959,7 @@ function viewGider(){
   return html;
 }
 function giderEkle(){
+  if(!isAdmin) return;
   const rec = {
     id: Date.now(),
     aciklama: document.getElementById('g_aciklama').value.trim(),
@@ -1843,6 +1977,7 @@ function giderEkle(){
   alert('Gider kaydedildi ve kasadan düşüldü: -'+fmtMoney(rec.tutar));
 }
 function giderDuzenle(id){
+  if(!isAdmin) return;
   const g = db.giderler.find(function(x){ return x.id===id; });
   if(!g) return;
   const body = '<h2>Gideri Düzenle</h2>'
@@ -1857,11 +1992,11 @@ function giderDuzenle(id){
   openModal(body);
 }
 function giderGuncelle(id){
+  if(!isAdmin) return;
   const g = db.giderler.find(function(x){ return x.id===id; });
   if(!g) return;
   const eskiTutar = g.tutar;
   const yeniTutar = Number(document.getElementById('g_tutar').value)||0;
-  // Kasa hareketini güncelle: eski tutarı sil, yeni tutarı ekle
   kasaHareketSilByRef(g.aciklama, null, eskiTutar);
   g.aciklama = document.getElementById('g_aciklama').value.trim();
   g.ay = document.getElementById('g_ay').value.trim();
@@ -1876,6 +2011,7 @@ function giderGuncelle(id){
   render();
 }
 function giderSil(id){
+  if(!isAdmin) return;
   if(!confirm('Silinsin mi?\n\nKasadan düşülen tutar geri eklenecek.')) return;
   const g = db.giderler.find(function(x){ return x.id===id; });
   if(g){
@@ -1886,8 +2022,9 @@ function giderSil(id){
   render();
 }
 
-/* ============ DUYURULAR - Düzenle/Sil ============ */
+/* ============ DUYURULAR ============ */
 function viewDuyurular(){
+  if(!isAdmin) return viewHome();
   let html = header('Duyurular','Site Yönetimi');
   html += '<div class="app">'
     + '<div class="card"><button class="btn btn-primary btn-block" onclick="duyuruYeniForm()">➕ Yeni Duyuru</button></div>';
@@ -1911,6 +2048,7 @@ function viewDuyurular(){
   return html;
 }
 function duyuruYeniForm(){
+  if(!isAdmin) return;
   const body = '<h2>Yeni Duyuru</h2>'
     + '<div class="fg"><label>Başlık</label><input class="fc" id="d_baslik"></div>'
     + '<div class="fg"><label>İçerik</label><textarea class="fc" id="d_icerik" rows="4"></textarea></div>'
@@ -1919,6 +2057,7 @@ function duyuruYeniForm(){
   openModal(body);
 }
 function duyuruEkle(){
+  if(!isAdmin) return;
   const b = document.getElementById('d_baslik').value.trim();
   const i = document.getElementById('d_icerik').value.trim();
   if(!b||!i){alert('Başlık ve içerik gerekli');return;}
@@ -1932,6 +2071,7 @@ function duyuruEkle(){
   render();
 }
 function duyuruDuzenle(id){
+  if(!isAdmin) return;
   const d = db.duyurular.find(function(x){ return x.id===id; });
   if(!d) return;
   const body = '<h2>Duyuruyu Düzenle</h2>'
@@ -1942,6 +2082,7 @@ function duyuruDuzenle(id){
   openModal(body);
 }
 function duyuruGuncelle(id){
+  if(!isAdmin) return;
   const d = db.duyurular.find(function(x){ return x.id===id; });
   if(!d) return;
   d.baslik = document.getElementById('d_baslik').value.trim();
@@ -1952,6 +2093,7 @@ function duyuruGuncelle(id){
   render();
 }
 function duyuruSil(id){
+  if(!isAdmin) return;
   if(!confirm('Silinsin mi?')) return;
   db.duyurular = db.duyurular.filter(function(d){ return d.id!==id; });
   saveDB();
@@ -1960,6 +2102,7 @@ function duyuruSil(id){
 
 /* ============ EXCEL ============ */
 function excelCikar(){
+  if(!isAdmin) return;
   try{
     const wb = XLSX.utils.book_new();
 
@@ -2067,6 +2210,28 @@ document.getElementById('mov').addEventListener('click', function(e){
 });
 
 /* ============ BAŞLAT ============ */
+// Login sayfası özel durumu (currentPage='login' olduğunda)
+const _origRender = render;
+render = function(){
+  if(currentPage === 'login'){
+    document.getElementById('app').innerHTML = viewLogin();
+    return;
+  }
+  _origRender();
+};
+// navTo içinde login kontrolü
+const _origNavTo = navTo;
+navTo = function(page){
+  if(page === 'login'){
+    currentPage = 'login';
+    renderNav();
+    render();
+    window.scrollTo(0,0);
+    return;
+  }
+  _origNavTo(page);
+};
+
 renderNav();
 render();
 initFirebase();
@@ -2095,8 +2260,8 @@ window.duyuruEkle = duyuruEkle;
 window.duyuruDuzenle = duyuruDuzenle;
 window.duyuruGuncelle = duyuruGuncelle;
 window.duyuruSil = duyuruSil;
-window.adminGiris = adminGiris;
 window.adminCikis = adminCikis;
+window.loginSubmit = loginSubmit;
 window.kasaDuzenle = kasaDuzenle;
 window.kasaKaydet = kasaKaydet;
 window.hareketGecmisi = hareketGecmisi;
