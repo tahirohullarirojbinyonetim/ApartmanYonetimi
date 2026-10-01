@@ -1163,7 +1163,22 @@ function viewHome(){
     html += '<div class="empty">Henüz duyuru yok.</div>';
   }
   html += '</div>';
-
+// SON İŞLEMLER
+const sonIslemler = (db.islemler||[]).slice().sort((a,b)=>new Date(b.tarih)-new Date(a.tarih)).slice(0,3);
+html += '<div class="card"><div class="card-title">📋 Son İşlemler <span class="badge-cnt">'+((db.islemler||[]).length)+'</span></div>';
+if(sonIslemler.length){
+  sonIslemler.forEach(function(i){
+    html += '<div class="li"><div style="flex:1">'
+      + '<div class="li-t">'+i.baslik+'</div>'
+      + '<div class="li-d">'+fmtDate(i.tarih)+'</div>'
+      + (i.aciklama?'<div class="li-d" style="margin-top:4px;color:var(--text)">'+i.aciklama.slice(0,90)+(i.aciklama.length>90?'...':'')+'</div>':'')
+      + '</div></div>';
+  });
+} else {
+  html += '<div class="empty">Henüz işlem kaydı yok.</div>';
+}
+html += '</div>';
+  
   // SON GİDER
   html += '<div class="card"><div class="card-title">🧾 Son 5 Gider <span class="badge-cnt">'+db.giderler.length+'</span></div>';
   if(sonGiderler.length){
