@@ -256,7 +256,7 @@ tr:last-child td{border-bottom:none}
 /* =========================================================
    VERİTABANI
    ========================================================= */
-const STORAGE_KEY = 'rojbin_db_v17';
+const STORAGE_KEY = 'rojbin_db_v19';
 const FIRESTORE_COLLECTION = 'rojbin_data';
 const FIRESTORE_DOC = 'state';
 const KASA_BASLANGIC_VARSAYILAN = 76735.79;
@@ -450,14 +450,30 @@ function setAidatTable(tbl){
 
 function checkAutoFill(){
   const now = new Date();
-  const curMonth = now.getMonth(); 
+  const curYear = now.getFullYear();
+  const curMonth = now.getMonth(); // 0 = Ocak, 9 = Ekim
+  
+  // Sadece seçili yıl, içinde bulunduğumuz yıl ile aynıysa çalışsın
+  if(db.aktifYil !== curYear) return; 
+
   const tbl = getAidatTable();
-  if(Object.keys(tbl).length === 0){
-    db.apartments.forEach(a => {
-      const k = aptKey(a);
-      tbl[k] = new Array(12).fill('');
-      for(let i=0; i<=curMonth; i++){ tbl[k][i] = 'ÖDENMEDİ'; }
-    });
+  let degisiklikVarMi = false;
+
+  db.apartments.forEach(a => {
+    const k = aptKey(a);
+    if(!tbl[k]) tbl[k] = new Array(12).fill('');
+    
+    // 1. Aydan içinde bulunduğumuz aya kadar kontrol et
+    for(let i = 0; i <= curMonth; i++){
+      // Eğer hücre tamamen boşsa, otomatik olarak "ÖDENMEDİ" yap
+      if(tbl[k][i] === '' || tbl[k][i] === undefined || tbl[k][i] === null){
+        tbl[k][i] = 'ÖDENMEDİ';
+        degisiklikVarMi = true;
+      }
+    }
+  });
+
+  if(degisiklikVarMi){
     setAidatTable(tbl);
     saveDB();
   }
@@ -737,7 +753,6 @@ function excelOku(file){
             }
             const tutar = parseFloat(tutarStr) || 0;
             
-            // SADECE A1-A16 ve B1-B16 formatındakileri kabul et!
             if(/^[AB]([1-9]|1[0-6])$/.test(daire) && tutar > 0){
               result.push({daire, tarih, isim, aciklama, tutar});
             }
@@ -826,7 +841,7 @@ function topluKaydet(){
   
   for(let i=0; i<data.length; i++){
     const chk = document.getElementById('tchk_'+i);
-    if(!chk || !chk.checked) continue; // Seçili değilse atla
+    if(!chk || !chk.checked) continue;
     
     const daireEl = document.getElementById('tv_d_'+i);
     if(!daireEl) continue;
@@ -1004,11 +1019,18 @@ function viewDenetim(){
       let baslik = k.tip === 'sakin' ? ('Sakin Girişi - '+(k.daire||'-')) : 'Site Ziyareti';
       let altYazi = k.tip === 'sakin' ? (k.isim || '-') : 'Anonim (giriş yapmamış)';
       html += '<div class="li"><div style="flex:1;min-width:0">'
-        + '<div class="li-t">'+ikon+' '+baslik+'</div><div class="li-d">🕐 '+denetimTarihFmt(k.tarih)+'</div><div class="li-d">'+altYazi+'</div></div></div>';
+        + '<div class="li-t">'+ikon+' '+baslik+'</div><div class="li-d">🕐 '+denetimTarihFmt(k.tarih)+'</div><div class="li-d">'+altYazi+'</div></div>'
+        + '<div class="li-actions"><button class="btn btn-xs btn-danger" onclick="denetimSil(\''+k.id+'\')">🗑️</button></div></div>';
     });
   }
   html += '</div></div>';
   return html;
+}
+function denetimSil(id){
+  if(!isAdmin) return;
+  if(!confirm('Silinsin mi?')) return;
+  db.denetimKayitlari = db.denetimKayitlari.filter(function(x){ return x.id !== id; });
+  saveDB(); render();
 }
 
 /* ============ NAVİGASYON ============ */
@@ -1161,18 +1183,6 @@ function viewHome(){
   html += '<div class="app">';
   html += '<div class="big-stat balance"><div class="lbl">💰 Toplam Banka Bakiyesi</div><div class="val">'+fmtMoney(bakiye)+'</div></div>';
   html += '<div class="big-stat expense"><div class="lbl">📤 Toplam Gider</div><div class="val">'+fmtMoney(gider)+'</div></div>';
-  html += '<div class="card"><div class="card-title">📢 Duyurular <span class="badge-cnt">'+db.duyurular.length+'</span></div>';
-  if(duyurular.length){ duyurular.forEach(function(d){ html += '<div class="li"><div style="flex:1"><div class="li-t">'+(d.onemli?'🔴 ':'')+d.baslik+'</div><div class="li-d">'+fmtDate(d.tarih)+'</div><div class="li-d" style="margin-top:4px;color:var(--text)">'+d.icerik.slice(0,90)+(d.icerik.length>90?'...':'')+'</div></div></div>'; }); }
-  else { html += '<div class="empty">Henüz duyuru yok.</div>'; }
-  html += '</div>';
-  html += '<div class="card"><div class="card-title">📋 Son İşlemler <span class="badge-cnt">'+((db.islemler||[]).length)+'</span></div>';
-  if(sonIslemler.length){ sonIslemler.forEach(function(i){ html += '<div class="li"><div style="flex:1"><div class="li-t">'+i.baslik+'</div><div class="li-d">'+fmtDate(i.tarih)+'</div>'+(i.aciklama?'<div class="li-d" style="margin-top:4px;color:var(--text)">'+i.aciklama.slice(0,90)+'</div>':'')+'</div></div>'; }); }
-  else { html += '<div class="empty">Henüz işlem kaydı yok.</div>'; }
-  html += '</div>';
-  html += '<div class="card"><div class="card-title">🧾 Son 5 Gider <span class="badge-cnt">'+db.giderler.length+'</span></div>';
-  if(sonGiderler.length){ sonGiderler.forEach(function(g){ html += '<div class="li"><div style="flex:1"><div class="li-t">'+g.aciklama+'</div><div class="li-d">'+(g.ay||'')+' · '+fmtDate(g.tarih)+'</div></div><div class="li-v red">-'+fmtMoney(g.tutar)+'</div></div>'; }); }
-  else { html += '<div class="empty">Henüz gider kaydı yok.</div>'; }
-  html += '</div>';
   
   if(isAdmin){
     html += '<div class="card"><div class="card-title">⚙️ Yönetici Kısayolları</div>'
@@ -1785,9 +1795,10 @@ document.getElementById('mov').addEventListener('click', function(e){ if(e.targe
 
 /* ============ BAŞLAT ============ */
 (function(){ if(!sessionStorage.getItem('ziyaret_kaydedildi')){ denetimEkle('ziyaret', null, null); sessionStorage.setItem('ziyaret_kaydedildi', '1'); } })();
+checkAutoFill(); // Sayfa açıldığında boş ayları doldur
 renderNav(); render(); initFirebase();
 
-window.navTo = navTo; window.aptDetay = aptDetay; window.kaydetApt = kaydetApt; window.kaydetVeWhatsapp = kaydetVeWhatsapp; window.editAidat = editAidat; window.hizliKaydet = hizliKaydet; window.hizliAidatMenu = hizliAidatMenu; window.setAidatBlok = setAidatBlok; window.changeYear = changeYear; window.eskiYeniForm = eskiYeniForm; window.eskiEkle = eskiEkle; window.eskiDuzenle = eskiDuzenle; window.eskiGuncelle = eskiGuncelle; window.eskiSil = eskiSil; window.eskiOdemeAl = eskiOdemeAl; window.eskiOdemeKaydet = eskiOdemeKaydet; window.giderEkle = giderEkle; window.giderDuzenle = giderDuzenle; window.giderGuncelle = giderGuncelle; window.giderSil = giderSil; window.duyuruYeniForm = duyuruYeniForm; window.duyuruEkle = duyuruEkle; window.duyuruDuzenle = duyuruDuzenle; window.duyuruGuncelle = duyuruGuncelle; window.duyuruSil = duyuruSil; window.islemYeniForm = islemYeniForm; window.islemEkle = islemEkle; window.islemDuzenle = islemDuzenle; window.islemGuncelle = islemGuncelle; window.islemSil = islemSil; window.denetimEkle = denetimEkle; window.adminCikis = adminCikis; window.sakinCikis = sakinCikis; window.loginSubmit = loginSubmit; window.sakinLoginSubmit = sakinLoginSubmit; window.bankaBakiyeDuzenle = bankaBakiyeDuzenle; window.bankaBakiyeKaydet = bankaBakiyeKaydet; window.excelCikar = excelCikar; window.closeModal = closeModal; window.yeniProjeForm = yeniProjeForm; window.projeDuzenleForm = projeDuzenleForm; window.renderProjeForm = renderProjeForm; window.projeKaydet = projeKaydet; window.secTum = secTum; window.secSecili = secSecili; window.toggleApt = toggleApt; window.projeDetay = projeDetay; window.odemeAlProje = odemeAlProje; window.odemeKaydetProje = odemeKaydetProje; window.projeSil = projeSil; window.demirbasOdemeAl = demirbasOdemeAl; window.demirbasOdemeKaydet = demirbasOdemeKaydet; window.bildirimGonder = bildirimGonder; window.waGonderOnayli = waGonderOnayli; window.topluSec = topluSec; window.topluGonder = topluGonder; window.hizliTelefon = hizliTelefon; window.hizliTelefonKaydet = hizliTelefonKaydet; window.sablonKaydet = sablonKaydet; window.sablonSifirla = sablonSifirla; window.fazlaDus = fazlaDus; window.bhYeniForm = bhYeniForm; window.bhKaydet = bhKaydet; window.bhDuzenle = bhDuzenle; window.bhSil = bhSil; window.pdfYukleForm = pdfYukleForm; window.pdfIsle = pdfIsle; window.pdfOnizlemeGoster = pdfOnizlemeGoster; window.pdfOnayla = pdfOnayla; window.topluYukleForm = topluYukleForm; window.topluIsle = topluIsle; window.topluTumunuSec = topluTumunuSec; window.topluOnizlemeGoster = topluOnizlemeGoster; window.topluKaydet = topluKaydet;
+window.navTo = navTo; window.aptDetay = aptDetay; window.kaydetApt = kaydetApt; window.kaydetVeWhatsapp = kaydetVeWhatsapp; window.editAidat = editAidat; window.hizliKaydet = hizliKaydet; window.hizliAidatMenu = hizliAidatMenu; window.setAidatBlok = setAidatBlok; window.changeYear = changeYear; window.eskiYeniForm = eskiYeniForm; window.eskiEkle = eskiEkle; window.eskiDuzenle = eskiDuzenle; window.eskiGuncelle = eskiGuncelle; window.eskiSil = eskiSil; window.eskiOdemeAl = eskiOdemeAl; window.eskiOdemeKaydet = eskiOdemeKaydet; window.giderEkle = giderEkle; window.giderDuzenle = giderDuzenle; window.giderGuncelle = giderGuncelle; window.giderSil = giderSil; window.duyuruYeniForm = duyuruYeniForm; window.duyuruEkle = duyuruEkle; window.duyuruDuzenle = duyuruDuzenle; window.duyuruGuncelle = duyuruGuncelle; window.duyuruSil = duyuruSil; window.islemYeniForm = islemYeniForm; window.islemEkle = islemEkle; window.islemDuzenle = islemDuzenle; window.islemGuncelle = islemGuncelle; window.islemSil = islemSil; window.denetimEkle = denetimEkle; window.denetimSil = denetimSil; window.adminCikis = adminCikis; window.sakinCikis = sakinCikis; window.loginSubmit = loginSubmit; window.sakinLoginSubmit = sakinLoginSubmit; window.bankaBakiyeDuzenle = bankaBakiyeDuzenle; window.bankaBakiyeKaydet = bankaBakiyeKaydet; window.excelCikar = excelCikar; window.closeModal = closeModal; window.yeniProjeForm = yeniProjeForm; window.projeDuzenleForm = projeDuzenleForm; window.renderProjeForm = renderProjeForm; window.projeKaydet = projeKaydet; window.secTum = secTum; window.secSecili = secSecili; window.toggleApt = toggleApt; window.projeDetay = projeDetay; window.odemeAlProje = odemeAlProje; window.odemeKaydetProje = odemeKaydetProje; window.projeSil = projeSil; window.demirbasOdemeAl = demirbasOdemeAl; window.demirbasOdemeKaydet = demirbasOdemeKaydet; window.bildirimGonder = bildirimGonder; window.waGonderOnayli = waGonderOnayli; window.topluSec = topluSec; window.topluGonder = topluGonder; window.hizliTelefon = hizliTelefon; window.hizliTelefonKaydet = hizliTelefonKaydet; window.sablonKaydet = sablonKaydet; window.sablonSifirla = sablonSifirla; window.fazlaDus = fazlaDus; window.bhYeniForm = bhYeniForm; window.bhKaydet = bhKaydet; window.bhDuzenle = bhDuzenle; window.bhSil = bhSil; window.pdfYukleForm = pdfYukleForm; window.pdfIsle = pdfIsle; window.pdfOnizlemeGoster = pdfOnizlemeGoster; window.pdfOnayla = pdfOnayla; window.topluYukleForm = topluYukleForm; window.topluIsle = topluIsle; window.topluTumunuSec = topluTumunuSec; window.topluOnizlemeGoster = topluOnizlemeGoster; window.topluKaydet = topluKaydet;
 </script>
 </body>
 </html>
