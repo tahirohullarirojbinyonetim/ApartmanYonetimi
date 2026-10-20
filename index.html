@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Tahiroğulları Rojbin Sitesi Yönetim Sistemi</title>
+<title>TAHİROĞULLARI ROJBİN SİTESİ YÖNETİM SİSTEMİ</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
@@ -256,7 +256,7 @@ tr:last-child td{border-bottom:none}
 /* =========================================================
    VERİTABANI
    ========================================================= */
-const STORAGE_KEY = 'rojbin_db_v19';
+const STORAGE_KEY = 'rojbin_db_v20';
 const FIRESTORE_COLLECTION = 'rojbin_data';
 const FIRESTORE_DOC = 'state';
 const KASA_BASLANGIC_VARSAYILAN = 76735.79;
@@ -1119,7 +1119,25 @@ function sakinLoginSubmit(){
   if(!a){ errEl.innerHTML = '<div class="login-err">Daire bulunamadı.</div>'; return; }
   if(!telGecerliMi(a.telefon)){ errEl.innerHTML = '<div class="login-err">Bu dairenin kayıtlı telefonu yok.</div>'; return; }
   if(!telefonEslestiMi(a.telefon, tel)){ errEl.innerHTML = '<div class="login-err">Telefon numarası eşleşmiyor.</div>'; return; }
-  denetimEkle('sakin', daire, a.isim || '(isim yok)');
+  
+  // Sakin giriş logunu doğrudan buluta kaydet (Admin yetkisi gerekmez)
+  const yeniLog = {
+    id: 'log_' + Date.now(),
+    tarih: new Date().toISOString(),
+    tip: 'sakin',
+    daire: daire,
+    isim: a.isim || '(isim yok)'
+  };
+  
+  if(!db.denetimKayitlari) db.denetimKayitlari = [];
+  db.denetimKayitlari.push(yeniLog);
+  saveLocalDB(db);
+  
+  if(_fbReady && _setDoc) {
+    _setDoc(_doc(_fs, FIRESTORE_COLLECTION, FIRESTORE_DOC), JSON.parse(JSON.stringify(db)))
+      .catch(function(e){ console.error("Log kayıt hatası:", e); });
+  }
+
   sakinDaireKodu = daire; sessionStorage.setItem('sakin_daire', daire);
   currentPage = 'sakin-home'; renderNav(); render(); window.scrollTo(0,0);
 }
