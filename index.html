@@ -16,7 +16,7 @@
   --shadow:0 8px 24px -4px rgba(15,23,42,.08), 0 3px 8px -2px rgba(15,23,42,.04);
   --radius:18px;--radius-sm:12px;--wa:#25d366;
 }
-body{background:var(--bg);color:var(--text);padding-bottom:92px;font-size:14.5px;line-height:1.5;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);padding-bottom:110px;font-size:14.5px;line-height:1.5;overflow-x:hidden}
 
 /* ================== GEÇİŞLER VE ANİMASYONLAR ================== */
 @keyframes pageSlideIn {
@@ -278,6 +278,22 @@ td.left,th.left{text-align:left;padding-left:10px}
 
 .hidden{display:none!important}
 
+/* ================== ZARİF İMZA ALANI ================== */
+.designer-credit{
+  text-align:center;
+  font-size:0.68rem;
+  color:var(--text-soft);
+  opacity:0.42;
+  margin:28px 0 10px;
+  letter-spacing:0.04em;
+  font-weight:500;
+  user-select:none;
+  transition:opacity 0.2s ease;
+}
+.designer-credit:hover{
+  opacity:0.85;
+}
+
 #syncBar{position:fixed;top:0;left:0;right:0;height:3px;background:transparent;z-index:999;transition:background .3s}
 #syncBar.saving{background:linear-gradient(90deg,#ffc107,#ff9800,#ffc107);background-size:200% 100%;animation:slide 1s linear infinite}
 #syncBar.saved{background:#22c55e}
@@ -403,7 +419,7 @@ function stopAmbientMusic(){
 /* =========================================================
    VERİTABANI VE İLK YÜKLEME
    ========================================================= */
-const STORAGE_KEY = 'rojbin_db_v23';
+const STORAGE_KEY = 'rojbin_db_v24';
 const FIRESTORE_COLLECTION = 'rojbin_data';
 const FIRESTORE_DOC = 'state';
 const KASA_BASLANGIC_VARSAYILAN = 76735.79;
@@ -510,8 +526,8 @@ const SEED_DUYURU = [
 ];
 
 const DEFAULT_SABLONLAR = {
-  borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nTahiroğulları Rojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n💰 AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
-  borcYok: "Sayın {ISIM} ({DAIRE}),\n\nTahiroğulları Rojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n✅ Ödemeniz bulunmamaktadır. Duyarlılığınız için teşekkür ederiz.\n{ALACAK_SATIR}\nİyi günler dileriz.\n— Site Yönetimi",
+  borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n💰 AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
+  borcYok: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n✅ Ödemeniz bulunmamaktadır. Duyarlılığınız için teşekkür ederiz.\n{ALACAK_SATIR}\nİyi günler dileriz.\n— Site Yönetimi",
   ozelDuyuru: "Sayın {ISIM} ({DAIRE}),\n\n{ICERIK}\n\n— Site Yönetimi"
 };
 
@@ -743,7 +759,7 @@ function sablonDoldur(sablon, daireKodu){
     .split('{TOPLAM_BORC}').join(fmtMoney(toplam))
     .split('{ALACAK}').join(fmtMoney(fazla))
     .split('{ALACAK_SATIR}').join(alacakSatir)
-    .split('{SITE_ADI}').join('Tahiroğulları Rojbin Sitesi');
+    .split('{SITE_ADI}').join('Rojbin Sitesi');
 }
 
 function whatsappGonder(daireKodu, mesaj){
@@ -906,7 +922,9 @@ function render(){
       default: viewHtml = viewHome();
     }
   }
-  app.innerHTML = '<div class="page-anim">' + viewHtml + '</div>';
+  
+  const footerCredit = '<div class="designer-credit">Esafil S. tarafından tasarlanmıştır.</div>';
+  app.innerHTML = '<div class="page-anim">' + viewHtml + footerCredit + '</div>';
 }
 
 function header(title, sub, rightBtn){
@@ -919,7 +937,7 @@ function header(title, sub, rightBtn){
 
 /* ============ GİRİŞ EKRANLARI ============ */
 function viewLogin(){
-  let html = header('TAHİROĞULLARI ROJBİN SİTESİ','Yönetici Girişi');
+  let html = header('ROJBİN SİTESİ','Yönetici Girişi');
   html += '<div class="app"><div class="login-wrap"><h2>🔐 Yönetici Girişi</h2><div class="sub">Yönetici şifrenizle giriş yapın</div><div id="loginErr"></div>'
     + '<div class="fg"><label>E-posta</label><input type="email" class="fc" id="loginEmail" placeholder="rojbin@yonetimi.com" autocomplete="username"></div>'
     + '<div class="fg"><label>Şifre</label><input type="password" class="fc" id="loginPass" placeholder="••••••••" autocomplete="current-password"></div>'
@@ -946,7 +964,7 @@ async function loginSubmit(){
 }
 
 function viewSakinLogin(){
-  let html = header('TAHİROĞULLARI ROJBİN SİTESİ','Site Sakini Girişi');
+  let html = header('ROJBİN SİTESİ','Site Sakini Girişi');
   html += '<div class="app"><div class="login-wrap"><h2>🏠 Site Sakini Girişi</h2><div class="sub">Dairenizi seçip kayıtlı telefonunuzu giriniz</div><div id="sakinErr"></div>'
     + '<div class="fg"><label>Daire Seçin</label><select class="fc" id="sakinDaire">';
   db.apartments.forEach(function(a){ html += '<option value="'+aptKey(a)+'">'+aptKey(a)+' - '+(a.isim||'(boş)')+'</option>'; });
@@ -1212,7 +1230,7 @@ function viewHome(){
   let rightBtn = ''; 
   if(isAdmin){ rightBtn = '<button class="btn-ghost" onclick="adminCikis()">🚪 Çıkış</button>'; }
   
-  let html = header('TAHİROĞULLARI ROJBİN SİTESİ','Site Yönetim ve Takip Portalı', rightBtn);
+  let html = header('ROJBİN SİTESİ','Site Yönetim ve Takip Portalı', rightBtn);
   html += '<div class="app">';
   html += '<div class="big-stat balance"><div class="lbl">💰 Toplam Banka Bakiyesi</div><div class="val">'+fmtMoney(bakiye)+'</div></div>';
   html += '<div class="big-stat expense"><div class="lbl">📤 Toplam Gider</div><div class="val">'+fmtMoney(gider)+'</div></div>';
