@@ -528,7 +528,7 @@ const SEED_DUYURU = [
 const DEFAULT_SABLONLAR = {
   borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n💰 AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
   borcYok: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n✅ Ödemeniz bulunmamaktadır. Duyarlılığınız için teşekkür ederiz.\n{ALACAK_SATIR}\nİyi günler dileriz.\n— Site Yönetimi",
-  ozelDuyuru: "Sayın {ISIM} ({DAIRE}),\n\n{ICERIK}\n\n— Site Yönetimi"
+  ozelDuyuru: "Sayın {ISIM} ({DAIRE}),\n\n📢 SİTE YÖNETİMİ DUYURUSU\nKonu: {DUYURU_BASLIK}\n\nSite yönetimimiz tarafından dairenize iletilen yeni bir duyuru bulunmaktadır. Detayları okumak ve onaylamak için lütfen site paneline giriş yapınız:\n\nÖzet / Not:\n\"{DUYURU_METIN}\"\n\nİyi günler dileriz.\n— Rojbin Sitesi Yönetimi"
 };
 
 const AIDAT_TUTAR = 750;
@@ -2072,6 +2072,7 @@ function viewDuyurular(){
         + '<div class="li-d">'+fmtDate(d.tarih)+' · <span class="tag">'+hedefYazi+'</span> · <span style="color:var(--success);font-weight:700">✓ '+okuyanSay+' okundu</span></div>'
         + '<div style="margin-top:5px;font-size:.83rem">'+d.icerik+'</div>'
         + '<div class="li-actions" style="margin-top:8px;flex-wrap:wrap">'
+        + '<button class="btn btn-xs btn-wa" onclick="duyuruWhatsAppBaslat('+d.id+')">📱 WhatsApp ile Bildir</button>'
         + '<button class="btn btn-xs btn-teal" onclick="tekDuyuruOkuyanlarModal('+d.id+')">👁️ Okuyanlar ('+okuyanSay+')</button>'
         + '<button class="btn btn-xs btn-primary" onclick="duyuruDuzenle('+d.id+')">✏️ Düzenle</button>'
         + '<button class="btn btn-xs btn-danger" onclick="duyuruSilOnay('+d.id+')">🗑️ Sil</button>'
@@ -2086,6 +2087,91 @@ function viewDuyurular(){
   }
   html += '</div></div>';
   return html;
+}
+
+/* =========================================================
+   DUYURU İÇİN WHATSAPP BİLDİRİM ASİSTANI
+   ========================================================= */
+let _duyuruTopluList = [];
+let _duyuruTopluIndex = 0;
+let _aktifDuyuruId = null;
+
+function duyuruWhatsAppBaslat(duyuruId){
+  if(!isAdmin) return;
+  const d = (db.duyurular||[]).find(x => String(x.id) === String(duyuruId));
+  if(!d) return;
+
+  const hedefListe = (!d.hedef || d.hedef === 'hepsi') ? tumDaireKodlari() : (d.seciliDaireler || []);
+  
+  // Yalnızca geçerli telefon numarası olanları seç
+  const gonderilecekler = hedefListe.filter(k => {
+    const apt = getApt(k);
+    return apt && telGecerliMi(apt.telefon);
+  });
+
+  if(!gonderilecekler.length){
+    openModal('<h2>📱 WhatsApp Bildirimi</h2><div class="uyari red">Bu duyurunun iletilebileceği telefon numarası kayıtlı bir daire bulunamadı.</div><button class="btn btn-primary btn-block" onclick="closeModal()">Tamam</button>');
+    return;
+  }
+
+  _aktifDuyuruId = duyuruId;
+  _duyuruTopluList = gonderilecekler;
+  _duyuruTopluIndex = 0;
+  duyuruAsistanGoster();
+}
+
+function duyuruAsistanGoster(){
+  if(_duyuruTopluIndex >= _duyuruTopluList.length){
+    let body = '<h2>🎉 Bildirimler Tamamlandı!</h2>'
+      + '<div class="uyari green">Duyuru için seçilen tüm dairelerin WhatsApp bildirim süreci tamamlandı.</div>'
+      + '<button class="btn btn-primary btn-block" onclick="closeModal();render();">Kapat</button>';
+    openModal(body);
+    return;
+  }
+
+  const d = (db.duyurular||[]).find(x => String(x.id) === String(_aktifDuyuruId));
+  if(!d) { closeModal(); return; }
+
+  const k = _duyuruTopluList[_duyuruTopluIndex];
+  const a = getApt(k);
+  const sira = (_duyuruTopluIndex + 1) + ' / ' + _duyuruTopluList.length;
+
+  let sablon = (db.sablonlar && db.sablonlar.ozelDuyuru) ? db.sablonlar.ozelDuyuru : DEFAULT_SABLONLAR.ozelDuyuru;
+  let mesaj = sablon
+    .split('{ISIM}').join(a ? a.isim || 'Sakin' : 'Sakin')
+    .split('{DAIRE}').join(k)
+    .split('{DUYURU_BASLIK}').join(d.baslik)
+    .split('{DUYURU_METIN}').join(d.icerik.length > 120 ? d.icerik.slice(0, 120) + '...' : d.icerik);
+
+  let body = '<h2>📢 Duyuru WhatsApp Bildirimi</h2>'
+    + '<div class="muted" style="margin-bottom:8px">Sıradaki Daire: <b>'+sira+'</b></div>'
+    + '<div class="proj-item" style="border-left-color:var(--wa);margin-bottom:12px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<h4 style="font-size:1.05rem;color:var(--primary)">'+k+' - '+(a?a.isim||'-':'-')+'</h4>'
+    + '<span class="tag" style="background:#e0f2fe;color:#0284c7;font-weight:700">Duyuru Bildirimi</span>'
+    + '</div>'
+    + '<div class="meta" style="margin-top:4px">📱 '+(a?a.telefon:'-')+' · Başlık: <b>'+d.baslik+'</b></div>'
+    + '</div>'
+    + '<div class="fg"><label>İletilecek WhatsApp Mesajı:</label><textarea class="fc" id="duyuruAsistanMesaj" rows="8" style="font-size:.82rem">'+mesaj+'</textarea></div>'
+    + '<button class="btn btn-wa btn-block" style="padding:14px;font-size:1rem;font-weight:800;margin-bottom:8px" onclick="duyuruAsistanGonderVeIlerle(\''+k+'\')">🚀 WhatsApp\'ı Aç ve Sıradakine Geç ('+sira+')</button>'
+    + '<div style="display:flex;gap:6px">'
+    + '<button class="btn btn-block" style="background:#f1f5f9;color:#475569;font-size:.78rem" onclick="duyuruAsistanSonraki()">Bu Daireyi Atla ➔</button>'
+    + '<button class="btn btn-danger btn-block" style="font-size:.78rem" onclick="closeModal()">İptal Et</button>'
+    + '</div>';
+
+  openModal(body);
+}
+
+function duyuruAsistanGonderVeIlerle(k){
+  const mesajEl = document.getElementById('duyuruAsistanMesaj');
+  const mesaj = mesajEl ? mesajEl.value : '';
+  whatsappGonder(k, mesaj);
+  duyuruAsistanSonraki();
+}
+
+function duyuruAsistanSonraki(){
+  _duyuruTopluIndex++;
+  duyuruAsistanGoster();
 }
 
 function duyuruYeniForm(){
@@ -2457,11 +2543,13 @@ function asistanSonraki(gonderildiMi){
 
 function viewSablonlar(){
   if(!isAdmin) return viewHome();
+  let ozelDuyuruMetni = (db.sablonlar && db.sablonlar.ozelDuyuru) ? db.sablonlar.ozelDuyuru : DEFAULT_SABLONLAR.ozelDuyuru;
   let html = header('Mesaj Şablonları','Otomatik WhatsApp Mesaj Formatları');
   html += '<div class="app"><div class="card">'
-    + '<div class="muted" style="margin-bottom:10px">Kullanılabilir Değişkenler: <span class="tag">{ISIM}</span><span class="tag">{DAIRE}</span><span class="tag">{AIDAT_ODENEN}</span><span class="tag">{AIDAT_BORC}</span><span class="tag">{DEMIRBAS_ODENEN}</span><span class="tag">{DEMIRBAS_BORC}</span><span class="tag">{TOPLAM_BORC}</span></div>'
-    + '<div class="fg"><label>📌 Borç Hatırlatma Mesajı</label><textarea class="fc" id="s_borc" rows="10">'+db.sablonlar.borcHatirlatma+'</textarea></div>'
-    + '<div class="fg"><label>✅ Borcu Olmayan Daire Mesajı</label><textarea class="fc" id="s_yok" rows="5">'+db.sablonlar.borcYok+'</textarea></div>'
+    + '<div class="muted" style="margin-bottom:10px">Kullanılabilir Değişkenler: <span class="tag">{ISIM}</span><span class="tag">{DAIRE}</span><span class="tag">{AIDAT_ODENEN}</span><span class="tag">{AIDAT_BORC}</span><span class="tag">{DEMIRBAS_ODENEN}</span><span class="tag">{DEMIRBAS_BORC}</span><span class="tag">{TOPLAM_BORC}</span><span class="tag">{DUYURU_BASLIK}</span><span class="tag">{DUYURU_METIN}</span></div>'
+    + '<div class="fg"><label>📌 Borç Hatırlatma Mesajı</label><textarea class="fc" id="s_borc" rows="8">'+db.sablonlar.borcHatirlatma+'</textarea></div>'
+    + '<div class="fg"><label>✅ Borcu Olmayan Daire Mesajı</label><textarea class="fc" id="s_yok" rows="4">'+db.sablonlar.borcYok+'</textarea></div>'
+    + '<div class="fg"><label>📢 Duyuru WhatsApp Bildirim Şablonu</label><textarea class="fc" id="s_duyuru" rows="7">'+ozelDuyuruMetni+'</textarea></div>'
     + '<button class="btn btn-primary btn-block" onclick="sablonKaydet()">Şablonları Kaydet</button>'
     + '</div></div>';
   return html;
@@ -2470,6 +2558,7 @@ function sablonKaydet(){
   if(!isAdmin) return;
   db.sablonlar.borcHatirlatma = document.getElementById('s_borc').value;
   db.sablonlar.borcYok = document.getElementById('s_yok').value;
+  db.sablonlar.ozelDuyuru = document.getElementById('s_duyuru').value;
   saveDB(); alert('Şablonlar başarıyla güncellendi.');
 }
 
@@ -2574,21 +2663,201 @@ function excelCikar(){
   if(!isAdmin) return;
   try{
     const wb = XLSX.utils.book_new();
-    const dData = [['BLOK','DAİRE','İSİM','TELEFON','PLAKA','EV SAHİBİ','EV SAHİBİ TEL','FAZLA ÖDEME']];
+
+    // 1. GENEL ÖZET
+    const genelData = [
+      ['ROJBİN SİTESİ - YÖNETİM VE MALİ ÖZET RAPORU'],
+      ['Rapor Tarihi', new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR')],
+      ['Aktif Çalışma Yılı', db.aktifYil || 2026],
+      [],
+      ['KASA VE MALİ DURUM', 'TUTAR (₺)'],
+      ['Güncel Banka Bakiyesi', bankaBaki()],
+      ['Toplam Harcanan Gider', toplamGider()],
+      ['Toplam Beklenen Aidat Alacağı', db.apartments.reduce((s,a)=>s+aidatKalan(aptKey(a)),0)],
+      ['Toplam Beklenen Demirbaş Alacağı', db.apartments.reduce((s,a)=>s+demirbasToplamBorc(aptKey(a)),0)],
+      [],
+      ['İSTATİSTİKLER', 'SAYI'],
+      ['Toplam Daire', db.apartments.length],
+      ['Aidat Borcu Olan Daire Sayısı', db.apartments.filter(a=>aidatKalan(aptKey(a))>0).length],
+      ['Demirbaş Borcu Olan Daire Sayısı', db.apartments.filter(a=>demirbasToplamBorc(aptKey(a))>0).length],
+      ['Toplam Gider Kaydı', (db.giderler||[]).length],
+      ['Toplam Yapılan İşlem Kaydı', (db.islemler||[]).length],
+      ['Toplam Yayınlanan Duyuru', (db.duyurular||[]).length]
+    ];
+    const wsGenel = XLSX.utils.aoa_to_sheet(genelData);
+    wsGenel['!cols'] = [{wch:35},{wch:25}];
+    XLSX.utils.book_append_sheet(wb, wsGenel, 'GENEL_OZET');
+
+    // 2. DAİRELER LİSTESİ
+    const dData = [['BLOK','DAİRE','İSİM','TELEFON','PLAKA','EV SAHİBİ','EV SAHİBİ TEL','FAZLA ÖDEME (ALACAK)','AİDAT BORCU','DEMİRBAŞ BORCU','TOPLAM BORÇ']];
     db.apartments.forEach(function(a){
       const k = aptKey(a);
-      dData.push([a.blok, a.daire, a.isim||'', a.telefon||'', a.plaka||'', a.evsahibi||'', a.evTel||'', fazlaOdemesi(k)||0]);
+      const aBorc = aidatKalan(k);
+      const dBorc = demirbasToplamBorc(k);
+      dData.push([
+        a.blok,
+        a.daire,
+        a.isim||'',
+        a.telefon||'',
+        a.plaka||'',
+        a.evsahibi||'',
+        a.evTel||'',
+        fazlaOdemesi(k)||0,
+        aBorc,
+        dBorc,
+        aBorc + dBorc
+      ]);
     });
     const wsD = XLSX.utils.aoa_to_sheet(dData);
+    wsD['!cols'] = [{wch:6},{wch:8},{wch:26},{wch:16},{wch:14},{wch:24},{wch:16},{wch:20},{wch:14},{wch:16},{wch:14}];
     XLSX.utils.book_append_sheet(wb, wsD, 'DAIRELER');
 
-    const gData = [['AÇIKLAMA','AY','TUTAR','TARİH','DURUM']];
-    db.giderler.forEach(function(g){ gData.push([g.aciklama, g.ay, g.tutar, g.tarih, g.durum]); });
+    // 3. AİDAT TABLOSU (AKTİF YIL)
+    const tbl = getAidatTable();
+    const aHeader = ['BLOK','DAİRE','İSİM'].concat(AY_ADLARI).concat(['TOPLAM ÖDENEN','FAZLA ÖDEME','KALAN BORÇ']);
+    const aData = [aHeader];
+    db.apartments.forEach(function(a){
+      const k = aptKey(a);
+      const row = tbl[k] || [];
+      const aylar = AY_ADLARI.map((_, i) => {
+        const v = row[i];
+        if(v === undefined || v === null || v === '') return '';
+        if(typeof v === 'number') return v;
+        const n = Number(v);
+        return (!isNaN(n) && n > 0) ? n : v;
+      });
+      aData.push([a.blok, a.daire, a.isim||''].concat(aylar).concat([aidatOdenen(k), fazlaOdemesi(k)||0, aidatKalan(k)]));
+    });
+    const wsA = XLSX.utils.aoa_to_sheet(aData);
+    wsA['!cols'] = [{wch:6},{wch:7},{wch:26}].concat(AY_ADLARI.map(()=>({wch:11}))).concat([{wch:16},{wch:14},{wch:14}]);
+    XLSX.utils.book_append_sheet(wb, wsA, 'AIDAT_' + db.aktifYil);
+
+    // 4. DEMİRBAŞLAR VE PROJELER
+    const demData = [];
+    demData.push(['1. DEVREDEN DEMİRBAŞ TABLOSU (NEFESTEN KALAN)']);
+    demData.push(['BLOK','DAİRE','İSİM','NEFESTEN KALAN (₺)','ÖDENEN (₺)','KALAN BORÇ (₺)','DURUM']);
+    db.apartments.forEach(function(a){
+      const k = aptKey(a);
+      const d = db.demirbas[k] || {nefestenKalan:4250, odenen:0};
+      const kalan = Math.max(0, d.nefestenKalan - d.odenen);
+      demData.push([a.blok, a.daire, a.isim||'', d.nefestenKalan, d.odenen, kalan, kalan === 0 ? 'ÖDENDİ' : 'BORÇLU']);
+    });
+
+    demData.push([]);
+    demData.push(['2. YENİ DEMİRBAŞ PROJELERİ VE MALİYET KIRILIMLARI (NEYE NE KADAR HARCANDI?)']);
+
+    if(db.demirbasProjeler && db.demirbasProjeler.length){
+      db.demirbasProjeler.forEach(function(p, pIdx){
+        demData.push(['PROJE #' + (pIdx+1), p.baslik, 'TARİH: ' + (p.tarih||''), 'TOPLAM MALİYET: ' + (p.toplam||0) + ' ₺', 'DAİRE BAŞI PAY: ' + (p.daireBasi||0) + ' ₺']);
+        demData.push(['--- Harcama Maddeleri / Kalemleri:']);
+        demData.push(['', 'Kalem / Malzeme Adı', 'Maliyet Tutarı (₺)']);
+        (p.kalemler||[]).forEach(function(klm){
+          demData.push(['', klm.ad, klm.tutar]);
+        });
+        demData.push(['', 'Toplam Proje Tutarı', p.toplam]);
+        
+        demData.push(['--- Daire Bazlı Ödeme Durumu:']);
+        demData.push(['Daire', 'Sakin İsmi', 'Daire Başı Pay (₺)', 'Ödenen Tutar (₺)', 'Kalan Borç (₺)', 'Durum']);
+        (p.secilenDaireler||[]).forEach(function(k){
+          const apt = getApt(k);
+          const od = (p.odemeler && p.odemeler[k]) || 0;
+          const kl = Math.max(0, p.daireBasi - od);
+          demData.push([k, apt ? (apt.isim||'') : '', p.daireBasi, od, kl, kl === 0 ? 'ÖDENDİ' : 'KALAN VAR']);
+        });
+        demData.push([]);
+      });
+    } else {
+      demData.push(['Henüz eklenmiş aktif bir yeni demirbaş projesi bulunmamaktadır.']);
+    }
+    const wsDem = XLSX.utils.aoa_to_sheet(demData);
+    wsDem['!cols'] = [{wch:12},{wch:28},{wch:22},{wch:18},{wch:16},{wch:16},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, wsDem, 'DEMIRBASLAR');
+
+    // 5. GİDERLER
+    const gData = [['AÇIKLAMA','AİT OLDUĞU AY','TUTAR (₺)','TARİH','DURUM']];
+    (db.giderler||[]).forEach(function(g){
+      gData.push([g.aciklama||'', g.ay||'', Number(g.tutar)||0, g.tarih||'', g.durum||'']);
+    });
     const wsG = XLSX.utils.aoa_to_sheet(gData);
+    wsG['!cols'] = [{wch:36},{wch:16},{wch:14},{wch:14},{wch:14}];
     XLSX.utils.book_append_sheet(wb, wsG, 'GIDERLER');
 
-    XLSX.writeFile(wb, 'Rojbin_Sitesi_Veri_'+bugun()+'.xlsx');
-  }catch(e){ alert('Excel oluşturulurken hata meydana geldi: '+e.message); }
+    // 6. YAPILAN İŞLEMLER
+    const iData = [['TARİH','İŞLEM BAŞLIĞI','DETAYLI AÇIKLAMA / NOT']];
+    (db.islemler||[]).forEach(function(i){
+      iData.push([i.tarih||'', i.baslik||'', i.aciklama||'']);
+    });
+    const wsI = XLSX.utils.aoa_to_sheet(iData);
+    wsI['!cols'] = [{wch:14},{wch:32},{wch:60}];
+    XLSX.utils.book_append_sheet(wb, wsI, 'YAPILAN_ISLEMLER');
+
+    // 7. DUYURULAR VE OKUMA ONAYLARI
+    const duyuruData = [['ID','TARİH','BAŞLIK','İÇERİK','HEDEF','ÖNEM DERECESİ','OKUYAN DAİRE SAYISI','OKUYANLARIN DETAYI (DAİRE - İSİM - TARİH)']];
+    (db.duyurular||[]).forEach(function(d){
+      const okuyanDetayStr = (d.okumaDetaylari||[]).map(x => {
+        if(typeof x === 'object'){
+          const dDate = x.tarih ? new Date(x.tarih).toLocaleDateString('tr-TR') + ' ' + new Date(x.tarih).toLocaleTimeString('tr-TR') : '';
+          return x.daire + ' (' + (x.isim||'') + ' - ' + dDate + ')';
+        }
+        return String(x);
+      }).join(' | ');
+
+      const hedefStr = (d.hedef === 'secili' && d.seciliDaireler) ? ('Seçili: ' + d.seciliDaireler.join(',')) : 'Tüm 32 Daire';
+
+      duyuruData.push([
+        d.id,
+        d.tarih||'',
+        d.baslik||'',
+        d.icerik||'',
+        hedefStr,
+        d.onemli ? 'ÖNEMLİ' : 'NORMAL',
+        (d.okuyanlar||[]).length,
+        okuyanDetayStr || 'Henüz okuyan yok'
+      ]);
+    });
+    const wsDuyuru = XLSX.utils.aoa_to_sheet(duyuruData);
+    wsDuyuru['!cols'] = [{wch:14},{wch:14},{wch:30},{wch:50},{wch:20},{wch:16},{wch:20},{wch:70}];
+    XLSX.utils.book_append_sheet(wb, wsDuyuru, 'DUYURULAR');
+
+    // 8. BANKA HAREKETLERİ
+    const bhData = [['DAİRE','TARİH','GÖNDEREN İSİM','TUTAR (₺)','AÇIKLAMA / NOT']];
+    (db.bankaHareketleri||[]).forEach(function(h){
+      bhData.push([h.daire||'', h.tarih||'', h.isim||'', Number(h.tutar)||0, h.aciklama||'']);
+    });
+    const wsBH = XLSX.utils.aoa_to_sheet(bhData);
+    wsBH['!cols'] = [{wch:10},{wch:14},{wch:26},{wch:14},{wch:45}];
+    XLSX.utils.book_append_sheet(wb, wsBH, 'BANKA_HAREKETLERI');
+
+    // 9. ESKİ OTURANLAR BORÇ TAKİBİ
+    const eData = [['BLOK','DAİRE','İSİM','DURUM','GİRİŞ TARİHİ','ÇIKIŞ TARİHİ','KALAN BORÇ (₺)','ÖDENEN TUTAR (₺)']];
+    (db.eskiOturan||[]).forEach(function(e){
+      eData.push([e.blok||'', e.daire||'', e.isim||'', e.durum||'', e.oturdu||'', e.cikti||'', Number(e.kalan)||0, Number(e.odenen)||0]);
+    });
+    const wsE = XLSX.utils.aoa_to_sheet(eData);
+    wsE['!cols'] = [{wch:10},{wch:8},{wch:24},{wch:18},{wch:14},{wch:14},{wch:16},{wch:16}];
+    XLSX.utils.book_append_sheet(wb, wsE, 'ESKI_OTURANLAR');
+
+    // 10. DENETİM VE GİRİŞ KAYITLARI
+    const denetimData = [['KAYIT ID','TARİH VE SAAT','TİP','DAİRE','AÇIKLAMA / İSİM']];
+    (db.denetimKayitlari||[]).slice().reverse().forEach(function(k){
+      const dt = k.tarih ? new Date(k.tarih).toLocaleDateString('tr-TR') + ' ' + new Date(k.tarih).toLocaleTimeString('tr-TR') : '-';
+      denetimData.push([
+        k.id||'',
+        dt,
+        k.tip === 'sakin' ? 'Sakin Girişi' : 'Site Ziyareti',
+        k.daire||'-',
+        k.isim||'Anonim'
+      ]);
+    });
+    const wsDenetim = XLSX.utils.aoa_to_sheet(denetimData);
+    wsDenetim['!cols'] = [{wch:18},{wch:20},{wch:16},{wch:10},{wch:26}];
+    XLSX.utils.book_append_sheet(wb, wsDenetim, 'DENETIM_KAYITLARI');
+
+    // İndirme işlemini tetikle
+    XLSX.writeFile(wb, 'Rojbin_Sitesi_Tam_Yonetim_Verisi_' + bugun() + '.xlsx');
+  }catch(e){
+    alert('Excel oluşturulurken hata meydana geldi: ' + e.message);
+  }
 }
 
 /* ============ TOPLU BANKA EKSTRESİ ============ */
@@ -2688,6 +2957,10 @@ window.duyuruGuncelle = duyuruGuncelle;
 window.duyuruSil = duyuruSil;
 window.duyuruSilOnay = duyuruSilOnay;
 window.duyuruSilGercek = duyuruSilGercek;
+window.duyuruWhatsAppBaslat = duyuruWhatsAppBaslat;
+window.duyuruAsistanGoster = duyuruAsistanGoster;
+window.duyuruAsistanGonderVeIlerle = duyuruAsistanGonderVeIlerle;
+window.duyuruAsistanSonraki = duyuruAsistanSonraki;
 window.duyuruOkumaRaporuModal = duyuruOkumaRaporuModal;
 window.tekDuyuruOkuyanlarModal = tekDuyuruOkuyanlarModal;
 window.checkOkunmamisDuyuru = checkOkunmamisDuyuru;
