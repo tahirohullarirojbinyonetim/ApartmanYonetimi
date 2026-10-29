@@ -429,16 +429,17 @@ function stopAmbientMusic(){
 }
 
 /* =========================================================
-   SESLİ ASİSTAN MOTORU
+   SESLİ ASİSTAN MOTORU (Kısık ses desteği ile)
    ========================================================= */
-function sesliKonus(metin){
+function sesliKonus(metin, kisikSes){
   try{
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(metin);
     utter.lang = 'tr-TR';
-    utter.rate = 0.96;
-    utter.pitch = 1.05;
+    utter.rate = kisikSes ? 0.92 : 0.96;
+    utter.pitch = 1.0;
+    utter.volume = kisikSes ? 0.35 : 1.0;
     
     const sesler = window.speechSynthesis.getVoices();
     const trSes = sesler.find(s => s.lang === 'tr-TR' || s.lang.startsWith('tr'));
@@ -930,7 +931,6 @@ async function initFirebase(){
     if(sakinDaire && getApt(sakinDaire)){ sakinDaireKodu = sakinDaire; }
 
     _onAuthStateChanged(_auth, async function(user){
-      // KRİTİK: Sakin girişliyse yönetici yetkisini zorla kapat
       const sakinAktif = !!sakinDaireKodu;
       
       if(user && user.email === YETKILI_EMAIL && !sakinAktif){
@@ -952,7 +952,6 @@ async function initFirebase(){
 let currentPage = 'home'; let isAdmin = false; let sakinDaireKodu = null;
 let _sonSesliDuyuruId = null;
 
-/* KRİTİK GÜVENLİK: Sakin mi kontrolü */
 function isSakin(){
   return !!sakinDaireKodu && !isAdmin;
 }
@@ -960,7 +959,6 @@ function isSakin(){
 function renderNav(){
   const nav = document.getElementById('bnav');
   let items = '';
-  // KRİTİK: isAdmin VE sakinDaireKodu aynı anda olmamalı
   if(isAdmin && !sakinDaireKodu){
     items = '<button data-page="home" class="'+(currentPage==='home'?'active':'')+'"><span class="ic">🏠</span>Ana Sayfa</button>'
       + '<button data-page="apartments" class="'+(currentPage==='apartments'?'active':'')+'"><span class="ic">🏢</span>Daireler</button>'
@@ -978,11 +976,8 @@ function renderNav(){
 }
 
 function navTo(page){
-  // KRİTİK: Sakin girişliyse sadece kendi sayfalarına gidebilir
   if(isSakin()){
-    if(page !== 'sakin-home' && page !== 'home'){
-      return;
-    }
+    if(page !== 'sakin-home' && page !== 'home'){ return; }
   }
   
   if(page === 'login'){ currentPage = 'login'; renderNav(); render(); window.scrollTo(0,0); return; }
@@ -993,7 +988,6 @@ function navTo(page){
 }
 
 function render(){
-  // KRİTİK: Sakin kullanıcı yönetici sayfalarına erişemez
   if(isSakin()){
     const adminPages = ['apartments','aidat','demirbas','eski','gider','islemler','duyurular','denetim','bildirimler','sablonlar'];
     if(adminPages.indexOf(currentPage) > -1){
@@ -1062,12 +1056,11 @@ async function loginSubmit(){
   
   btn.textContent = 'Giriş yapılıyor...'; btn.disabled = true; errEl.innerHTML = '';
   try{
-    // KRİTİK: Yönetici girişinde sakin oturumunu temizle
     sakinDaireKodu = null;
     sessionStorage.removeItem('sakin_daire');
     
     await _signInWithEmailAndPassword(_auth, email, pass);
-    sesliKonus("Giriş yapıldı. Hoş geldiniz yönetici.");
+    sesliKonus("Giriş yapıldı.", true);
   }catch(e){
     btn.textContent = 'Giriş Yap'; btn.disabled = false;
     errEl.innerHTML = '<div class="login-err">Giriş başarısız: '+e.message+'</div>';
@@ -1086,7 +1079,6 @@ function viewSakinLogin(){
 }
 
 function sakinLoginSubmit(){
-  // KRİTİK GÜVENLİK: Sakin girişinde yönetici yetkisini zorla kapat
   isAdmin = false;
   if(_signOut && _auth){
     try { _signOut(_auth); } catch(e) {}
@@ -1121,23 +1113,8 @@ function sakinLoginSubmit(){
   render(); 
   window.scrollTo(0,0);
 
-  // Cinsiyetli hitap
-  const hitapMetni = hitap(a.isim);
-  
-  // Okunmamış duyuru var mı
-  const dKodStr = String(daire).trim().toUpperCase();
-  const okunmamisDuyuruVar = (db.duyurular || []).some(d => {
-    const hedefte = (!d.hedef || d.hedef === 'hepsi' || 
-      (d.seciliDaireler && d.seciliDaireler.map(x=>String(x).trim().toUpperCase()).indexOf(dKodStr) > -1));
-    const okundu = d.okuyanlar && d.okuyanlar.map(x=>String(x).trim().toUpperCase()).indexOf(dKodStr) > -1;
-    return hedefte && !okundu;
-  });
-
-  let karsilama = "Hoş geldiniz " + hitapMetni + ", daire bilgileriniz yüklendi.";
-  if(okunmamisDuyuruVar){
-    karsilama += " Size önemli bir duyuru var, lütfen inceleyiniz.";
-  }
-  sesliKonus(karsilama);
+  // Kısa ve kısık sesli karşılama
+  sesliKonus("Giriş yapıldı, bilgiler güncellendi.", true);
   
   setTimeout(() => {
     checkOkunmamisDuyuru(daire);
@@ -1158,7 +1135,7 @@ function checkOkunmamisDuyuru(daireKodu){
     zorunluDuyuruBalonAc(okunmamis, dKodStr);
     if(_sonSesliDuyuruId !== okunmamis.id){
       _sonSesliDuyuruId = okunmamis.id;
-      sesliKonus("Dikkat! Dairenize ait yeni bir duyuru bulunmaktadır. Lütfen inceleyiniz.");
+      sesliKonus("Yeni bir duyurunuz var.", true);
     }
   } else {
     _sonSesliDuyuruId = null;
@@ -1225,11 +1202,10 @@ function zorunluDuyuruOnayla(duyuruId, daireKodu){
   }, 350);
 }
 
-/* ============ SAKİN ANA SAYFA (SADECE GÖRÜNTÜLEME) ============ */
+/* ============ SAKİN ANA SAYFA ============ */
 function viewSakinHome(){
   const k = sakinDaireKodu; 
   
-  // KRİTİK: Sadece kendi dairesi
   if(!k || !getApt(k)){ 
     sakinCikis(); 
     return viewHome(); 
@@ -1461,10 +1437,7 @@ function viewApartments(){
       const k = aptKey(a); 
       const durum = aidatDurum(k); 
       const isim = a.isim || 'İsimsiz';
-      const eskiVar = db.eskiOturan.some(e => {
-        const eKod = ((e.blok||'').replace(/\s+/g,'') + e.daire).toUpperCase();
-        return eKod === k.toUpperCase() || (e.daire === a.daire && (e.blok||'').includes(a.blok));
-      });
+      const eskiVar = !!getEskiSakinKayit(k);
       
       html += '<div class="apt-btn '+durum+'" onclick="aptDetay(\''+k+'\')">'
         + '<div class="daire-no">'+k+' - '+isim.split(' ')[0]+'</div>'
@@ -1477,13 +1450,23 @@ function viewApartments(){
   return html;
 }
 
+/* ============ DÜZELTİLDİ: A1 ile B1 Ayrımı Sağlandı ============ */
 function getEskiSakinKayit(k){
   const a = getApt(k);
   if(!a) return null;
+  
+  // k = "A1", "B16" gibi. Blok + daire kesin eşleşmeli.
+  const hedefBlok = String(a.blok).trim().toUpperCase();     // "A"
+  const hedefDaire = Number(a.daire);                       // 1
+  
   return db.eskiOturan.find(e => {
-    const eKod = ((e.blok||'').replace(/\s+/g,'') + e.daire).toUpperCase();
-    return eKod === k.toUpperCase() || (e.daire === a.daire && (e.blok||'').includes(a.blok));
-  });
+    // Kayıttaki blok: "A Blok", "A", "a blok" gibi olabilir → sadece harfi al
+    const kayitBlokHam = String(e.blok||'').trim().toUpperCase();
+    const kayitBlokHarf = kayitBlokHam.replace(/[^A-ZÇĞİÖŞÜ]/g,'').charAt(0); // "A"
+    const kayitDaire = Number(e.daire);
+    
+    return kayitBlokHarf === hedefBlok && kayitDaire === hedefDaire;
+  }) || null;
 }
 
 function aptDetayTabDegis(k, tab){
@@ -1493,7 +1476,6 @@ function aptDetayTabDegis(k, tab){
 }
 
 function aptDetay(k){
-  // KRİTİK GÜVENLİK
   if(!isAdmin || sakinDaireKodu){ return; }
   
   const a = getApt(k); if(!a) return;
@@ -1602,6 +1584,7 @@ function eskiSakinDaireSil(id, daireKodu){
   alert('Eski sakin kaydı silindi.');
 }
 
+/* ============ DÜZELTİLDİ: Blok artık sadece harf olarak kaydediliyor ============ */
 function yeniEskiSakinDaireyeEkle(daireKodu){
   if(!isAdmin || sakinDaireKodu) return;
   const a = getApt(daireKodu);
@@ -1614,7 +1597,7 @@ function yeniEskiSakinDaireyeEkle(daireKodu){
   
   db.eskiOturan.push({
     id: Date.now(),
-    blok: a.blok + ' Blok',
+    blok: a.blok,
     daire: a.daire,
     isim: isim,
     durum: durum,
