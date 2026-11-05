@@ -3427,5 +3427,582 @@ if(document.readyState === 'loading'){
   uygulamaBaslat();
 }
 </script>
+<script>
+/* =========================================================
+   YENİ ÖZELLİK: TOPLU BANKA EKSTRESİ YÜKLEME SİSTEMİ
+   (Tek Parça - Mevcut Hiçbir Kodu Bozmaz)
+   ========================================================= */
+
+// 1. ESKİ EXCEL BUTONUNU DEVRE DIŞI BIRAK VE YENİ MENÜYE YÖNLENDİR
+window.topluYukleForm = function(){
+  if(!isAdmin || sakinDaireKodu) return;
+  topluBankaMenu();
+};
+
+// 2. VERİTABANI KONTROLÜ
+if(typeof db !== 'undefined' && !db.importGecmisi){
+  db.importGecmisi = []; 
+}
+
+// 3. TÜRKÇE NORMALİZASYON VE PARSE YARDIMCILARI
+function trNormalize(s){
+  if(s===undefined||s===null) return '';
+  return String(s)
+    .replace(/İ/g,'I').replace(/ı/g,'i').replace(/Ş/g,'S').replace(/ş/g,'s')
+    .replace(/Ğ/g,'G').replace(/ğ/g,'g').replace(/Ü/g,'U').replace(/ü/g,'u')
+    .replace(/Ö/g,'O').replace(/ö/g,'o').replace(/Ç/g,'C').replace(/ç/g,'c')
+    .toUpperCase().replace(/\s+/g,' ').trim();
+}
+
+function tutarParse(str){
+  if(str===undefined||str===null) return 0;
+  if(typeof str==='number') return str;
+  let s = String(str).replace(/[^\d.,-]/g,'');
+  if(!s) return 0;
+  if(s.indexOf(',')>-1){ s = s.replace(/\./g,'').replace(',', '.'); }
+  else { const p=s.split('.'); if(p.length===2 && p[1].length===3) s=p.join(''); }
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// 4. AKILLI DAİRE BULMA MOTORU
+function akilliDaireBul(aciklama, isim){
+  const U = trNormalize((aciklama||'')+' '+(isim||''));
+  let m;
+
+  // Örn: "A blok kat 2 daire 3" veya "B blok D:11"
+  m = U.match(/\b(A|B)\s*BLOK\b[\s\S]{0,40}?\b(?:DAIRE|NO|D|NUMARA)\s*:?\s*(\d{1,2})\b/);
+  if(m){ const k=m[1]+Number(m[2]); if(getApt(k)) return {kod:k,yontem:'blok+daire',guven:'yuksek'}; }
+
+  // Örn: "B BLOK 16 NUMARA"
+  m = U.match(/\b(A|B)\s*BLOK\b[\s\S]{0,20}?\b(\d{1,2})\s*(?:NUMARA|NO|DAIRE)?\b/);
+  if(m){ const k=m[1]+Number(m[2]); if(getApt(k)) return {kod:k,yontem:'blok+numara',guven:'yuksek'}; }
+
+  // Örn: "A1", "B-5", "A 13"
+  m = U.match(/\b(A|B)\s*-?\s*(\d{1,2})\b/);
+  if(m){ const k=m[1]+Number(m[2]); if(getApt(k)) return {kod:k,yontem:'kisa-format',guven:'yuksek'}; }
+
+  // Örn: "kat 2 daire 6" (Blok yoksa A ve B'ye bakar)
+  m = U.match(/\bKAT\s*:?\s*(\d{1,2})\s*(?:DAIRE|NO|D)\s*:?\s*(\d{1,2})\b/);
+  if(m){ const d=Number(m[2]);
+    if(getApt('A'+d) && !getApt('B'+d)) return {kod:'A'+d,yontem:'kat+daire',guven:'orta'};
+    if(getApt('B'+d) && !getApt('A'+d)) return {kod:'B'+d,yontem:'kat+daire',guven:'orta'};
+  }
+
+  // İsim eşleştirme (son çare)
+  const ad = (isim||'').trim();
+  if(ad.length>=5){
+    const ara = trNormalize(ad);
+    const es = db.apartments.filter(a=>{
+      if(!a.isim) return false;
+      const ai = trNormalize(a.isim);
+      return ai===ara || ai.indexOf(ara)>-1 || ara.indexOf(ai)>-1;
+    });
+    if(es.length===1) return {kod:aptKey(es[0]),yontem:'isim',guven:'orta'};
+  }
+  return {kod:null,yontem:'bulunamadi',guven:'yok'};
+}
+
+// 5. MÜKERRER KONTROLÜ
+function hareketMukerrerMi(h){
+  return (db.bankaHareketleri||[]).some(function(x){
+    return x.tarih===h.tarih && Math.abs((Number(x.tutar)||0)-(Number(h.tutar)||0))<0.01 && trNormalize(x.isim||'')===trNormalize(h.isim||'');
+  });
+}
+
+// 6. PDF AYRIŞTIRICI
+async function pdfBankaEkstreOku(file){
+  if(!window.pdfjsLib) throw new Error('pdf.js kütüphanesi yüklenemedi');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  
+  const buf = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({data: buf}).promise;
+  const satirlar = [];
+
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const tc = await page.getTextContent();
+    const items = tc.items.map(it=>({t:it.str, x:it.transform[4], y:Math.round(it.transform[5])}));
+    const gruplar = {};
+    items.forEach(it=>{ const k=Math.round(it.y/3)*3; (gruplar[k]=gruplar[k]||[]).push(it); });
+    Object.keys(gruplar).map(Number).sort((a,b)=>b-a).forEach(y=>{
+      const s = gruplar[y].sort((a,b)=>a.x-b.x).map(i=>i.t).join(' ').replace(/\s+/g,' ').trim();
+      if(s) satirlar.push(s);
+    });
+  }
+
+  const hareketler = []; let sonBakiye = null;
+  for(let i=0; i<satirlar.length; i++){
+    const s = satirlar[i];
+    const tm = s.match(/^(\d{2}\.\d{2}\.\d{4})\s+(.+)$/);
+    if(!tm) continue;
+    
+    const tarih = tm[1], kalan = tm[2];
+    const mm = kalan.match(/^(.+?)\s+([\d.,]+)\s*TL\s+([\d.,]+)\s*TL\s*$/);
+    if(!mm) continue;
+    
+    let acik = mm[1].trim();
+    const tutar = tutarParse(mm[2]);
+    const bakiye = tutarParse(mm[3]);
+    
+    acik = acik.replace(/^(Gelen Transfer|Giden Transfer|Havale|EFT|FAST)\s+/i,'').trim();
+    let isim='', aciklama=acik;
+    const v = acik.indexOf(',');
+    if(v>0 && v<60){ isim=acik.slice(0,v).trim(); aciklama=acik.slice(v+1).trim(); }
+    
+    sonBakiye = bakiye;
+    hareketler.push({tarih, isim, aciklama, tutar, bakiye});
+  }
+  return {hareketler, sonBakiye, toplamSayfa:pdf.numPages};
+}
+
+// 7. 3 SEKMELİ ANA MENÜ VE EKRANLAR
+let _bankaSekme = 'yeni';
+let _bankaOnizleme = null;
+let _bankaHareketFiltre = 'tumu';
+
+function topluBankaMenu(){
+  if(!isAdmin || sakinDaireKodu) return;
+  let body = '<h2>🏦 Toplu Banka Ekstresi Yönetimi</h2>';
+  
+  body += '<div class="profile-switcher" style="margin-bottom:14px">'
+    + '<button class="profile-tab '+(_bankaSekme==='yeni'?'active':'')+'" onclick="_bankaSekme=\'yeni\';topluBankaMenu()">📥 Yeni Yükle</button>'
+    + '<button class="profile-tab '+(_bankaSekme==='tumu'?'active':'')+'" onclick="_bankaSekme=\'tumu\';topluBankaMenu()">📋 Hareketler</button>'
+    + '<button class="profile-tab '+(_bankaSekme==='gecmis'?'active':'')+'" onclick="_bankaSekme=\'gecmis\';topluBankaMenu()">📜 Geçmiş</button>'
+    + '</div>';
+    
+  if(_bankaSekme==='yeni') body += bankaSekmeYeni();
+  else if(_bankaSekme==='tumu') body += bankaSekmeTumHareketler();
+  else body += bankaSekmeGecmis();
+  
+  openModal(body);
+}
+
+function bankaSekmeYeni(){
+  if(_bankaOnizleme) return bankaOnizlemeRender();
+  let html = '';
+  if((db.importGecmisi||[]).length){
+    const son = db.importGecmisi[db.importGecmisi.length-1];
+    html += '<div class="uyari teal" style="margin-bottom:10px"><b>📜 Son Yükleme:</b> '
+      + new Date(son.yuklemeZamani).toLocaleString('tr-TR')
+      + ' · PDF son hareket: <b>'+(son.pdfSonHareketTarihi||'-')+'</b>'
+      + '<br><span class="muted">'+(son.dosyaAdi||'-')+' · '+(son.eklenen||0)+' kayıt</span></div>';
+  }
+  html += '<div class="uyari">Enpara banka ekstresini PDF olarak yükleyin. Sistem otomatik ayrıştırır, <b>siz onaylamadan hiçbir şey kaydedilmez</b>.</div>'
+    + '<div class="fg"><label>PDF Dosyası</label><input type="file" class="fc" id="topluFile" accept=".pdf,application/pdf"></div>'
+    + '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="bakiyeGuncelle" checked> PDF son bakiyesini kasaya yaz</label></div>'
+    + '<button class="btn btn-primary btn-block" style="padding:14px" onclick="onIzlemeBaslat()">🔍 Ön İzleme (Kaydetmeden)</button>';
+  return html;
+}
+
+async function onIzlemeBaslat(){
+  if(!isAdmin || sakinDaireKodu) return;
+  const fi = document.getElementById('topluFile');
+  if(!fi || !fi.files || !fi.files[0]){ alert('PDF seçin'); return; }
+  const file = fi.files[0];
+  if(!file.name.toLowerCase().endsWith('.pdf')){ alert('PDF formatı gerekli'); return; }
+  
+  openModal('<div style="padding:40px;text-align:center"><div style="font-size:2rem">⏳</div><b>PDF ayrıştırılıyor...</b></div>', false);
+  
+  try{
+    const sonuc = await pdfBankaEkstreOku(file);
+    if(!sonuc.hareketler.length){
+      openModal('<h2>⚠️ Hareket Bulunamadı</h2><div class="uyari red">PDF\'te banka hareketi tespit edilemedi.</div><button class="btn btn-primary btn-block" onclick="topluBankaMenu()">Geri</button>');
+      return;
+    }
+    
+    const isl = sonuc.hareketler.map((h,i)=>{
+      const b = akilliDaireBul(h.aciklama, h.isim);
+      const mk = hareketMukerrerMi(h);
+      return {_idx:i, tarih:h.tarih, isim:h.isim, aciklama:h.aciklama, tutar:h.tutar, bakiye:h.bakiye,
+        daire: b.kod||'genel', daireYontem:b.yontem, daireGuven:b.guven,
+        mukerrer: mk, dahil: !mk};
+    });
+    
+    const bg = document.getElementById('bakiyeGuncelle');
+    _bankaOnizleme = {hareketler: isl, sonBakiye: sonuc.sonBakiye, dosyaAdi: file.name,
+      bakiyeGuncellenecek: bg ? bg.checked : true, eskiBakiye: bankaBaki()};
+    topluBankaMenu();
+  }catch(e){
+    openModal('<h2>❌ Hata</h2><div class="uyari red">'+(e.message||'PDF okunamadı')+'</div><button class="btn btn-primary btn-block" onclick="topluBankaMenu()">Geri</button>');
+  }
+}
+
+function bankaOnizlemeRender(){
+  const on = _bankaOnizleme;
+  const dahil = on.hareketler.filter(h=>h.dahil).length;
+  const belirsiz = on.hareketler.filter(h=>h.dahil && h.daire==='genel').length;
+  const muk = on.hareketler.filter(h=>h.mukerrer).length;
+  
+  let html = '<div class="uyari green" style="margin-bottom:10px">🔍 <b>Ön İzleme</b> — Hiçbir şey kaydedilmedi. Düzenle/atla, sonra onayla.</div>';
+  
+  html += '<div class="stats" style="margin-bottom:10px">'
+    + '<div class="stat blue"><div class="lbl">Toplam</div><div class="val">'+on.hareketler.length+'</div></div>'
+    + '<div class="stat green"><div class="lbl">Dahil</div><div class="val">'+dahil+'</div></div>'
+    + '<div class="stat yellow"><div class="lbl">Genel</div><div class="val">'+belirsiz+'</div></div>'
+    + '<div class="stat red"><div class="lbl">Mükerrer</div><div class="val">'+muk+'</div></div>'
+    + '</div>';
+    
+  if(on.sonBakiye!=null && on.bakiyeGuncellenecek){
+    html += '<div class="uyari teal" style="margin-bottom:10px">💰 Kasa: '+fmtMoney(on.eskiBakiye)+' → <b style="color:#16a34a">'+fmtMoney(on.sonBakiye)+'</b></div>';
+  }
+  
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'
+    + '<button class="btn btn-sm btn-primary" onclick="_topluHepsiniSec()">Tümünü Dahil Et</button>'
+    + '<button class="btn btn-sm" onclick="_topluHepsiniKaldir()">Tümünü Atla</button>'
+    + '<button class="btn btn-sm" onclick="_topluMukerrerKaldir()">Mükerrerleri Çıkar</button>'
+    + '<button class="btn btn-sm btn-danger" onclick="_onizlemeIptal()">İptal</button>'
+    + '</div>';
+    
+  html += '<div style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px">';
+  
+  on.hareketler.forEach((h,i)=>{
+    let bg = '#fff', bd = '#cbd5e1';
+    if(h.mukerrer){ bg='#fee2e2'; bd='#fca5a5'; }
+    else if(!h.dahil){ bg='#f1f5f9'; bd='#cbd5e1'; }
+    else if(h.daire==='genel'){ bg='#fef3c7'; bd='#fde047'; }
+    else { bg='#dcfce7'; bd='#86efac'; }
+    
+    html += '<div style="padding:8px;border:1px solid '+bd+';background:'+bg+';border-radius:8px;margin-bottom:6px;'+(h.dahil?'':'opacity:.6')+'">'
+      + '<div style="display:flex;gap:6px;align-items:flex-start">'
+      + '<input type="checkbox" '+(h.dahil?'checked':'')+' onchange="_onizlemeDahilToggle('+i+',this.checked)" style="margin-top:3px">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="display:flex;justify-content:space-between;gap:4px;flex-wrap:wrap"><b style="font-size:.8rem">'+h.tarih+' · '+(h.isim||'-')+'</b><b style="color:'+(h.tutar>0?'#166534':'#991b1b')+'">'+fmtMoney(h.tutar)+'</b></div>'
+      + '<div style="font-size:.7rem;color:#64748b;margin-top:2px">'+(h.aciklama||'-')+'</div>'
+      + '<div style="display:flex;gap:4px;align-items:center;margin-top:5px;flex-wrap:wrap">'
+      + '<select class="fc" style="padding:3px 6px;font-size:.72rem;max-width:120px" onchange="_onizlemeDaireDegistir('+i+',this.value)">'
+      + _daireSecenekleri(h.daire)
+      + '</select>'
+      + (h.mukerrer ? '<span class="tag" style="background:#fee2e2;color:#991b1b;font-size:.65rem">⚠️ Mükerrer</span>' : '')
+      + (h.daire==='genel' ? '<span class="tag" style="background:#fef3c7;color:#92400e;font-size:.65rem">Genel</span>' : '<span class="tag" style="background:#dcfce7;color:#166534;font-size:.65rem">'+h.daire+'</span>')
+      + '</div></div></div></div>';
+  });
+  
+  html += '</div>';
+  html += '<button class="btn btn-success btn-block" style="padding:14px;font-size:1rem" onclick="onizlemeOnayla()">✅ Onayla ve '+dahil+' Satırı Sisteme Aktar</button>';
+  return html;
+}
+
+function _daireSecenekleri(secili){
+  let o = '<option value="genel" '+(secili==='genel'?'selected':'')+'>Genel / Daire Dışı</option>';
+  db.apartments.forEach(a=>{ const k=aptKey(a); o += '<option value="'+k+'" '+(secili===k?'selected':'')+'>'+k+' - '+(a.isim||'-')+'</option>'; });
+  return o;
+}
+
+function _onizlemeDahilToggle(i, chk){ if(_bankaOnizleme){ _bankaOnizleme.hareketler[i].dahil = chk; topluBankaMenu(); } }
+function _onizlemeDaireDegistir(i, v){ if(_bankaOnizleme){ _bankaOnizleme.hareketler[i].daire = v; topluBankaMenu(); } }
+function _topluHepsiniSec(){ if(_bankaOnizleme){ _bankaOnizleme.hareketler.forEach(h=>h.dahil=true); topluBankaMenu(); } }
+function _topluHepsiniKaldir(){ if(_bankaOnizleme){ _bankaOnizleme.hareketler.forEach(h=>h.dahil=false); topluBankaMenu(); } }
+function _topluMukerrerKaldir(){ if(_bankaOnizleme){ _bankaOnizleme.hareketler.forEach(h=>{ if(h.mukerrer) h.dahil=false; }); topluBankaMenu(); } }
+function _onizlemeIptal(){ _bankaOnizleme=null; _bankaSekme='yeni'; topluBankaMenu(); }
+
+function onizlemeOnayla(){
+  if(!isAdmin || sakinDaireKodu) return;
+  if(!_bankaOnizleme){ return; }
+  const on = _bankaOnizleme;
+  const dahil = on.hareketler.filter(h=>h.dahil);
+  if(!dahil.length){ alert('Aktarılacak satır yok'); return; }
+  if(!confirm(dahil.length+' satır sisteme aktarılacak. Onaylıyor musunuz?')) return;
+
+  let eklenen = 0;
+  const simdi = new Date().toISOString();
+  const importId = 'imp_'+Date.now();
+
+  dahil.forEach(h=>{
+    db.bankaHareketleri.push({
+      id: 'bh_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      daire: h.daire || 'genel',
+      tarih: h.tarih,
+      isim: h.isim || '(isim yok)',
+      tutar: Number(h.tutar)||0,
+      aciklama: h.aciklama || '',
+      atanmamis: (h.daire==='genel'),
+      importId: importId,
+      kayitZamani: simdi
+    });
+    eklenen++;
+  });
+
+  const tumHareketler = on.hareketler.slice().sort((a,b)=>{
+    const da = a.tarih.split('.').reverse().join('');
+    const db2 = b.tarih.split('.').reverse().join('');
+    return db2.localeCompare(da);
+  });
+  const enSon = tumHareketler[0];
+
+  db.importGecmisi.push({
+    id: importId,
+    yuklemeZamani: simdi,
+    pdfSonHareketTarihi: enSon ? enSon.tarih : null,
+    pdfSonHareketIsim: enSon ? enSon.isim : null,
+    pdfSonHareketTutar: enSon ? enSon.tutar : null,
+    dosyaAdi: on.dosyaAdi,
+    toplamSatir: on.hareketler.length,
+    eklenen: eklenen,
+    belirsiz: dahil.filter(h=>h.daire==='genel').length,
+    mukerrer: on.hareketler.filter(h=>h.mukerrer).length,
+    sonBakiye: on.sonBakiye
+  });
+
+  if(on.bakiyeGuncellenecek && on.sonBakiye != null){
+    db.bankaBakiyesi = on.sonBakiye;
+  }
+
+  saveDB();
+  _bankaOnizleme = null;
+  _bankaSekme = 'tumu';
+  topluBankaMenu();
+  alert('✅ '+eklenen+' banka hareketi sisteme eklendi.\nKasa bakiyesi güncellendi.');
+}
+
+function bankaSekmeTumHareketler(){
+  let html = '<div class="uyari teal" style="margin-bottom:10px">Banka hareketleri sadece bilgi/arşiv amaçlıdır. Aidat, demirbaş, kasa bakiyesini <b>ETKİLEMEZ</b>.</div>';
+  
+  html += '<div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">'
+    + '<button class="btn btn-sm '+(_bankaHareketFiltre==='tumu'?'btn-primary':'')+'" onclick="_bankaHareketFiltre=\'tumu\';topluBankaMenu()">Tümü</button>'
+    + '<button class="btn btn-sm '+(_bankaHareketFiltre==='daireli'?'btn-primary':'')+'" onclick="_bankaHareketFiltre=\'daireli\';topluBankaMenu()">Daireli</button>'
+    + '<button class="btn btn-sm '+(_bankaHareketFiltre==='genel'?'btn-primary':'')+'" onclick="_bankaHareketFiltre=\'genel\';topluBankaMenu()">Daire Dışı</button>'
+    + '</div>';
+
+  let liste = (db.bankaHareketleri||[]).slice();
+  if(_bankaHareketFiltre==='daireli') liste = liste.filter(h=>h.daire && h.daire!=='genel');
+  else if(_bankaHareketFiltre==='genel') liste = liste.filter(h=>!h.daire || h.daire==='genel');
+
+  liste.sort((a,b)=>{
+    const da = (a.tarih||'').split('.').reverse().join('');
+    const db2 = (b.tarih||'').split('.').reverse().join('');
+    return db2.localeCompare(da);
+  });
+
+  html += '<div style="max-height:420px;overflow-y:auto">';
+  if(!liste.length){ html += '<div class="empty">Kayıt yok.</div>'; }
+  else {
+    liste.forEach(h=>{
+      const genel = (!h.daire || h.daire==='genel');
+      html += '<div style="padding:9px;border:1px solid '+(genel?'#fde047':'#86efac')+';background:'+(genel?'#fef3c7':'#dcfce7')+';border-radius:9px;margin-bottom:6px">'
+        + '<div style="display:flex;justify-content:space-between;gap:4px;flex-wrap:wrap"><b style="font-size:.82rem">'+(genel?'⚠️ GENEL':h.daire)+' · '+h.tarih+' · '+(h.isim||'-')+'</b><b style="color:#166534">'+fmtMoney(h.tutar)+'</b></div>'
+        + (h.aciklama?'<div style="font-size:.72rem;color:#64748b;margin-top:3px">'+h.aciklama+'</div>':'')
+        + '<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">'
+        + '<button class="btn btn-xs btn-primary" onclick="bhDuzenle(\''+h.id+'\')">✏️ Düzenle</button>'
+        + (genel ? '<button class="btn btn-xs btn-success" onclick="_daireAtaModal(\''+h.id+'\')">🔗 Daireye Ata</button>' : '<button class="btn btn-xs" onclick="_daireBaglantiKaldir(\''+h.id+'\')">🔓 Bağlantıyı Kaldır</button>')
+        + '<button class="btn btn-xs btn-danger" onclick="_bhSilYeni(\''+h.id+'\')">🗑️ Sil</button>'
+        + '</div></div>';
+    });
+  }
+  html += '</div>';
+  return html;
+}
+
+function _bhSilYeni(id){
+  if(!confirm('Bu banka hareketi silinsin mi? (Kasa bakiyesi etkilenmez)')) return;
+  db.bankaHareketleri = (db.bankaHareketleri||[]).filter(x=>x.id!==id);
+  saveDB(); topluBankaMenu();
+}
+
+function _daireAtaModal(id){
+  const h = (db.bankaHareketleri||[]).find(x=>x.id===id);
+  if(!h) return;
+  let opts = '';
+  db.apartments.forEach(a=>{ opts += '<option value="'+aptKey(a)+'">'+aptKey(a)+' - '+(a.isim||'-')+'</option>'; });
+  
+  const body = '<h2>🔗 Daireye Ata</h2>'
+    + '<div class="li"><div class="li-t">Hareket</div><div class="li-v">'+h.tarih+' · '+h.isim+'</div></div>'
+    + '<div class="li"><div class="li-t">Tutar</div><div class="li-v">'+fmtMoney(h.tutar)+'</div></div>'
+    + '<div class="uyari" style="margin-top:10px"><b>⚠️ Not:</b> Bu atama sadece <b>etikettir</b>. Aidat, demirbaş, proje veya kasa bakiyesini <b>ETKİLEMEZ</b>. Sadece seçilen dairenin "Banka Hareketleri" bölümünde görünür.</div>'
+    + '<div class="fg" style="margin-top:10px"><label>Daire Seç</label><select class="fc" id="atamaDaire">'+opts+'</select></div>'
+    + '<button class="btn btn-success btn-block" onclick="_daireAtaKaydet(\''+id+'\')">✅ Ata</button>'
+    + '<button class="btn btn-block" style="margin-top:6px" onclick="topluBankaMenu()">İptal</button>';
+  openModal(body);
+}
+
+function _daireAtaKaydet(id){
+  const d = document.getElementById('atamaDaire').value;
+  const h = (db.bankaHareketleri||[]).find(x=>x.id===id);
+  if(!h) return;
+  h.daire = d; h.atanmamis = false;
+  saveDB(); topluBankaMenu();
+}
+
+function _daireBaglantiKaldir(id){
+  const h = (db.bankaHareketleri||[]).find(x=>x.id===id);
+  if(!h) return;
+  if(!confirm('Daire bağlantısı kaldırılsın mı?')) return;
+  h.daire = 'genel'; h.atanmamis = true;
+  saveDB(); topluBankaMenu();
+}
+
+function bankaSekmeGecmis(){
+  const g = (db.importGecmisi||[]).slice().reverse();
+  let html = '<div class="uyari teal" style="margin-bottom:10px">Her yükleme burada kayıtlıdır. PDF\'teki son hareket tarihi ile yükleme zamanı ayrı ayrı görünür.</div>';
+  
+  if(!g.length){ html += '<div class="empty">Henüz yükleme yok.</div>'; return html; }
+  
+  g.forEach(imp=>{
+    html += '<div style="padding:10px;border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:9px;margin-bottom:8px;background:#fff">'
+      + '<div style="font-size:.75rem;color:#64748b">📥 Yükleme: <b>'+new Date(imp.yuklemeZamani).toLocaleString('tr-TR')+'</b></div>'
+      + '<div style="font-size:.82rem;margin-top:3px">📄 Dosya: '+(imp.dosyaAdi||'-')+'</div>'
+      + '<div style="font-size:.82rem">📅 PDF son hareket: <b>'+(imp.pdfSonHareketTarihi||'-')+'</b>'+(imp.pdfSonHareketIsim?' · '+imp.pdfSonHareketIsim:'')+'</div>'
+      + '<div style="font-size:.75rem;color:#16a34a;margin-top:4px">✅ '+imp.eklenen+' eklendi'+(imp.belirsiz?' · ⚠️ '+imp.belirsiz+' genel':'')+(imp.mukerrer?' · ❌ '+imp.mukerrer+' mükerrer':'')+'</div>'
+      + '<button class="btn btn-xs btn-danger" style="margin-top:6px" onclick="_importGeriAl(\''+imp.id+'\')">↩️ Bu Yüklemeyi Geri Al</button>'
+      + '</div>';
+  });
+  return html;
+}
+
+function _importGeriAl(importId){
+  const adet = (db.bankaHareketleri||[]).filter(h=>h.importId===importId).length;
+  if(!adet){ alert('Bu yüklemeye ait hareket bulunamadı'); return; }
+  if(!confirm(adet+' hareket silinecek. Kasa bakiyesi etkilenmez. Onaylıyor musunuz?')) return;
+  db.bankaHareketleri = (db.bankaHareketleri||[]).filter(h=>h.importId!==importId);
+  db.importGecmisi = (db.importGecmisi||[]).filter(x=>x.id!==importId);
+  saveDB(); topluBankaMenu();
+}
+
+// 8. FONKSİYONLARI PENCEREYE TANIT
+window.topluBankaMenu = topluBankaMenu;
+window.onIzlemeBaslat = onIzlemeBaslat;
+window.onizlemeOnayla = onizlemeOnayla;
+window._onizlemeDahilToggle = _onizlemeDahilToggle;
+window._onizlemeDaireDegistir = _onizlemeDaireDegistir;
+window._topluHepsiniSec = _topluHepsiniSec;
+window._topluHepsiniKaldir = _topluHepsiniKaldir;
+window._topluMukerrerKaldir = _topluMukerrerKaldir;
+window._onizlemeIptal = _onizlemeIptal;
+window._daireAtaModal = _daireAtaModal;
+window._daireAtaKaydet = _daireAtaKaydet;
+window._daireBaglantiKaldir = _daireBaglantiKaldir;
+window._bhSilYeni = _bhSilYeni;
+window._importGeriAl = _importGeriAl;
+</script>
+<script>
+/* =========================================================
+   EK GÜNCELLEME: GEÇMİŞ DÜZELTMESİ + SAKİN İCMAL EKRANI
+   ========================================================= */
+
+// 1. GEÇMİŞ SEKME DÜZELTMESİ
+// En son yükleme bilgisinin her zaman en üstte görünmesi için:
+const _eskiBankaSekmeGecmis = bankaSekmeGecmis;
+window.bankaSekmeGecmis = function(){
+  let html = '<div class="uyari teal" style="margin-bottom:10px"><b>📌 Yükleme Geçmişi</b><br>Aşağıda sisteme eklediğiniz tüm PDF ekstrelerinin kayıtları ve içindeki en son transfer tarihleri yer alır.</div>';
+  
+  const g = (db.importGecmisi||[]).slice().reverse();
+  if(!g.length){ 
+    html += '<div class="empty">Henüz sisteme yüklenmiş bir PDF geçmişi bulunmuyor.</div>'; 
+    return html; 
+  }
+  
+  g.forEach((imp, index) => {
+    html += '<div style="padding:12px;border:1px solid var(--border);border-left:5px solid '+(index===0?'#16a34a':'var(--primary)')+';border-radius:9px;margin-bottom:10px;background:'+(index===0?'#f0fdf4':'#fff')+'">'
+      + (index===0 ? '<div style="font-size:.7rem;color:#16a34a;font-weight:800;margin-bottom:4px">⭐ EN SON YÜKLEME</div>' : '')
+      + '<div style="font-size:.8rem;color:#0f172a;margin-bottom:6px">📥 <b>Sisteme Yükleme Tarihi:</b> '+new Date(imp.yuklemeZamani).toLocaleString('tr-TR')+'</div>'
+      + '<div style="font-size:.8rem;color:#0f172a;margin-bottom:6px">📄 <b>Dosya Adı:</b> '+(imp.dosyaAdi||'-')+'</div>'
+      + '<div style="font-size:.85rem;color:#dc2626;margin-bottom:6px">📅 <b>PDF\'teki En Son Transfer Tarihi:</b> '+(imp.pdfSonHareketTarihi||'-')+'</div>'
+      + '<div style="font-size:.85rem;color:#0f172a">👤 <b>En Son Transferi Yapan:</b> '+(imp.pdfSonHareketIsim||'-')+' ('+fmtMoney(imp.pdfSonHareketTutar)+')</div>'
+      + '<div style="font-size:.75rem;color:#16a34a;margin-top:8px">✅ '+imp.eklenen+' kayıt eklendi'+(imp.belirsiz?' · ⚠️ '+imp.belirsiz+' genel':'')+(imp.mukerrer?' · ❌ '+imp.mukerrer+' mükerrer':'')+'</div>'
+      + '<button class="btn btn-xs btn-danger" style="margin-top:8px" onclick="_importGeriAl(\''+imp.id+'\')">↩️ Bu Yüklemeyi Geri Al</button>'
+      + '</div>';
+  });
+  return html;
+};
+
+// Onayla dedikten sonra geçmişin anında güncellenmesi için yönlendirmeyi düzeltiyoruz:
+const _eskiOnizlemeOnayla = onizlemeOnayla;
+window.onizlemeOnayla = function(){
+  _eskiOnizlemeOnayla();
+  _bankaSekme = 'gecmis'; // Onaydan sonra direkt geçmişe at
+  topluBankaMenu();
+};
+
+/* =========================================================
+   2. SİTE SAKİNİ İÇİN GENEL İCMAL EKRANI
+   ========================================================= */
+
+// Sakine özel "Genel İcmal" butonunu ana sayfaya ekliyoruz
+const _eskiViewSakinHome = viewSakinHome;
+window.viewSakinHome = function(){
+  let orijinalHtml = _eskiViewSakinHome();
+  
+  // Sakin giriş sayfasındaki uyarı kutusunun hemen altına büyük butonu ekle
+  let ekButon = '<div class="card" style="background:linear-gradient(135deg, #1e3f6e, #2563eb); color:#fff; text-align:center; margin-bottom:14px;" onclick="sakinIcmalGoster()">'
+    + '<div style="font-size:2rem; margin-bottom:8px;">📊</div>'
+    + '<div style="font-size:1.1rem; font-weight:800;">SİTE GENEL İCMALİ</div>'
+    + '<div style="font-size:.75rem; opacity:.8; margin-top:4px;">Tüm dairelerin aidat ve demirbaş durumlarını görüntüle (Sadece Okuma)</div>'
+    + '</div>';
+    
+  // Uyarı div'inin (sakin-uyari) hemen sonrasına yerleştir
+  return orijinalHtml.replace('<div class="stats">', ekButon + '<div class="stats">');
+};
+
+// İcmal Modalını Açan Fonksiyon
+function sakinIcmalGoster(){
+  let body = '<h2>📊 Site Genel İcmali (Sadece Görüntüleme)</h2>';
+  body += '<div class="uyari teal" style="margin-bottom:12px;">Aşağıda tüm blokların aidat ve demirbaş borç/ödeme durumları yer almaktadır. <b>Bu ekran sadece okuma amaçlıdır, değişiklik yapılamaz.</b></div>';
+
+  // Blokları sırala (A ve B)
+  ['A','B'].forEach(blok => {
+    body += '<div style="margin-bottom:15px;">';
+    body += '<div style="font-weight:800; color:var(--primary); background:var(--surface-soft); padding:6px 10px; border-radius:6px; margin-bottom:8px;">'+blok+' BLOK</div>';
+    
+    // Daireleri daire numarasına göre sırala
+    const blokDaireleri = db.apartments.filter(a => a.blok === blok).sort((x,y) => x.daire - y.daire);
+    
+    blokDaireleri.forEach(a => {
+      const k = aptKey(a);
+      const aidatRow = getAidatTable()[k] || [];
+      
+      // Aidat Ayları (Ocak - Aralık)
+      let aylarHtml = '<div style="display:flex; gap:3px; flex-wrap:wrap; margin-top:6px;">';
+      AY_ADLARI.forEach((ay, i) => {
+        const v = aidatRow[i];
+        let bg = '#f1f5f9', color = '#94a3b8', txt = ay.slice(0,3);
+        if(v === 'MUAF'){ bg = '#e2e8f0'; color = '#64748b'; txt += ' (Muaf)'; }
+        else if(v === 'ÖDENMEDİ'){ bg = '#fee2e2'; color = '#dc2626'; txt += ' (Ödemedi)'; }
+        else if(hucreTutar(v) > 0){ bg = '#dcfce7'; color = '#16a34a'; txt += ' (Ödedi)'; }
+        aylarHtml += '<span style="background:'+bg+'; color:'+color+'; font-size:.65rem; padding:3px 6px; border-radius:4px; font-weight:700; border:1px solid '+color+'33;">'+txt+'</span>';
+      });
+      aylarHtml += '</div>';
+
+      // Demirbaş Durumu
+      const demir = db.demirbas[k] || {nefestenKalan:4250, odenen:0};
+      const dKalan = Math.max(0, demir.nefestenKalan - demir.odenen);
+      const demirDurum = dKalan === 0 ? '<span style="color:#16a34a; font-weight:700;">✅ Ödendi</span>' : '<span style="color:#dc2626; font-weight:700;">🔴 Kalan: '+fmtMoney(dKalan)+'</span>';
+      
+      // Projeler
+      let projelerHtml = '';
+      const projeler = (db.demirbasProjeler||[]).filter(p => p.secilenDaireler && p.secilenDaireler.includes(k));
+      if(projeler.length){
+        projelerHtml += '<div style="font-size:.7rem; color:var(--text-soft); margin-top:6px;"><b>Demirbaş Projeleri:</b></div>';
+        projelerHtml += '<div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:2px;">';
+        projeler.forEach(p => {
+          const od = p.odemeler[k] || 0;
+          const kl = Math.max(0, p.daireBasi - od);
+          let pBg = kl === 0 ? '#dcfce7' : (od > 0 ? '#fef3c7' : '#fee2e2');
+          let pColor = kl === 0 ? '#16a34a' : (od > 0 ? '#d97706' : '#dc2626');
+          projelerHtml += '<span style="background:'+pBg+'; color:'+pColor+'; font-size:.65rem; padding:3px 6px; border-radius:4px; font-weight:700; border:1px solid '+pColor+'33;">'+p.baslik.slice(0,15)+'... '+(kl===0?'✅':'❌')+'</span>';
+        });
+        projelerHtml += '</div>';
+      }
+
+      body += '<div style="border:1px solid var(--border); border-radius:8px; padding:10px; margin-bottom:8px; background:#fff;">'
+        + '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:6px;">'
+        + '<div style="font-weight:800; color:var(--primary);">'+k+' - '+(a.isim||'İsimsiz')+'</div>'
+        + '</div>'
+        + aylarHtml
+        + '<div style="margin-top:8px; font-size:.75rem; display:flex; justify-content:space-between; align-items:center; background:var(--surface-soft); padding:5px 8px; border-radius:6px;">'
+        + '<span style="font-weight:700;">Demirbaş (Nefesten):</span> ' + demirDurum
+        + '</div>'
+        + projelerHtml
+        + '</div>';
+    });
+    body += '</div>';
+  });
+
+  body += '<button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="closeModal()">Kapat</button>';
+  openModal(body);
+}
+
+window.sakinIcmalGoster = sakinIcmalGoster;
+
+</script>
 </body>
 </html>
