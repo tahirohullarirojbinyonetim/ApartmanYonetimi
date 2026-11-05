@@ -4004,5 +4004,148 @@ function sakinIcmalGoster(){
 window.sakinIcmalGoster = sakinIcmalGoster;
 
 </script>
+<script>
+/* =========================================================
+   EK GÜNCELLEME: SES YÖNETİMİ VE DUYURU EKRANI
+   (Robot Sesi İptal Edildi - Sadece Link Çalar)
+   ========================================================= */
+
+// 1. VERİTABANI KONTROLÜ
+if(typeof db !== 'undefined'){
+  if(!db.settings) db.settings = {};
+  if(db.settings.sakinGirisSesLinki === undefined) db.settings.sakinGirisSesLinki = '';
+  if(db.settings.sakinDuyuruSesLinki === undefined) db.settings.sakinDuyuruSesLinki = '';
+}
+
+// 2. YÖNETİCİ PANELİNE SES AYARLARI BUTONU EKLE
+const _eskiViewHome = viewHome;
+window.viewHome = function(){
+  let orijinalHtml = _eskiViewHome();
+  
+  if(isAdmin && !sakinDaireKodu){
+    let ayarButonu = '<div class="more-item" onclick="sesAyarlariModal()"><span class="ic">🎵</span>Ses Ayarları</div>';
+    orijinalHtml = orijinalHtml.replace(
+      '<div class="more-item" onclick="excelCikar()">', 
+      ayarButonu + '<div class="more-item" onclick="excelCikar()">'
+    );
+  }
+  return orijinalHtml;
+};
+
+// 3. SES AYARLARI MODALI (İki Ayrı Link)
+function sesAyarlariModal(){
+  if(!isAdmin || sakinDaireKodu) return;
+  
+  let linkGiris = db.settings.sakinGirisSesLinki || '';
+  let linkDuyuru = db.settings.sakinDuyuruSesLinki || '';
+  
+  let body = '<h2>🎵 Ses / Müzik Ayarları</h2>'
+    + '<div class="uyari teal">Aşağıdaki alanlara ses dosyası (örneğin .mp3) linkleri yapıştırabilirsiniz. <b>Link girilmezse hiçbir ses çalmaz.</b></div>'
+    
+    + '<div class="fg" style="margin-top:14px;">'
+    + '<label style="color:var(--primary); font-weight:800;">1. Giriş Yapıldığında Çalacak Ses</label>'
+    + '<input class="fc" id="sesLinkGiris" placeholder="https://site.com/muzik.mp3" value="'+linkGiris+'">'
+    + '<button class="btn btn-sm btn-primary" style="margin-top:6px;" onclick="testSesLinki(\'sesLinkGiris\')">▶️ Bu Linki Test Et</button>'
+    + '</div>'
+    
+    + '<div class="fg" style="margin-top:14px;">'
+    + '<label style="color:#dc2626; font-weight:800;">2. Duyuru Sesi (Duyuruyu Dinle Butonu İçin)</label>'
+    + '<input class="fc" id="sesLinkDuyuru" placeholder="https://site.com/duyuru.mp3" value="'+linkDuyuru+'">'
+    + '<button class="btn btn-sm btn-primary" style="margin-top:6px;" onclick="testSesLinki(\'sesLinkDuyuru\')">▶️ Bu Linki Test Et</button>'
+    + '</div>'
+    
+    + '<div style="display:flex; gap:6px; margin-top:20px;">'
+    + '<button class="btn btn-success btn-block" onclick="sesAyarlariKaydet()">💾 Kaydet</button>'
+    + '</div>';
+    
+  openModal(body);
+}
+
+// 4. AYARLARI KAYDET
+function sesAyarlariKaydet(){
+  const giris = document.getElementById('sesLinkGiris').value.trim();
+  const duyuru = document.getElementById('sesLinkDuyuru').value.trim();
+  
+  db.settings.sakinGirisSesLinki = giris;
+  db.settings.sakinDuyuruSesLinki = duyuru;
+  saveDB();
+  closeModal();
+  alert('Ses ayarları başarıyla kaydedildi.');
+}
+
+// 5. LİNK TEST ETME
+function testSesLinki(inputId){
+  const val = document.getElementById(inputId).value.trim();
+  if(!val){ alert('Lütfen önce bir link girin'); return; }
+  const audio = new Audio(val);
+  audio.play().catch(e => alert('Ses çalınamadı. Link geçerli bir ses dosyası olmayabilir.'));
+}
+
+// 6. ROBOT SESİNİ TAMAMEN KALDIR VE GİRİŞ SESİNİ BAĞLA
+const _eskiSakinLoginSubmit = sakinLoginSubmit;
+window.sakinLoginSubmit = function(){
+  // Önce mevcut giriş işlemlerini yap
+  _eskiSakinLoginSubmit();
+  
+  // Eski robot sesini (varsa) sustur
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  
+  // Yönetici link girdiyse çal, girmediyse sessiz kal
+  const link = db.settings.sakinGirisSesLinki;
+  if(sakinDaireKodu && link && link.trim() !== ''){
+    try {
+      const audio = new Audio(link);
+      audio.volume = 0.6;
+      audio.play().catch(e => console.log('Giriş sesi otomatik başlatılamadı:', e));
+    } catch(e) {}
+  }
+};
+
+// 7. ZORUNLU DUYURU EKRANINA ÇİFT BUTON EKLE
+const _eskiZorunluDuyuruBalonAc = zorunluDuyuruBalonAc;
+window.zorunluDuyuruBalonAc = function(d, daireKodu){
+  window._aktifDuyuruMetni = d.icerik;
+  window._aktifDuyuruBaslik = d.baslik;
+
+  const body = '<div class="zorunlu-modal-wrap">'
+    + '<div class="zorunlu-badge">📢 SİZE AİT YENİ BİR DUYURU VAR</div>'
+    + '<div class="zorunlu-baslik">'+d.baslik+'</div>'
+    + '<div class="zorunlu-aciklama">Site yönetimimiz tarafından dairenize iletilen önemli bir duyuru bulunmaktadır.</div>'
+    
+    + '<div style="display:flex; gap:8px; margin-top:10px;">'
+    + '<button class="btn" style="flex:1; background:rgba(255,255,255,0.15); color:#fff; font-weight:700; padding:14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);" onclick="duyuruSesliDinle()">🔊 Sesi Dinle</button>'
+    + '<button class="btn" style="flex:1; background:#fff; color:#1e3f6e; font-weight:800; font-size:.9rem; padding:14px; border-radius:20px; box-shadow:0 4px 14px rgba(0,0,0,.2);" onclick="zorunluDuyuruDetayGoster('+d.id+', \''+daireKodu+'\')">📖 Duyuruyu Oku</button>'
+    + '</div>'
+    + '</div>';
+  
+  openModal(body, false);
+};
+
+// 8. DUYURUYU DİNLE BUTONU (Sadece link varsa çalar, yoksa uyarı verir)
+function duyuruSesliDinle(){
+  if(window.speechSynthesis) window.speechSynthesis.cancel(); // Robot sesi iptal
+  
+  const link = db.settings.sakinDuyuruSesLinki;
+  
+  if(link && link.trim() !== ''){
+    try {
+      const audio = new Audio(link);
+      audio.play().catch(e => alert('Ses çalınamadı (Tarayıcı engeli veya geçersiz link).'));
+    } catch(e) {
+      alert('Ses linki hatalı.');
+    }
+  } else {
+    // Link yoksa hiçbir ses çıkmasın, sadece uyarı versin
+    alert('Yönetici bu duyuru için henüz bir ses kaydı eklememiş.');
+  }
+}
+
+// Global Atamalar
+window.sesAyarlariModal = sesAyarlariModal;
+window.sesAyarlariKaydet = sesAyarlariKaydet;
+window.testSesLinki = testSesLinki;
+window.duyuruSesliDinle = duyuruSesliDinle;
+
+</script>
 </body>
 </html>
