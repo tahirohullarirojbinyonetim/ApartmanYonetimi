@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -595,7 +596,7 @@ const SEED_DUYURU = [
 ];
 
 const DEFAULT_SABLONLAR = {
-  borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n💰 AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
+  borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n?? AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
   borcYok: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n✅ Ödemeniz bulunmamaktadır. Duyarlılığınız için teşekkür ederiz.\n{ALACAK_SATIR}\nİyi günler dileriz.\n— Site Yönetimi",
   ozelDuyuru: "Sayın {ISIM} ({DAIRE}),\n\n📢 SİTE YÖNETİMİ DUYURUSU\nKonu: {DUYURU_BASLIK}\n\nSite yönetimimiz tarafından dairenize iletilen yeni bir duyuru bulunmaktadır. Detayları okumak ve onaylamak için lütfen site paneline giriş yapınız:\n\nÖzet / Not:\n\"{DUYURU_METIN}\"\n\nİyi günler dileriz.\n— Rojbin Sitesi Yönetimi",
   eskiSakinHatirlatma: "Sayın {ISIM} ({DAIRE} Eski Sakini),\n\nRojbin Sitesi yönetimi olarak oturduğunuz geçmiş döneme ait kalan bakiye bilgilendirmesidir:\n\n📜 GEÇMİŞ DÖNEM BORCUNUZ: {TOPLAM_BORC}\n\nSite yönetimi ile irtibata geçerek ödemenizi kapatmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi"
@@ -4146,6 +4147,473 @@ window.sesAyarlariKaydet = sesAyarlariKaydet;
 window.testSesLinki = testSesLinki;
 window.duyuruSesliDinle = duyuruSesliDinle;
 
+</script>
+<script>
+/* =========================================================
+   EK MODÜL 1: DİNAMİK AİDAT TUTARI BELİRLEME (YIL BAZLI)
+   ========================================================= */
+
+// Aidat ekranına "Aidat Belirle" butonu entegrasyonu
+const _orijinalViewAidat = window.viewAidat;
+window.viewAidat = function() {
+  let html = _orijinalViewAidat();
+  if (!isAdmin || sakinDaireKodu) return html;
+
+  const guncelAidat = (db.settings && db.settings.aidatTutar) ? db.settings.aidatTutar : 750;
+  const butonHtml = '<div style="display:flex;justify-content:center;margin-bottom:12px;">'
+    + '<button class="btn btn-sm btn-primary" onclick="aidatTutarAyarModal()">'
+    + '⚙️ Aylık Aidat Tutarını Belirle (Şu an: ' + fmtMoney(guncelAidat) + ')'
+    + '</button></div>';
+
+  return html.replace('<div class="profile-switcher">', butonHtml + '<div class="profile-switcher">');
+};
+
+window.aidatTutarAyarModal = function() {
+  const guncel = (db.settings && db.settings.aidatTutar) ? db.settings.aidatTutar : 750;
+  let body = '<h2>⚙️ Aylık Aidat Tutarı Ayarla</h2>'
+    + '<div class="uyari teal">Burada belirleyeceğiniz tutar hem sistemdeki aylık aidat borçlarını hem de banka PDF ekstresi okunurken düşülecek aidat bedelini belirler.</div>'
+    + '<div class="fg"><label>Aylık Aidat Tutarı (₺)</label>'
+    + '<input type="number" step="1" class="fc" id="yeniAidatInput" value="' + guncel + '">'
+    + '</div>'
+    + '<button class="btn btn-success btn-block" onclick="aidatTutarAyarKaydet()">💾 Kaydet ve Uygula</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="closeModal()">İptal</button>';
+  openModal(body);
+};
+
+window.aidatTutarAyarKaydet = function() {
+  const v = Number(document.getElementById('yeniAidatInput').value);
+  if (!v || v <= 0) { alert('Geçerli bir aidat tutarı giriniz.'); return; }
+  if (!db.settings) db.settings = {};
+  db.settings.aidatTutar = v;
+  saveDB();
+  closeModal();
+  render();
+  alert('Aylık aidat tutarı ' + fmtMoney(v) + ' olarak güncellendi.');
+};
+
+function getGuncelAidatTutar() {
+  return (db.settings && Number(db.settings.aidatTutar)) ? Number(db.settings.aidatTutar) : 750;
+}
+
+
+/* =========================================================
+   EK MODÜL 2: DAİRE ÖZEL NOTLARI VE GÖRÜNÜRLÜK SİSTEMİ
+   ========================================================= */
+
+if (typeof db !== 'undefined' && !db.daireNotlari) {
+  db.daireNotlari = {};
+}
+
+const _orijinalAptDetay = window.aptDetay;
+window.aptDetay = function(k) {
+  _orijinalAptDetay(k);
+  if (!isAdmin || sakinDaireKodu) return;
+
+  const notListesi = (db.daireNotlari && db.daireNotlari[k]) || [];
+  let notlarHtml = '<div class="divider"></div>'
+    + '<div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">'
+    + '<span>📝 Daire Notları / Diyaloglar (' + notListesi.length + ')</span>'
+    + '<button class="btn btn-xs btn-primary" onclick="daireNotEkleModal(\'' + k + '\')">+ Yeni Not</button>'
+    + '</div>';
+
+  if (!notListesi.length) {
+    notlarHtml += '<div class="muted" style="padding:6px 0;font-size:.78rem;">Bu daire için henüz not eklenmemiş.</div>';
+  } else {
+    notlarHtml += '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;max-height:220px;overflow-y:auto;">';
+    notListesi.slice().reverse().forEach(n => {
+      notlarHtml += '<div style="border:1px solid var(--border);border-left:4px solid ' + (n.sakinGorsun ? '#16a34a' : '#64748b') + ';background:#fff;border-radius:8px;padding:8px;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+        + '<span style="font-size:.68rem;color:var(--text-soft);font-weight:700;">' + fmtDate(n.tarih) + '</span>'
+        + '<span class="tag" style="background:' + (n.sakinGorsun ? '#dcfce7;color:#166534' : '#f1f5f9;color:#475569') + ';font-size:.65rem;font-weight:700;">'
+        + (n.sakinGorsun ? '👁️ Sakin Görür' : '🔒 Yalnızca Yönetici')
+        + '</span>'
+        + '</div>'
+        + '<div style="font-size:.82rem;white-space:pre-wrap;color:var(--text);margin-bottom:6px;">' + n.metin + '</div>'
+        + '<div style="display:flex;gap:4px;justify-content:flex-end;">'
+        + '<button class="btn btn-xs btn-primary" onclick="daireNotDuzenleModal(\'' + k + '\', \'' + n.id + '\')">✏️ Düzenle</button>'
+        + '<button class="btn btn-xs btn-danger" onclick="daireNotSil(\'' + k + '\', \'' + n.id + '\')">🗑️ Sil</button>'
+        + '</div></div>';
+    });
+    notlarHtml += '</div>';
+  }
+
+  const modBody = document.getElementById('modBody');
+  if (modBody) {
+    modBody.insertAdjacentHTML('beforeend', notlarHtml);
+  }
+};
+
+window.daireNotEkleModal = function(daireKodu) {
+  let body = '<h2>' + daireKodu + ' - Yeni Not Ekle</h2>'
+    + '<div class="fg"><label>Not / Konuşulan Diyalog</label><textarea class="fc" id="yeniNotMetin" rows="4" placeholder="Daireye ait notunuzu girin..."></textarea></div>'
+    + '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;color:var(--primary);">'
+    + '<input type="checkbox" id="yeniNotSakinGorsun"> 👁️ Bu notu daire sakini de görsün'
+    + '</label></div>'
+    + '<button class="btn btn-primary btn-block" onclick="daireNotKaydet(\'' + daireKodu + '\')">Kaydet</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="aptDetay(\'' + daireKodu + '\')">İptal</button>';
+  openModal(body);
+};
+
+window.daireNotKaydet = function(daireKodu) {
+  const metin = document.getElementById('yeniNotMetin').value.trim();
+  const sakinGorsun = document.getElementById('yeniNotSakinGorsun').checked;
+  if (!metin) { alert('Lütfen bir not metni giriniz.'); return; }
+
+  if (!db.daireNotlari) db.daireNotlari = {};
+  if (!db.daireNotlari[daireKodu]) db.daireNotlari[daireKodu] = [];
+
+  db.daireNotlari[daireKodu].push({
+    id: 'not_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    tarih: bugun(),
+    metin: metin,
+    sakinGorsun: sakinGorsun
+  });
+
+  saveDB();
+  aptDetay(daireKodu);
+};
+
+window.daireNotDuzenleModal = function(daireKodu, notId) {
+  const n = (db.daireNotlari[daireKodu] || []).find(x => x.id === notId);
+  if (!n) return;
+
+  let body = '<h2>Notu Düzenle</h2>'
+    + '<div class="fg"><label>Not / Konuşulan Diyalog</label><textarea class="fc" id="duzenleNotMetin" rows="4">' + n.metin + '</textarea></div>'
+    + '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;color:var(--primary);">'
+    + '<input type="checkbox" id="duzenleNotSakinGorsun" ' + (n.sakinGorsun ? 'checked' : '') + '> 👁️ Bu notu daire sakini de görsün'
+    + '</label></div>'
+    + '<button class="btn btn-primary btn-block" onclick="daireNotGuncelle(\'' + daireKodu + '\', \'' + notId + '\')">Güncellemeyi Kaydet</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="aptDetay(\'' + daireKodu + '\')">İptal</button>';
+  openModal(body);
+};
+
+window.daireNotGuncelle = function(daireKodu, notId) {
+  const n = (db.daireNotlari[daireKodu] || []).find(x => x.id === notId);
+  if (!n) return;
+  const metin = document.getElementById('duzenleNotMetin').value.trim();
+  const sakinGorsun = document.getElementById('duzenleNotSakinGorsun').checked;
+  if (!metin) { alert('Not metni boş olamaz.'); return; }
+
+  n.metin = metin;
+  n.sakinGorsun = sakinGorsun;
+  saveDB();
+  aptDetay(daireKodu);
+};
+
+window.daireNotSil = function(daireKodu, notId) {
+  if (!confirm('Bu notu silmek istediğinize emin misiniz?')) return;
+  db.daireNotlari[daireKodu] = (db.daireNotlari[daireKodu] || []).filter(x => x.id !== notId);
+  saveDB();
+  aptDetay(daireKodu);
+};
+
+const _eskiViewSakinHomeNotlu = window.viewSakinHome;
+window.viewSakinHome = function() {
+  let html = _eskiViewSakinHomeNotlu();
+  const k = sakinDaireKodu;
+  if (!k) return html;
+
+  const izinliNotlar = ((db.daireNotlari && db.daireNotlari[k]) || []).filter(n => n.sakinGorsun === true);
+  if (izinliNotlar.length > 0) {
+    let notKutusu = '<div class="card"><div class="card-title">📌 Site Yönetiminden Dairenize Notlar <span class="badge-cnt">' + izinliNotlar.length + '</span></div>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;">';
+    izinliNotlar.slice().reverse().forEach(n => {
+      notKutusu += '<div style="background:var(--surface-soft);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:10px;padding:10px;">'
+        + '<div style="font-size:.7rem;color:var(--text-soft);font-weight:700;margin-bottom:3px;">📅 ' + fmtDate(n.tarih) + '</div>'
+        + '<div style="font-size:.86rem;color:var(--text);white-space:pre-wrap;">' + n.metin + '</div>'
+        + '</div>';
+    });
+    notKutusu += '</div></div>';
+    html = html.replace('<div class="stats">', notKutusu + '<div class="stats">');
+  }
+  return html;
+};
+
+
+/* =========================================================
+   EK MODÜL 3: GELİŞMİŞ BASAMAKLI BORÇ DAĞITIM VE PDF MASASI
+   ========================================================= */
+
+// Bir daire için gelen paranın basamaklı simülasyonunu hesaplar
+function hesaplaBasamakliDagitim(daireKodu, gelenTutar) {
+  let kalanPara = Number(gelenTutar) || 0;
+  const plan = {
+    aidatAylar: [],
+    aidatToplam: 0,
+    devredenDemirbas: 0,
+    projeler: [],
+    fazlaOdeme: 0,
+    ozetHtml: ''
+  };
+
+  if (!daireKodu || daireKodu === 'genel' || kalanPara <= 0) {
+    return plan;
+  }
+
+  const birimAidat = getGuncelAidatTutar();
+  const tblAidat = getAidatTable();
+  const row = tblAidat[daireKodu] || [];
+
+  // 1. ADIM: Aidat Borçlarını Tara ve Kapat
+  for (let m = 0; m < 12; m++) {
+    const val = row[m];
+    const borcluMu = (val === 'ÖDENMEDİ' || val === '' || val === null || val === undefined);
+    if (borcluMu && kalanPara >= birimAidat) {
+      plan.aidatAylar.push({ ayIndex: m, ayAdi: AY_ADLARI[m], tutar: birimAidat });
+      plan.aidatToplam += birimAidat;
+      kalanPara -= birimAidat;
+    }
+  }
+
+  // 2. ADIM: Devreden Demirbaş Borcunu Kapat
+  if (kalanPara > 0) {
+    const d = db.demirbas[daireKodu] || { nefestenKalan: 4250, odenen: 0 };
+    const demKalan = Math.max(0, (Number(d.nefestenKalan) || 0) - (Number(d.odenen) || 0));
+    if (demKalan > 0) {
+      const odenecekDem = Math.min(kalanPara, demKalan);
+      plan.devredenDemirbas = odenecekDem;
+      kalanPara -= odenecekDem;
+    }
+  }
+
+  // 3. ADIM: Demirbaş Projelerini Sırayla Kapat (Eskiden Yeniye)
+  if (kalanPara > 0 && db.demirbasProjeler && db.demirbasProjeler.length) {
+    db.demirbasProjeler.forEach(p => {
+      if (kalanPara <= 0) return;
+      if (p.secilenDaireler && p.secilenDaireler.indexOf(daireKodu) > -1) {
+        const odenen = (p.odemeler && p.odemeler[daireKodu]) || 0;
+        const projeBorc = Math.max(0, p.daireBasi - odenen);
+        if (projeBorc > 0) {
+          const odenecekProje = Math.min(kalanPara, projeBorc);
+          plan.projeler.push({ projeId: p.id, baslik: p.baslik, tutar: odenecekProje });
+          kalanPara -= odenecekProje;
+        }
+      }
+    });
+  }
+
+  // 4. ADIM: Artan Para Varsa Fazla Ödemeye Yaz
+  if (kalanPara > 0) {
+    plan.fazlaOdeme = kalanPara;
+  }
+
+  // Görsel Özet Metni Hazırla
+  let ozet = [];
+  if (plan.aidatAylar.length) {
+    ozet.push('💰 Aidat (' + plan.aidatAylar.map(x => x.ayAdi).join(', ') + '): ' + fmtMoney(plan.aidatToplam));
+  }
+  if (plan.devredenDemirbas > 0) {
+    ozet.push('🏗️ Devreden Demirbaş: ' + fmtMoney(plan.devredenDemirbas));
+  }
+  plan.projeler.forEach(pr => {
+    ozet.push('🛠️ ' + pr.baslik + ': ' + fmtMoney(pr.tutar));
+  });
+  if (plan.fazlaOdeme > 0) {
+    ozet.push('💚 Fazla Ödeme (Alacak): ' + fmtMoney(plan.fazlaOdeme));
+  }
+
+  plan.ozetHtml = ozet.join('<br>');
+  return plan;
+}
+
+// Ön İzleme Masası Render
+window.bankaOnizlemeRender = function() {
+  const on = _bankaOnizleme;
+  if (!on) return '';
+
+  const guncelAidat = getGuncelAidatTutar();
+  let html = '<div class="uyari teal" style="margin-bottom:10px">'
+    + '<b>📋 PDF Analiz ve Dağıtım Masası</b><br>'
+    + 'Aylık Aidat Birimi: <b>' + fmtMoney(guncelAidat) + '</b>. Büyük tutarlar otomatik olarak sırasıyla <i>Ödenmemiş Aidatlara ➔ Devreden Demirbaşa ➔ Projelere ➔ Fazla Ödemeye</i> dağıtılır.'
+    + '</div>';
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'
+    + '<button class="btn btn-sm btn-primary" onclick="_topluHepsiniSec()">Tümünü Seç</button>'
+    + '<button class="btn btn-sm" onclick="_topluHepsiniKaldir()">Seçimi Kaldır</button>'
+    + '</div>';
+
+  html += '<div style="max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:12px;">';
+
+  on.hareketler.forEach((h, i) => {
+    if (!h.islemModu) {
+      h.islemModu = (h.daire && h.daire !== 'genel') ? 'otomatik' : 'hareket';
+    }
+
+    const plan = hesaplaBasamakliDagitim(h.daire, h.tutar);
+    h._hesaplananPlan = plan;
+
+    let borderClr = '#cbd5e1';
+    let bgClr = '#fff';
+    if (h.islemModu === 'otomatik') { borderClr = '#86efac'; bgClr = '#f0fdf4'; }
+    else if (h.islemModu === 'hareket') { borderClr = '#fde047'; bgClr = '#fefce8'; }
+    else if (h.islemModu === 'atla') { borderClr = '#e2e8f0'; bgClr = '#f8fafc'; }
+
+    html += '<div style="padding:10px;border:1px solid ' + borderClr + ';background:' + bgClr + ';border-radius:9px;margin-bottom:8px;' + (h.dahil ? '' : 'opacity:.55;') + '">'
+      + '<div style="display:flex;gap:8px;align-items:flex-start;">'
+      + '<input type="checkbox" ' + (h.dahil ? 'checked' : '') + ' onchange="_onizlemeDahilToggle(' + i + ', this.checked)" style="margin-top:4px;">'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">'
+      + '<b style="font-size:.84rem;">' + h.tarih + ' · ' + (h.isim || 'Bilinmiyor') + '</b>'
+      + '<b style="color:var(--success);font-size:.9rem;">' + fmtMoney(h.tutar) + '</b>'
+      + '</div>'
+      + '<div style="font-size:.72rem;color:var(--text-soft);margin-top:2px;">' + (h.aciklama || '-') + '</div>'
+      
+      + '<div style="display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;">'
+      + '<div style="display:flex;flex-direction:column;gap:2px;">'
+      + '<span style="font-size:.65rem;color:var(--text-soft);font-weight:700;">DAİRE SEÇ:</span>'
+      + '<select class="fc" style="padding:4px 6px;font-size:.74rem;max-width:130px;" onchange="_onizlemeDaireDegistir(' + i + ', this.value)">'
+      + _daireSecenekleri(h.daire)
+      + '</select>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:2px;">'
+      + '<span style="font-size:.65rem;color:var(--text-soft);font-weight:700;">İŞLEM ŞEKLİ:</span>'
+      + '<select class="fc" style="padding:4px 6px;font-size:.74rem;font-weight:700;" onchange="_onizlemeModDegistir(' + i + ', this.value)">'
+      + '<option value="otomatik" ' + (h.islemModu === 'otomatik' ? 'selected' : '') + '>⚡ Borçlara Otomatik Dağıt (Önerilen)</option>'
+      + '<option value="hareket" ' + (h.islemModu === 'hareket' ? 'selected' : '') + '>🏦 Sadece Banka Hareketi Olarak Ekle</option>'
+      + '<option value="atla" ' + (h.islemModu === 'atla' ? 'selected' : '') + '>⏭️ Atla (Hiçbir Şey Yapma)</option>'
+      + '</select>'
+      + '</div>'
+      + '</div>';
+
+    // Otomatik dağıtım planının satır altı şeffaf dökümü
+    if (h.islemModu === 'otomatik' && h.daire && h.daire !== 'genel') {
+      html += '<div style="margin-top:8px;padding:6px 10px;background:#ffffff;border:1px dashed #86efac;border-radius:6px;font-size:.74rem;line-height:1.5;">'
+        + '<div style="font-weight:800;color:#15803d;margin-bottom:2px;">⚡ Planlanan Borç Düşümü:</div>'
+        + (plan.ozetHtml || '<span style="color:#64748b;">Borç bulunamadı, tamamı Fazla Ödeme (Alacak) olarak yazılacaktır.</span>')
+        + '</div>';
+    }
+
+    html += '</div></div></div>';
+  });
+
+  html += '</div>';
+
+  const seciliSayisi = on.hareketler.filter(h => h.dahil && h.islemModu !== 'atla').length;
+  html += '<button class="btn btn-success btn-block" style="padding:14px;font-size:1rem;font-weight:800;" onclick="onizlemeBasamakliOnayla()">'
+    + '✅ Seçilenleri Sisteme Dağıt ve Kaydet (' + seciliSayisi + ' Hareket)'
+    + '</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="_onizlemeIptal()">İptal Et</button>';
+
+  return html;
+};
+
+window._onizlemeModDegistir = function(index, yeniMod) {
+  if (_bankaOnizleme && _bankaOnizleme.hareketler[index]) {
+    _bankaOnizleme.hareketler[index].islemModu = yeniMod;
+    _bankaOnizleme.hareketler[index].dahil = (yeniMod !== 'atla');
+    topluBankaMenu();
+  }
+};
+
+// Basamaklı Dağıtımı Sisteme Uygulama
+window.onizlemeBasamakliOnayla = function() {
+  if (!isAdmin || sakinDaireKodu) return;
+  if (!_bankaOnizleme) return;
+
+  const on = _bankaOnizleme;
+  const islenecekler = on.hareketler.filter(h => h.dahil && h.islemModu !== 'atla');
+
+  if (!islenecekler.length) {
+    alert('Lütfen işleme almak için en az bir hareket seçiniz.');
+    return;
+  }
+
+  if (!confirm(islenecekler.length + ' adet banka hareketi borç önceliklerine göre tablolara dağıtılacaktır. Kasa bakiyesi sabit kalacaktır. Onaylıyor musunuz?')) {
+    return;
+  }
+
+  let toplamAidatAy = 0;
+  let toplamDemirbasTutar = 0;
+  let toplamFazlaTutar = 0;
+  let hareketEklenen = 0;
+
+  const simdi = new Date().toISOString();
+  const importId = 'imp_' + Date.now();
+  const tblAidat = getAidatTable();
+
+  islenecekler.forEach(h => {
+    const dKod = h.daire;
+    const tutar = Number(h.tutar) || 0;
+
+    // 1. Banka Hareketine Kaydet
+    db.bankaHareketleri.push({
+      id: 'bh_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      daire: dKod || 'genel',
+      tarih: h.tarih,
+      isim: h.isim || '(İsimsiz)',
+      tutar: tutar,
+      aciklama: h.aciklama || '',
+      atanmamis: (dKod === 'genel'),
+      importId: importId,
+      kayitZamani: simdi
+    });
+    hareketEklenen++;
+
+    // 2. Otomatik Mod Seçildiyse Basamaklı Dağıtımı Uygula
+    if (h.islemModu === 'otomatik' && dKod && dKod !== 'genel') {
+      const plan = h._hesaplananPlan || hesaplaBasamakliDagitim(dKod, tutar);
+
+      // Aidatları İşle
+      if (plan.aidatAylar && plan.aidatAylar.length) {
+        if (!tblAidat[dKod]) tblAidat[dKod] = new Array(12).fill('');
+        plan.aidatAylar.forEach(item => {
+          tblAidat[dKod][item.ayIndex] = item.tutar;
+          toplamAidatAy++;
+        });
+      }
+
+      // Devreden Demirbaşı Düş
+      if (plan.devredenDemirbas > 0) {
+        if (!db.demirbas[dKod]) db.demirbas[dKod] = { nefestenKalan: 4250, odenen: 0 };
+        db.demirbas[dKod].odenen = (Number(db.demirbas[dKod].odenen) || 0) + plan.devredenDemirbas;
+        toplamDemirbasTutar += plan.devredenDemirbas;
+      }
+
+      // Projeleri Düş
+      if (plan.projeler && plan.projeler.length) {
+        plan.projeler.forEach(pr => {
+          const proje = db.demirbasProjeler.find(p => p.id === pr.projeId);
+          if (proje) {
+            if (!proje.odemeler) proje.odemeler = {};
+            proje.odemeler[dKod] = (Number(proje.odemeler[dKod]) || 0) + pr.tutar;
+            toplamDemirbasTutar += pr.tutar;
+          }
+        });
+      }
+
+      // Artan Parayı Fazla Ödeme (Alacak) Olarak Yaz
+      if (plan.fazlaOdeme > 0) {
+        if (!db.fazlaOdemeler) db.fazlaOdemeler = {};
+        db.fazlaOdemeler[dKod] = (Number(db.fazlaOdemeler[dKod]) || 0) + plan.fazlaOdeme;
+        toplamFazlaTutar += plan.fazlaOdeme;
+      }
+    }
+  });
+
+  setAidatTable(tblAidat);
+
+  if (!db.importGecmisi) db.importGecmisi = [];
+  db.importGecmisi.push({
+    id: importId,
+    yuklemeZamani: simdi,
+    dosyaAdi: on.dosyaAdi,
+    toplamSatir: on.hareketler.length,
+    eklenen: islenecekler.length,
+    detay: toplamAidatAy + ' ay aidat ödendi, ' + fmtMoney(toplamDemirbasTutar) + ' demirbaş düşüldü, ' + fmtMoney(toplamFazlaTutar) + ' alacak yazıldı.'
+  });
+
+  saveDB();
+  _bankaOnizleme = null;
+  closeModal();
+  render();
+
+  alert('Dağıtım Başarıyla Tamamlandı:\n'
+    + '• ' + toplamAidatAy + ' aylık aidat ödendi yapıldı.\n'
+    + '• ' + fmtMoney(toplamDemirbasTutar) + ' demirbaş borçlarından düşüldü.\n'
+    + (toplamFazlaTutar > 0 ? ('• ' + fmtMoney(toplamFazlaTutar) + ' fazla ödeme/alacak olarak işlendi.\n') : '')
+    + '• ' + hareketEklenen + ' adet banka hareketi arşive kaydedildi.\n'
+    + '(Kasa bakiyeniz değiştirilmemiştir.)');
+};
 </script>
 </body>
 </html>
