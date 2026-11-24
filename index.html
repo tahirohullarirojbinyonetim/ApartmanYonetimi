@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ROJBİN SİTESİ YÖNETİM SİSTEMİ</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -596,7 +596,7 @@ const SEED_DUYURU = [
 ];
 
 const DEFAULT_SABLONLAR = {
-  borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n?? AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
+  borcHatirlatma: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n💰 AİDAT DURUMU\n• Ödenen: {AIDAT_ODENEN}\n• Kalan Borç: {AIDAT_BORC}\n\n🏗️ DEMİRBAŞ DURUMU\n• Ödenen: {DEMIRBAS_ODENEN}\n• Kalan Borç: {DEMIRBAS_BORC}\n{ALACAK_SATIR}\n⏳ *TOPLAM BEKLENEN: {TOPLAM_BORC}*\n\nÖdemenizi en kısa sürede yapmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi",
   borcYok: "Sayın {ISIM} ({DAIRE}),\n\nRojbin Sitesi yönetimi olarak bilgilendiriyoruz:\n\n✅ Ödemeniz bulunmamaktadır. Duyarlılığınız için teşekkür ederiz.\n{ALACAK_SATIR}\nİyi günler dileriz.\n— Site Yönetimi",
   ozelDuyuru: "Sayın {ISIM} ({DAIRE}),\n\n📢 SİTE YÖNETİMİ DUYURUSU\nKonu: {DUYURU_BASLIK}\n\nSite yönetimimiz tarafından dairenize iletilen yeni bir duyuru bulunmaktadır. Detayları okumak ve onaylamak için lütfen site paneline giriş yapınız:\n\nÖzet / Not:\n\"{DUYURU_METIN}\"\n\nİyi günler dileriz.\n— Rojbin Sitesi Yönetimi",
   eskiSakinHatirlatma: "Sayın {ISIM} ({DAIRE} Eski Sakini),\n\nRojbin Sitesi yönetimi olarak oturduğunuz geçmiş döneme ait kalan bakiye bilgilendirmesidir:\n\n📜 GEÇMİŞ DÖNEM BORCUNUZ: {TOPLAM_BORC}\n\nSite yönetimi ile irtibata geçerek ödemenizi kapatmanızı rica ederiz.\nİyi günler dileriz.\n— Site Yönetimi"
@@ -617,7 +617,7 @@ function seedDB(){
     apartments: SEED_APARTMENTS.map((a,i)=>Object.assign({id:i+1}, a)),
     aidat: JSON.parse(JSON.stringify(SEED_AIDAT)),
     aidat_2027: {},
-    demirbas: JSON.parse(JSON.stringify(SEED_DEMIRBAS)),
+    demirbas: {},
     demirbasProjeler: [],
     eskiOturan: [],
     giderler: [],
@@ -638,7 +638,7 @@ function seedDB(){
 let db = loadLocalDB() || seedDB();
 if(!db.aidat) db.aidat = JSON.parse(JSON.stringify(SEED_AIDAT));
 if(!db.aidat_2027) db.aidat_2027 = {};
-if(!db.demirbas) db.demirbas = JSON.parse(JSON.stringify(SEED_DEMIRBAS));
+if(!db.demirbas) db.demirbas = {};
 if(!db.demirbasProjeler) db.demirbasProjeler = [];
 if(!db.eskiOturan) db.eskiOturan = [];
 if(!db.giderler) db.giderler = [];
@@ -654,6 +654,47 @@ if(db.bankaBakiyesi === undefined || db.bankaBakiyesi === 0){
 if(!db.sablonlar) db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
 if(!db.settings) db.settings = { aidatTutar: AIDAT_TUTAR };
 if(!db.aktifYil) db.aktifYil = 2026;
+
+/* =========================================================
+   NEFESTEN KALAN DEMİRBAŞI STANDART PROJE FORMATINA DÖNÜŞTÜRME
+   ========================================================= */
+function migrateNefestenToProject(){
+  if(!db.demirbasProjeler) db.demirbasProjeler = [];
+  if(!db._nefestenMigrated){
+    const varMi = db.demirbasProjeler.some(p => p.id === 1001 || (p.baslik && p.baslik.toLowerCase().indexOf('nefesten') > -1));
+    if(!varMi){
+      const kaynak = (db.demirbas && Object.keys(db.demirbas).length > 0) ? db.demirbas : SEED_DEMIRBAS;
+      const tumDaireler = db.apartments.map(a => a.blok + a.daire);
+      const odemeler = {};
+      let ornekDaireBasi = 4250;
+      tumDaireler.forEach(k => {
+        if(kaynak[k]){
+          if(kaynak[k].nefestenKalan) ornekDaireBasi = Number(kaynak[k].nefestenKalan) || 4250;
+          if(Number(kaynak[k].odenen) > 0){
+            odemeler[k] = Number(kaynak[k].odenen);
+          }
+        }
+      });
+      const toplamButce = ornekDaireBasi * tumDaireler.length;
+      db.demirbasProjeler.unshift({
+        id: 1001,
+        baslik: 'Nefesten Kalan Demirbaş Ödemesi',
+        kalemler: [
+          { ad: 'Nefesten Devreden Demirbaş Payı', tutar: toplamButce }
+        ],
+        toplam: toplamButce,
+        secilenDaireler: tumDaireler,
+        daireBasi: ornekDaireBasi,
+        tarih: '2026-01-01',
+        odemeler: odemeler
+      });
+    }
+    db.demirbas = {};
+    db._nefestenMigrated = true;
+    saveLocalDB(db);
+  }
+}
+migrateNefestenToProject();
 saveLocalDB(db);
 
 const UI_LIMITS = {
@@ -740,7 +781,7 @@ function aidatKalanFazlaOncesi(k){
   if(row.some(v=>v==='MUAF')) return 0;
   let doluAySayisi = 0;
   for(let i=0; i<12; i++){ if(row[i] !== undefined && row[i] !== null && row[i] !== '') doluAySayisi++; }
-  const beklenen = doluAySayisi * AIDAT_TUTAR;
+  const beklenen = doluAySayisi * ((db.settings && Number(db.settings.aidatTutar)) || AIDAT_TUTAR);
   return Math.max(0, beklenen - aidatOdenen(k));
 }
 function fazlaOdemesi(k){ return db.fazlaOdemeler[k] || 0; }
@@ -760,7 +801,7 @@ function aidatDurum(k){
   return 'unpaid';
 }
 
-function demirbasOdenen(k){ return (db.demirbas[k]&&db.demirbas[k].odenen)||0; }
+function demirbasOdenen(k){ return (db.demirbas && db.demirbas[k] && db.demirbas[k].odenen)||0; }
 function demirbasToplamOdenen(k){
   let t = demirbasOdenen(k);
   (db.demirbasProjeler||[]).forEach(p=>{ t += (p.odemeler[k]||0); });
@@ -768,7 +809,7 @@ function demirbasToplamOdenen(k){
 }
 function demirbasToplamBorc(k){
   let t = 0;
-  const d = db.demirbas[k];
+  const d = db.demirbas && db.demirbas[k];
   if(d) t += Math.max(0, d.nefestenKalan - d.odenen);
   (db.demirbasProjeler||[]).forEach(p=>{
     if(p.secilenDaireler && p.secilenDaireler.indexOf(k) > -1){
@@ -900,6 +941,7 @@ async function loadFromCloud(){
         if(!db.sablonlar) db.sablonlar = JSON.parse(JSON.stringify(DEFAULT_SABLONLAR));
         if(!db.bildirimGecmisi) db.bildirimGecmisi = [];
         if(!db.aktifYil) db.aktifYil = 2026;
+        migrateNefestenToProject();
         saveLocalDB(db);
       }
     }
@@ -1114,7 +1156,6 @@ function sakinLoginSubmit(){
   render(); 
   window.scrollTo(0,0);
 
-  // Kısa ve kısık sesli karşılama
   sesliKonus("Giriş yapıldı, bilgiler güncellendi.", true);
   
   setTimeout(() => {
@@ -1214,7 +1255,6 @@ function viewSakinHome(){
   
   const a = getApt(k);
   const aidatRow = getAidatTable()[k] || [];
-  const demir = db.demirbas[k] || {nefestenKalan:4250, odenen:0};
   const fazla = fazlaOdemesi(k);
   const bh = daireBankaHareketleri(k);
   const bhToplam = daireBankaToplam(k);
@@ -1260,14 +1300,8 @@ function viewSakinHome(){
   });
   html += '</tbody></table></div></div>';
 
-  const demKalan = Math.max(0, demir.nefestenKalan - demir.odenen);
-  html += '<div class="card"><div class="card-title">🏗️ Demirbaş Durumu & Harcama Detayı</div>'
-    + '<div class="li"><div class="li-t">Devreden Demirbaş</div><div class="li-v">'+fmtMoney(demir.nefestenKalan)+'</div></div>'
-    + '<div class="li"><div class="li-t">Ödenen Tutar</div><div class="li-v green">'+fmtMoney(demir.odenen)+'</div></div>'
-    + '<div class="li"><div class="li-t">Kalan Borç</div><div class="li-v '+(demKalan>0?'red':'green')+'">'+fmtMoney(demKalan)+'</div></div>';
-
+  html += '<div class="card"><div class="card-title">🏗️ Demirbaş Durumu & Harcama Detayı</div>';
   if(sakininProjeleri.length){
-    html += '<div class="divider"></div><div class="sec-title">🛠️ Yapılan / Yapılacak Demirbaş Projeleri</div>';
     sakininProjeleri.forEach(function(p){
       const odenenProje = p.odemeler[k] || 0;
       const kalanProje = Math.max(0, p.daireBasi - odenenProje);
@@ -1284,6 +1318,8 @@ function viewSakinHome(){
         + '<div class="li-v '+(kalanProje>0?'red':'green')+'">'+(kalanProje>0 ? fmtMoney(kalanProje)+' Kalan' : '✓ Tamamı Ödendi')+'</div>'
         + '</div></div>';
     });
+  } else {
+    html += '<div class="empty">Dairenize atanmış aktif bir demirbaş kalemi bulunmuyor.</div>';
   }
   html += '</div>';
 
@@ -1370,6 +1406,7 @@ function viewHome(){
       + '<div class="more-item" onclick="navTo(\'denetim\')"><span class="ic">📊</span>Denetim Kaydı</div>'
       + '<div class="more-item" onclick="navTo(\'sablonlar\')"><span class="ic">✏️</span>Mesaj Şablonları</div>'
       + '<div class="more-item" onclick="excelCikar()"><span class="ic">📥</span>Excel\'e Çıkar</div>'
+      + '<div class="more-item" onclick="pdfCikar()" style="border-color:#93c5fd;background:#eff6ff"><span class="ic">📄</span>PDF İndir (WP)</div>'
       + '<div class="more-item" onclick="bankaBakiyeDuzenle()"><span class="ic">💵</span>Bakiye Düzenle</div>'
       + '<div class="more-item" onclick="topluYukleForm()"><span class="ic">📥</span>Toplu Banka Yükle</div>'
       + '</div></div>';
@@ -1439,10 +1476,30 @@ function viewApartments(){
       const durum = aidatDurum(k); 
       const isim = a.isim || 'İsimsiz';
       const eskiVar = !!getEskiSakinKayit(k);
+      const aBorc = aidatKalan(k);
+      const dBorc = demirbasToplamBorc(k);
+      const topBorc = aBorc + dBorc;
+      const fazla = fazlaOdemesi(k);
+
+      let borcDetayHtml = '';
+      if(topBorc > 0){
+        let parcalar = [];
+        if(aBorc > 0) parcalar.push('Aidat: ' + fmtMoney(aBorc));
+        if(dBorc > 0) parcalar.push('Demirbaş: ' + fmtMoney(dBorc));
+        borcDetayHtml = '<div style="font-size:.67rem;color:#b91c1c;font-weight:700;margin-top:4px;line-height:1.3;">'
+          + parcalar.join(' · ')
+          + '<br><span style="font-size:.72rem;font-weight:800;text-decoration:underline;">Toplam: ' + fmtMoney(topBorc) + '</span>'
+          + '</div>';
+      } else {
+        borcDetayHtml = '<div style="font-size:.69rem;color:#15803d;font-weight:700;margin-top:4px;">'
+          + (fazla > 0 ? '✅ Borçsuz (+' + fmtMoney(fazla) + ' Alacak)' : '✅ Borcu Yok')
+          + '</div>';
+      }
       
       html += '<div class="apt-btn '+durum+'" onclick="aptDetay(\''+k+'\')">'
         + '<div class="daire-no">'+k+' - '+isim.split(' ')[0]+'</div>'
-        + (eskiVar ? '<div style="font-size:.65rem;color:#b45309;font-weight:700">📜 Eski Sakin Kaydı Var</div>' : '')
+        + borcDetayHtml
+        + (eskiVar ? '<div style="font-size:.65rem;color:#b45309;font-weight:700;margin-top:3px;">📜 Eski Sakin Kaydı Var</div>' : '')
         + '</div>';
     });
     html += '</div></div>';
@@ -1451,21 +1508,15 @@ function viewApartments(){
   return html;
 }
 
-/* ============ DÜZELTİLDİ: A1 ile B1 Ayrımı Sağlandı ============ */
 function getEskiSakinKayit(k){
   const a = getApt(k);
   if(!a) return null;
-  
-  // k = "A1", "B16" gibi. Blok + daire kesin eşleşmeli.
-  const hedefBlok = String(a.blok).trim().toUpperCase();     // "A"
-  const hedefDaire = Number(a.daire);                       // 1
-  
+  const hedefBlok = String(a.blok).trim().toUpperCase();
+  const hedefDaire = Number(a.daire);
   return db.eskiOturan.find(e => {
-    // Kayıttaki blok: "A Blok", "A", "a blok" gibi olabilir → sadece harfi al
     const kayitBlokHam = String(e.blok||'').trim().toUpperCase();
-    const kayitBlokHarf = kayitBlokHam.replace(/[^A-ZÇĞİÖŞÜ]/g,'').charAt(0); // "A"
+    const kayitBlokHarf = kayitBlokHam.replace(/[^A-ZÇĞİÖŞÜ]/g,'').charAt(0);
     const kayitDaire = Number(e.daire);
-    
     return kayitBlokHarf === hedefBlok && kayitDaire === hedefDaire;
   }) || null;
 }
@@ -1480,7 +1531,6 @@ function aptDetay(k){
   if(!isAdmin || sakinDaireKodu){ return; }
   
   const a = getApt(k); if(!a) return;
-  const demir = db.demirbas[k] || {nefestenKalan:4250, odenen:0};
   const projeler = (db.demirbasProjeler||[]).filter(p=>p.secilenDaireler && p.secilenDaireler.indexOf(k)>-1);
   const telVar = telGecerliMi(a.telefon); 
   const son = sonBildirimKisa(k); 
@@ -1524,6 +1574,56 @@ function aptDetay(k){
     }
   } else {
     if(fazla > 0){ body += '<div class="uyari teal">💚 <b>Fazla ödeme alacağı: '+fmtMoney(fazla)+'</b></div>'; }
+
+    // HER KALEM İÇİN AYRI AYRI ÖDEME AL BUTONLARI (AİDAT VE HER BİR PROJE)
+    const aBorc = aidatKalan(k);
+    const aOdenen = aidatOdenen(k);
+    const dBorc = demirbasToplamBorc(k);
+    const toplamBorc = aBorc + dBorc;
+    const tblRow = getAidatTable()[k] || [];
+    const odenmemisAylar = [];
+    AY_ADLARI.forEach(function(ay, idx){
+      if(tblRow[idx] === 'ÖDENMEDİ') odenmemisAylar.push(ay);
+    });
+
+    body += '<div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">'
+      + '<span style="font-weight:800;font-size:.88rem;color:var(--primary);">💳 Daire Ödeme & Tahsilat Kalemleri</span>'
+      + '<span style="font-weight:800;font-size:.86rem;color:'+(toplamBorc>0?'#dc2626':'#16a34a')+';">'+(toplamBorc>0?'Toplam: '+fmtMoney(toplamBorc):'Borçsuz ✓')+'</span>'
+      + '</div>';
+
+    // 1. AİDAT SATIRI VE ÖDEME AL BUTONU
+    body += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;background:#fff;border:1px solid '+(aBorc>0?'#fca5a5':'#86efac')+';border-radius:10px;margin-bottom:7px;">'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-weight:700;font-size:.84rem;color:var(--text);">💰 '+db.aktifYil+' Yılı Aidatları</div>'
+      + '<div style="font-size:.72rem;color:'+(aBorc>0?'#b91c1c':'#15803d')+';font-weight:600;">'
+      + (aBorc>0 ? 'Kalan: <b>'+fmtMoney(aBorc)+'</b>'+(odenmemisAylar.length?' ('+odenmemisAylar.join(', ')+')':'') : 'Ödenen: '+fmtMoney(aOdenen)+' · Borcu Yok ✓')
+      + '</div></div>'
+      + '<button class="btn btn-xs btn-success" style="padding:7px 11px;font-weight:700;flex-shrink:0;" onclick="daireAidatOdemeAlModal(\''+k+'\')">💵 Ödeme Al</button>'
+      + '</div>';
+
+    // 2. HER BİR DEMİRBAŞ PROJESİ İÇİN AYRI SATIR VE ÖDEME AL BUTONU
+    if(projeler.length){
+      projeler.forEach(function(p){
+        const od = Number((p.odemeler && p.odemeler[k]) || 0);
+        const kl = Math.max(0, p.daireBasi - od);
+        body += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;background:#fff;border:1px solid '+(kl>0?'#fca5a5':'#86efac')+';border-radius:10px;margin-bottom:7px;">'
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-weight:700;font-size:.84rem;color:var(--text);">🏗️ '+p.baslik+'</div>'
+          + '<div style="font-size:.72rem;color:'+(kl>0?'#b91c1c':'#15803d')+';font-weight:600;">'
+          + 'Ödenen: '+fmtMoney(od)+' / '+fmtMoney(p.daireBasi)
+          + (kl>0 ? ' · Kalan: <b>'+fmtMoney(kl)+'</b>' : ' · Tamamı Ödendi ✓')
+          + '</div></div>'
+          + '<button class="btn btn-xs btn-success" style="padding:7px 11px;font-weight:700;flex-shrink:0;" onclick="daireProjeOdemeAlModal('+p.id+', \''+k+'\')">💵 Ödeme Al</button>'
+          + '</div>';
+      });
+    }
+
+    if(toplamBorc > 0){
+      body += '<button class="btn btn-primary btn-block btn-sm" style="margin-top:4px;font-weight:700;" onclick="daireGenelOdemeAlModal(\''+k+'\')">⚡ Tüm Borçları Tek Seferde Tahsil Et ('+fmtMoney(toplamBorc)+')</button>';
+    }
+    body += '</div>';
+
     body += '<div class="uyari '+(telVar?'green':'red')+'"><b>📱 WhatsApp:</b> '+(telVar?'Telefon Kayıtlı':'Telefon Eksik')+(son?'<br>Son Bildirim: '+son:'')+'</div>';
     body += '<div class="sec-title">👤 Aktif Sakin Bilgileri</div>'
       + '<div class="fg"><label>Oturan İsim</label><input class="fc" id="f_isim" value="'+(a.isim||'')+'"></div>'
@@ -1543,24 +1643,182 @@ function aptDetay(k){
     } else { body += '<div class="muted" style="padding:6px 0">Henüz banka hareketi eklenmedi.</div>'; }
     body += '<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="bhYeniForm(\''+k+'\')">➕ Manuel Banka Hareketi Ekle</button>';
 
-    body += '<div class="divider"></div><div class="sec-title">🏗️ Aktif Sakin Demirbaş Durumu</div>'
-      + '<div class="li"><div class="li-t">Nefesten Kalan</div><div class="li-v">'+fmtMoney(demir.nefestenKalan)+'</div></div>'
-      + '<div class="li"><div class="li-t">Ödenen</div><div class="li-v green">'+fmtMoney(demir.odenen)+'</div></div>'
-      + '<div class="li"><div class="li-t">Kalan</div><div class="li-v red">'+fmtMoney(Math.max(0, demir.nefestenKalan - demir.odenen))+'</div></div>';
-
+    body += '<div class="divider"></div><div class="sec-title">🏗️ Aktif Sakin Demirbaş Durumu</div>';
     if(projeler.length){
-      body += '<div class="sec-title" style="margin-top:8px">Yeni Demirbaş Projeleri:</div>';
       projeler.forEach(function(p){
         const od = p.odemeler[k]||0; const kl = Math.max(0, p.daireBasi - od);
         body += '<div class="li"><div style="flex:1"><div class="li-t">'+p.baslik+'</div><div class="li-d">Daire Başı: '+fmtMoney(p.daireBasi)+' · Ödenen: '+fmtMoney(od)+'</div></div><div class="li-v '+(kl>0?'red':'green')+'">'+(kl>0?fmtMoney(kl)+' borç':'Ödendi ✓')+'</div></div>';
       });
+    } else {
+      body += '<div class="muted" style="padding:6px 0">Demirbaş projesi kaydı bulunmuyor.</div>';
     }
-
-    body += '<div class="fg" style="margin-top:12px"><label>Demirbaş Ödenen Tutar (₺)</label><input type="number" step="0.01" class="fc" id="f_demirOdenen" value="'+(demir.odenen||0)+'"></div>'
-      + '<button class="btn btn-primary btn-block" style="margin-top:12px" onclick="kaydetApt(\''+k+'\')">Değişiklikleri Onayla</button>';
   }
 
   openModal(body);
+}
+
+/* ============ DAİRE KARTI İÇİNDE TEKİL AİDAT & TEKİL PROJE ÖDEME AL MODALLARI ============ */
+function daireAidatOdemeAlModal(k){
+  if(!isAdmin || sakinDaireKodu) return;
+  const a = getApt(k); if(!a) return;
+  const aBorc = aidatKalan(k);
+  const aOdenen = aidatOdenen(k);
+  const birimAidat = (db.settings && Number(db.settings.aidatTutar)) || AIDAT_TUTAR;
+  const row = getAidatTable()[k] || [];
+
+  let body = '<h2>💰 '+k+' - Aidat Ödemesi Al</h2>'
+    + '<div class="muted" style="margin-bottom:10px">Sakin: <b>'+(a.isim||'İsimsiz')+'</b> · Birim Aidat: <b>'+fmtMoney(birimAidat)+'</b></div>'
+    + '<div class="li"><div class="li-t">Ödenen Aidat</div><div class="li-v green">'+fmtMoney(aOdenen)+'</div></div>'
+    + '<div class="li"><div class="li-t">Kalan Aidat Borcu</div><div class="li-v '+(aBorc>0?'red':'green')+'">'+fmtMoney(aBorc)+'</div></div>'
+    + '<div class="sec-title" style="margin-top:10px">Ödenecek Ayları Seçin:</div>'
+    + '<div class="apt-check-grid" style="margin-bottom:12px;">';
+
+  AY_ADLARI.forEach(function(ay, idx){
+    const v = row[idx];
+    const odendiMi = hucreTutar(v) > 0;
+    const muafMi = (v === 'MUAF' || String(v).indexOf('ESKİ') > -1);
+    const borcluMu = (v === 'ÖDENMEDİ');
+    if(odendiMi){
+      body += '<div class="apt-check" style="background:#dcfce7;border-color:#86efac;color:#166534;opacity:.85;cursor:default;">✓ '+ay.slice(0,3)+'</div>';
+    } else if(muafMi){
+      body += '<div class="apt-check" style="background:#f1f5f9;color:#64748b;opacity:.7;cursor:default;">⚪ '+ay.slice(0,3)+'</div>';
+    } else {
+      body += '<label class="apt-check '+(borcluMu?'on':'')+'" id="daireAyChk_'+idx+'">'
+        + '<input type="checkbox" value="'+idx+'" '+(borcluMu?'checked':'')+' onchange="daireAidatSecimGuncelle(\''+k+'\')"> '+ay.slice(0,3)
+        + '</label>';
+    }
+  });
+
+  const varsayilanTutar = aBorc > 0 ? aBorc : birimAidat;
+  body += '</div>'
+    + '<div class="fg"><label>Tahsil Edilecek Tutar (₺)</label>'
+    + '<input type="number" step="0.01" class="fc" id="daireTekAidatTutar" value="'+varsayilanTutar+'"></div>'
+    + '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">'
+    + '<input type="checkbox" id="daireTekAidatKasa" checked> Banka bakiyesine (kasaya) ekle'
+    + '</label></div>'
+    + '<button class="btn btn-success btn-block" style="padding:13px;font-weight:800;" onclick="daireAidatOdemeKaydet(\''+k+'\')">✅ Aidat Ödemesini Kaydet</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="aptDetay(\''+k+'\')">← Daire Kartına Dön</button>';
+
+  openModal(body);
+}
+
+function daireAidatSecimGuncelle(k){
+  const birimAidat = (db.settings && Number(db.settings.aidatTutar)) || AIDAT_TUTAR;
+  const seciliKutular = document.querySelectorAll('[id^="daireAyChk_"] input[type="checkbox"]:checked');
+  document.querySelectorAll('[id^="daireAyChk_"]').forEach(lbl => {
+    const inp = lbl.querySelector('input');
+    lbl.classList.toggle('on', inp && inp.checked);
+  });
+  const tutarInp = document.getElementById('daireTekAidatTutar');
+  if(tutarInp){
+    tutarInp.value = seciliKutular.length * birimAidat;
+  }
+}
+
+function daireAidatOdemeKaydet(k){
+  if(!isAdmin || sakinDaireKodu) return;
+  const tutar = Number(document.getElementById('daireTekAidatTutar').value) || 0;
+  const kasayaEkle = document.getElementById('daireTekAidatKasa').checked;
+  if(tutar <= 0){ alert('Lütfen geçerli bir tutar giriniz.'); return; }
+
+  const birimAidat = (db.settings && Number(db.settings.aidatTutar)) || AIDAT_TUTAR;
+  const tbl = getAidatTable();
+  if(!tbl[k]) tbl[k] = new Array(12).fill('');
+
+  const seciliAylar = Array.from(document.querySelectorAll('[id^="daireAyChk_"] input[type="checkbox"]:checked')).map(c => Number(c.value));
+  let kalanPara = tutar;
+  const islenenAylar = [];
+
+  if(seciliAylar.length > 0){
+    seciliAylar.forEach(idx => {
+      if(kalanPara >= birimAidat){
+        tbl[k][idx] = birimAidat;
+        kalanPara -= birimAidat;
+        islenenAylar.push(AY_ADLARI[idx]);
+      } else if(kalanPara > 0){
+        tbl[k][idx] = kalanPara;
+        islenenAylar.push(AY_ADLARI[idx] + ' (' + fmtMoney(kalanPara) + ')');
+        kalanPara = 0;
+      }
+    });
+  } else {
+    for(let i=0; i<12; i++){
+      if(kalanPara <= 0) break;
+      if(tbl[k][i] === 'ÖDENMEDİ' || tbl[k][i] === ''){
+        const od = Math.min(kalanPara, birimAidat);
+        tbl[k][i] = od;
+        kalanPara -= od;
+        islenenAylar.push(AY_ADLARI[i]);
+      }
+    }
+  }
+
+  if(kalanPara > 0){
+    if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
+    db.fazlaOdemeler[k] = (Number(db.fazlaOdemeler[k]) || 0) + kalanPara;
+  }
+
+  setAidatTable(tbl);
+  if(kasayaEkle) bankaBakiEkle(tutar);
+  saveDB();
+  render();
+  aptDetay(k);
+  alert('✓ ' + k + ' dairesi için ' + fmtMoney(tutar) + ' aidat ödemesi kaydedildi.' + (islenenAylar.length ? '\nİşlenen Aylar: ' + islenenAylar.join(', ') : ''));
+}
+
+function daireProjeOdemeAlModal(projeId, k){
+  if(!isAdmin || sakinDaireKodu) return;
+  const p = (db.demirbasProjeler||[]).find(x => x.id === projeId);
+  const a = getApt(k);
+  if(!p || !a) return;
+
+  const mevcut = Number((p.odemeler && p.odemeler[k]) || 0);
+  const kalan = Math.max(0, p.daireBasi - mevcut);
+
+  let body = '<h2>🏗️ '+k+' - Demirbaş Ödemesi Al</h2>'
+    + '<div class="uyari teal" style="margin-bottom:10px"><b>Proje:</b> '+p.baslik+'<br><b>Sakin:</b> '+(a.isim||'İsimsiz')+'</div>'
+    + '<div class="li"><div class="li-t">Daire Başı Proje Payı</div><div class="li-v">'+fmtMoney(p.daireBasi)+'</div></div>'
+    + '<div class="li"><div class="li-t">Daha Önce Ödenen</div><div class="li-v green">'+fmtMoney(mevcut)+'</div></div>'
+    + '<div class="li"><div class="li-t">Kalan Borç</div><div class="li-v '+(kalan>0?'red':'green')+'">'+fmtMoney(kalan)+'</div></div>'
+    + '<div class="fg" style="margin-top:12px"><label>Tahsil Edilecek Tutar (₺)</label>'
+    + '<input type="number" step="0.01" class="fc" id="daireTekProjeTutar" value="'+(kalan>0?kalan:'')+'" placeholder="Tutar giriniz..."></div>'
+    + '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">'
+    + '<input type="checkbox" id="daireTekProjeKasa" checked> Banka bakiyesine (kasaya) ekle'
+    + '</label></div>'
+    + '<button class="btn btn-success btn-block" style="padding:13px;font-weight:800;" onclick="daireProjeOdemeKaydet('+projeId+', \''+k+'\')">✅ Demirbaş Ödemesini Kaydet</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="aptDetay(\''+k+'\')">← Daire Kartına Dön</button>';
+
+  openModal(body);
+}
+
+function daireProjeOdemeKaydet(projeId, k){
+  if(!isAdmin || sakinDaireKodu) return;
+  const p = (db.demirbasProjeler||[]).find(x => x.id === projeId);
+  if(!p) return;
+
+  const tutar = Number(document.getElementById('daireTekProjeTutar').value) || 0;
+  const kasayaEkle = document.getElementById('daireTekProjeKasa').checked;
+  if(tutar <= 0){ alert('Lütfen geçerli bir tutar giriniz.'); return; }
+
+  if(!p.odemeler) p.odemeler = {};
+  const mevcut = Number(p.odemeler[k]) || 0;
+  const kalan = Math.max(0, p.daireBasi - mevcut);
+
+  p.odemeler[k] = mevcut + tutar;
+  if(kasayaEkle) bankaBakiEkle(tutar);
+
+  if(tutar > kalan){
+    const fazlaTutar = tutar - kalan;
+    if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
+    db.fazlaOdemeler[k] = (Number(db.fazlaOdemeler[k]) || 0) + fazlaTutar;
+    alert('✓ ' + p.baslik + ' için ' + fmtMoney(tutar) + ' kaydedildi.\n💚 ' + fmtMoney(fazlaTutar) + ' fazla ödeme alacağı olarak eklendi.');
+  } else {
+    alert('✓ ' + k + ' dairesi için ' + p.baslik + ' ödemesi (' + fmtMoney(tutar) + ') kaydedildi.');
+  }
+
+  saveDB();
+  render();
+  aptDetay(k);
 }
 
 function eskiSakinDetayKaydet(id, daireKodu){
@@ -1585,7 +1843,6 @@ function eskiSakinDaireSil(id, daireKodu){
   alert('Eski sakin kaydı silindi.');
 }
 
-/* ============ DÜZELTİLDİ: Blok artık sadece harf olarak kaydediliyor ============ */
 function yeniEskiSakinDaireyeEkle(daireKodu){
   if(!isAdmin || sakinDaireKodu) return;
   const a = getApt(daireKodu);
@@ -1620,16 +1877,6 @@ function kaydetApt(k){
   a.plaka = document.getElementById('f_plaka').value.trim();
   a.evsahibi = document.getElementById('f_evsahibi').value.trim();
   a.evTel = document.getElementById('f_evtel').value.trim();
-  const dO = document.getElementById('f_demirOdenen');
-  if(dO){
-    if(!db.demirbas[k]) db.demirbas[k] = {nefestenKalan:4250, odenen:0};
-    const eskiOdenen = db.demirbas[k].odenen || 0;
-    const yeniOdenen = Number(dO.value)||0;
-    const fark = yeniOdenen - eskiOdenen;
-    if(fark > 0) bankaBakiEkle(fark);
-    else if(fark < 0) bankaBakiDus(-fark);
-    db.demirbas[k].odenen = yeniOdenen;
-  }
   saveDB(); closeModal(); render(); alert('Daire güncellendi.');
 }
 
@@ -1637,6 +1884,109 @@ function kaydetVeWhatsapp(k){
   if(!isAdmin || sakinDaireKodu) return;
   kaydetApt(k);
   setTimeout(function(){ bildirimGonder(k); }, 250);
+}
+
+/* ============ DAİRE KARTINDAN TEK TUŞLA TOPLU / TEKLİ ÖDEME ALMA ============ */
+function daireGenelOdemeAlModal(k){
+  if(!isAdmin || sakinDaireKodu) return;
+  const a = getApt(k);
+  if(!a) return;
+
+  const aBorc = aidatKalan(k);
+  const dBorc = demirbasToplamBorc(k);
+  const toplamBorc = aBorc + dBorc;
+  const projeler = (db.demirbasProjeler||[]).filter(p => p.secilenDaireler && p.secilenDaireler.indexOf(k) > -1);
+
+  let body = '<h2>💵 '+k+' - Tahsilat / Ödeme Al</h2>'
+    + '<div class="muted" style="margin-bottom:10px">Sakin: <b>'+(a.isim||'İsimsiz')+'</b></div>'
+    + '<div class="proj-breakdown">'
+    + '<div class="proj-breakdown-row"><span>💰 Kalan Aidat Borcu</span><span style="color:'+(aBorc>0?'#dc2626':'#16a34a')+'">'+fmtMoney(aBorc)+'</span></div>';
+
+  projeler.forEach(function(p){
+    const od = Number((p.odemeler && p.odemeler[k]) || 0);
+    const kl = Math.max(0, p.daireBasi - od);
+    body += '<div class="proj-breakdown-row"><span>🏗️ '+p.baslik+'</span><span style="color:'+(kl>0?'#dc2626':'#16a34a')+'">'+(kl>0?fmtMoney(kl)+' borç':'Ödendi ✓')+'</span></div>';
+  });
+
+  body += '<div class="proj-breakdown-row" style="border-top:1px solid #94a3b8;margin-top:4px;padding-top:5px;">'
+    + '<span>TOPLAM KALAN BORÇ</span><span style="color:'+(toplamBorc>0?'#dc2626':'#16a34a')+'">'+fmtMoney(toplamBorc)+'</span>'
+    + '</div></div>'
+    + '<div class="fg" style="margin-top:12px"><label>Tahsil Edilecek Tutar (₺)</label>'
+    + '<input type="number" step="0.01" class="fc" id="daireTahsilatTutar" value="'+(toplamBorc>0?toplamBorc:'')+'" placeholder="Tutar giriniz..." oninput="daireTahsilatOnizlemeGuncelle(\''+k+'\')">'
+    + '</div>'
+    + '<div id="daireTahsilatOnizleme" class="uyari teal" style="font-size:.78rem;line-height:1.5;"></div>'
+    + '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">'
+    + '<input type="checkbox" id="daireTahsilatKasaEkle" checked> Banka bakiyesine (kasaya) ekle'
+    + '</label></div>'
+    + '<button class="btn btn-success btn-block" style="padding:13px;font-weight:800;" onclick="daireGenelOdemeKaydet(\''+k+'\')">✅ Ödemeyi Onayla ve Borçlardan Düş</button>'
+    + '<button class="btn btn-block" style="margin-top:8px;" onclick="aptDetay(\''+k+'\')">← Daire Kartına Dön</button>';
+
+  openModal(body);
+  daireTahsilatOnizlemeGuncelle(k);
+}
+
+function daireTahsilatOnizlemeGuncelle(k){
+  const el = document.getElementById('daireTahsilatOnizleme');
+  const inp = document.getElementById('daireTahsilatTutar');
+  if(!el || !inp) return;
+  const tutar = Number(inp.value) || 0;
+  if(tutar <= 0){
+    el.innerHTML = 'Tahsil edilecek tutarı girdiğinizde hangi borçların kapanacağı burada görünür.';
+    return;
+  }
+  const plan = typeof hesaplaBasamakliDagitim === 'function' ? hesaplaBasamakliDagitim(k, tutar) : null;
+  if(plan && plan.ozetHtml){
+    el.innerHTML = '<b>⚡ Otomatik Dağıtım Planı:</b><br>' + plan.ozetHtml;
+  } else {
+    el.innerHTML = '<b>⚡ Otomatik Dağıtım Planı:</b><br>💚 Tamamı Fazla Ödeme (Alacak) olarak işlenecektir: ' + fmtMoney(tutar);
+  }
+}
+
+function daireGenelOdemeKaydet(k){
+  if(!isAdmin || sakinDaireKodu) return;
+  const tutar = Number(document.getElementById('daireTahsilatTutar').value) || 0;
+  const kasayaEkle = document.getElementById('daireTahsilatKasaEkle').checked;
+  if(tutar <= 0){ alert('Lütfen geçerli bir tahsilat tutarı giriniz.'); return; }
+
+  const plan = hesaplaBasamakliDagitim(k, tutar);
+  const tblAidat = getAidatTable();
+
+  if(plan.aidatAylar && plan.aidatAylar.length){
+    if(!tblAidat[k]) tblAidat[k] = new Array(12).fill('');
+    plan.aidatAylar.forEach(item => {
+      tblAidat[k][item.ayIndex] = item.tutar;
+    });
+    setAidatTable(tblAidat);
+  }
+
+  if(plan.projeler && plan.projeler.length){
+    plan.projeler.forEach(pr => {
+      const proje = (db.demirbasProjeler||[]).find(p => p.id === pr.projeId);
+      if(proje){
+        if(!proje.odemeler) proje.odemeler = {};
+        proje.odemeler[k] = (Number(proje.odemeler[k]) || 0) + pr.tutar;
+      }
+    });
+  }
+
+  if(plan.fazlaOdeme > 0){
+    if(!db.fazlaOdemeler) db.fazlaOdemeler = {};
+    db.fazlaOdemeler[k] = (Number(db.fazlaOdemeler[k]) || 0) + plan.fazlaOdeme;
+  }
+
+  if(kasayaEkle){
+    bankaBakiEkle(tutar);
+  }
+
+  saveDB();
+  render();
+  aptDetay(k);
+
+  let ozetMesaj = k + ' dairesi için ' + fmtMoney(tutar) + ' tahsilat kaydedildi.';
+  if(plan.aidatAylar.length) ozetMesaj += '\n• Aidat: ' + plan.aidatAylar.map(x=>x.ayAdi).join(', ');
+  if(plan.projeler.length) ozetMesaj += '\n• Demirbaş: ' + plan.projeler.map(x=>x.baslik + ' (' + fmtMoney(x.tutar) + ')').join(', ');
+  if(plan.fazlaOdeme > 0) ozetMesaj += '\n• Fazla Ödeme Alacağı: ' + fmtMoney(plan.fazlaOdeme);
+  alert(ozetMesaj);
 }
 
 /* ============ BANKA HAREKETLERİ ============ */
@@ -1772,11 +2122,12 @@ function hizliAidatMenu(daireKodu, ayIndex){
   const mevcutDeger = row[ayIndex];
   const ayAdi = AY_ADLARI[ayIndex];
   const tutar = hucreTutar(mevcutDeger);
+  const guncelAidat = (db.settings && Number(db.settings.aidatTutar)) || AIDAT_TUTAR;
 
   let body = '<h2>'+daireKodu+' - '+ayAdi+' Aidat İşlemi</h2>'
     + '<div class="li"><div class="li-t">Mevcut Durum</div><div class="li-v">'+(mevcutDeger === 'ÖDENMEDİ' ? '🔴 Ödenmedi' : (mevcutDeger === 'MUAF' ? '⚪ Muaf' : (tutar > 0 ? '🟢 '+fmtMoney(tutar) : '— Boş')))+'</div></div>'
     + '<div class="divider"></div>'
-    + '<div class="fg"><label>Yeni Tutar (₺) - Boş bırakırsanız "ÖDENMEDİ" olur</label><input type="number" step="0.01" class="fc" id="hizliAidatTutar" value="'+(tutar > 0 ? tutar : '')+'" placeholder="750"></div>'
+    + '<div class="fg"><label>Yeni Tutar (₺) - Boş bırakırsanız "'+guncelAidat+' ₺" işlenir</label><input type="number" step="0.01" class="fc" id="hizliAidatTutar" value="'+(tutar > 0 ? tutar : '')+'" placeholder="'+guncelAidat+'"></div>'
     + '<button class="btn btn-success btn-block" style="margin-bottom:8px" onclick="hizliAidatKaydet(\''+daireKodu+'\', '+ayIndex+', \'odendi\')">✅ Ödendi Olarak İşaretle</button>'
     + '<button class="btn btn-danger btn-block" style="margin-bottom:8px" onclick="hizliAidatKaydet(\''+daireKodu+'\', '+ayIndex+', \'odenmedi\')">🔴 Ödenmedi Olarak İşaretle</button>'
     + '<button class="btn btn-block" style="margin-bottom:8px;background:#e2e8f0;color:#475569" onclick="hizliAidatKaydet(\''+daireKodu+'\', '+ayIndex+', \'muaf\')">⚪ Muaf Tut</button>'
@@ -1788,10 +2139,11 @@ function hizliAidatKaydet(daireKodu, ayIndex, islem){
   if(!isAdmin || sakinDaireKodu){ return; }
   const tbl = getAidatTable();
   if(!tbl[daireKodu]) tbl[daireKodu] = new Array(12).fill('');
+  const guncelAidat = (db.settings && Number(db.settings.aidatTutar)) || AIDAT_TUTAR;
   
   if(islem === 'odendi'){
     const tutarInput = document.getElementById('hizliAidatTutar');
-    const tutar = Number(tutarInput.value) || AIDAT_TUTAR;
+    const tutar = Number(tutarInput.value) || guncelAidat;
     tbl[daireKodu][ayIndex] = tutar;
   } else if(islem === 'odenmedi'){
     tbl[daireKodu][ayIndex] = 'ÖDENMEDİ';
@@ -1973,27 +2325,7 @@ function viewDemirbas(){
   } else {
     html += '<div class="empty">Henüz oluşturulmuş bir demirbaş projesi yok. "Yeni Demirbaş Projesi Ekle" butonuna basarak kalemleri belirleyip ekleyebilirsiniz.</div>';
   }
-  html += '</div>';
-
-  html += '<div class="card"><div class="card-title">📋 Devreden Demirbaş (32 Daire)</div><div class="odemeli-list">';
-  db.apartments.forEach(function(a){
-    const k = aptKey(a); 
-    const d = db.demirbas[k]||{nefestenKalan:4250,odenen:0}; 
-    const kalan = Math.max(0, d.nefestenKalan - d.odenen);
-    const telVar = telGecerliMi(a.telefon); 
-    let cls = 'borc';
-    if(kalan === 0) cls = 'odendi'; else if(d.odenen > 0) cls = 'kismi';
-    html += '<div class="odeme-satir '+cls+'">'
-      + '<div class="ds-kod">'+k+'</div>'
-      + '<div class="ds-isim">'+(a.isim||'-')+'</div>'
-      + '<div class="ds-tutar">'+d.odenen.toLocaleString('tr-TR')+' / '+d.nefestenKalan.toLocaleString('tr-TR')
-      + (kalan>0?'<br><span style="color:#dc2626">'+kalan.toLocaleString('tr-TR')+' kaldı</span>':'<br><span style="color:#16a34a">✓ ödendi</span>')+'</div>'
-      + '<div class="ds-btn">'
-      + '<button class="btn btn-xs btn-success" onclick="demirbasOdemeAl(\''+k+'\')">💵 Al</button>'
-      + (telVar?'<button class="btn btn-xs btn-wa" onclick="bildirimGonder(\''+k+'\')">📱</button>':'')
-      + '</div></div>';
-  });
-  html += '</div></div></div>';
+  html += '</div></div>';
   return html;
 }
 
@@ -2240,37 +2572,6 @@ function projeSil(id){
   db.demirbasProjeler = db.demirbasProjeler.filter(p => p.id!==id); 
   saveDB(); 
   render(); 
-}
-
-function demirbasOdemeAl(k){
-  if(!isAdmin || sakinDaireKodu) return;
-  const d = db.demirbas[k]||{nefestenKalan:4250,odenen:0}; 
-  const kalan = Math.max(0, d.nefestenKalan - d.odenen);
-  const body = '<h2>'+k+' - Devreden Demirbaş Tahsilatı</h2>'
-    + '<div class="li"><div class="li-t">Toplam Borç</div><div class="li-v">'+fmtMoney(d.nefestenKalan)+'</div></div>'
-    + '<div class="li"><div class="li-t">Ödenmiş</div><div class="li-v green">'+fmtMoney(d.odenen)+'</div></div>'
-    + '<div class="li"><div class="li-t">Kalan</div><div class="li-v red">'+fmtMoney(kalan)+'</div></div>'
-    + '<div class="fg" style="margin-top:12px"><label>Tahsil Edilecek Tutar (₺)</label><input type="number" step="0.01" class="fc" id="dmTutar" value="'+kalan+'"></div>'
-    + '<button class="btn btn-primary btn-block" onclick="demirbasOdemeKaydet(\''+k+'\')">Kaydet</button>';
-  openModal(body);
-}
-
-function demirbasOdemeKaydet(k){
-  if(!isAdmin || sakinDaireKodu) return;
-  const tutar = Number(document.getElementById('dmTutar').value)||0;
-  if(tutar <= 0){ alert('Geçerli bir tutar girin'); return; }
-  if(!db.demirbas[k]) db.demirbas[k] = {nefestenKalan:4250, odenen:0};
-  const kalan = Math.max(0, db.demirbas[k].nefestenKalan - db.demirbas[k].odenen);
-  db.demirbas[k].odenen = (db.demirbas[k].odenen||0) + tutar; 
-  bankaBakiEkle(tutar);
-  if(tutar > kalan){ 
-    const fazlaTutar = tutar - kalan; 
-    db.fazlaOdemeler[k] = (db.fazlaOdemeler[k]||0) + fazlaTutar; 
-    alert('✓ '+fmtMoney(tutar)+' kasaya eklendi.\n💚 '+fmtMoney(fazlaTutar)+' fazla ödeme olarak yazıldı.'); 
-  } else { 
-    alert(fmtMoney(tutar)+' ödeme kaydedildi.'); 
-  }
-  saveDB(); closeModal(); render();
 }
 
 /* ============ GİDERLER ============ */
@@ -3040,24 +3341,88 @@ function viewDenetim(){
   return html;
 }
 
-/* ============ EXCEL AKTARIM ============ */
+/* ============ RENKLİ VE ÖLÇÜLÜ EXCEL AKTARIM ============ */
 function excelCikar(){
   if(!isAdmin || sakinDaireKodu) return;
   try{
     const wb = XLSX.utils.book_new();
 
+    const bdr = {
+      top: {style: 'thin', color: {rgb: 'CBD5E1'}},
+      bottom: {style: 'thin', color: {rgb: 'CBD5E1'}},
+      left: {style: 'thin', color: {rgb: 'CBD5E1'}},
+      right: {style: 'thin', color: {rgb: 'CBD5E1'}}
+    };
+    const stBanner = {
+      font: {bold: true, sz: 13, color: {rgb: 'FFFFFF'}},
+      fill: {fgColor: {rgb: '0F2342'}},
+      alignment: {vertical: 'center', horizontal: 'left'}
+    };
+    const stHeader = {
+      font: {bold: true, sz: 10, color: {rgb: 'FFFFFF'}},
+      fill: {fgColor: {rgb: '1E3F6E'}},
+      alignment: {vertical: 'center', horizontal: 'center', wrapText: true},
+      border: bdr
+    };
+    const stSubHeader = {
+      font: {bold: true, sz: 10, color: {rgb: '1E3F6E'}},
+      fill: {fgColor: {rgb: 'E0E7FF'}},
+      alignment: {vertical: 'center', horizontal: 'left'},
+      border: bdr
+    };
+    const stCell = {
+      font: {sz: 10, color: {rgb: '0F172A'}},
+      alignment: {vertical: 'center', horizontal: 'center'},
+      border: bdr
+    };
+    const stLeft = {
+      font: {sz: 10, color: {rgb: '0F172A'}},
+      alignment: {vertical: 'center', horizontal: 'left'},
+      border: bdr
+    };
+    const stBold = {
+      font: {bold: true, sz: 10, color: {rgb: '0F172A'}},
+      alignment: {vertical: 'center', horizontal: 'center'},
+      border: bdr
+    };
+    const stGreen = {
+      font: {bold: true, sz: 10, color: {rgb: '166534'}},
+      fill: {fgColor: {rgb: 'DCFCE7'}},
+      alignment: {vertical: 'center', horizontal: 'center'},
+      border: bdr
+    };
+    const stRed = {
+      font: {bold: true, sz: 10, color: {rgb: '991B1B'}},
+      fill: {fgColor: {rgb: 'FEE2E2'}},
+      alignment: {vertical: 'center', horizontal: 'center'},
+      border: bdr
+    };
+    const stGray = {
+      font: {italic: true, sz: 9, color: {rgb: '475569'}},
+      fill: {fgColor: {rgb: 'F1F5F9'}},
+      alignment: {vertical: 'center', horizontal: 'center'},
+      border: bdr
+    };
+
+    function applyMoneyFmt(ws, r, c, style){
+      const ref = XLSX.utils.encode_cell({r:r, c:c});
+      if(ws[ref]){
+        ws[ref].s = Object.assign({}, style, {numFmt: '#,##0.00 "₺"'});
+      }
+    }
+
     const genelData = [
-      ['ROJBİN SİTESİ - YÖNETİM VE MALİ ÖZET RAPORU'],
+      ['ROJBİN SİTESİ - YÖNETİM VE MALİ ÖZET RAPORU', ''],
       ['Rapor Tarihi', new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR')],
       ['Aktif Çalışma Yılı', db.aktifYil || 2026],
-      [],
+      ['', ''],
       ['KASA VE MALİ DURUM', 'TUTAR (₺)'],
       ['Güncel Banka Bakiyesi', bankaBaki()],
       ['Toplam Harcanan Gider', toplamGider()],
       ['Toplam Beklenen Aidat Alacağı', db.apartments.reduce((s,a)=>s+aidatKalan(aptKey(a)),0)],
       ['Toplam Beklenen Demirbaş Alacağı', db.apartments.reduce((s,a)=>s+demirbasToplamBorc(aptKey(a)),0)],
       ['Toplam Fazla Ödeme (Alacak) Tutarı', db.apartments.reduce((s,a)=>s+fazlaOdemesi(aptKey(a)),0)],
-      [],
+      ['', ''],
       ['İSTATİSTİKLER', 'SAYI'],
       ['Toplam Daire', db.apartments.length],
       ['Aidat Borcu Olan Daire Sayısı', db.apartments.filter(a=>aidatKalan(aptKey(a))>0).length],
@@ -3070,10 +3435,21 @@ function excelCikar(){
       ['Toplam WhatsApp Bildirim Sayısı', (db.bildirimGecmisi||[]).length]
     ];
     const wsGenel = XLSX.utils.aoa_to_sheet(genelData);
-    wsGenel['!cols'] = [{wch:40},{wch:25}];
+    wsGenel['!cols'] = [{wch:44},{wch:24}];
+    wsGenel['!rows'] = genelData.map((_, idx) => ({hpt: idx === 0 ? 32 : (idx === 4 || idx === 11 ? 26 : 22)}));
+    wsGenel['A1'].s = stBanner; wsGenel['B1'].s = stBanner;
+    wsGenel['A5'].s = stHeader; wsGenel['B5'].s = stHeader;
+    wsGenel['A12'].s = stHeader; wsGenel['B12'].s = stHeader;
+    [1,2].forEach(r => { wsGenel['A'+(r+1)].s = stLeft; wsGenel['B'+(r+1)].s = stBold; });
+    [5,6,7,8,9].forEach(r => {
+      wsGenel['A'+(r+1)].s = stLeft;
+      const st = (r === 5 || r === 9) ? stGreen : (r === 6 ? stRed : stBold);
+      applyMoneyFmt(wsGenel, r, 1, st);
+    });
+    for(let r=12; r<=20; r++){ wsGenel['A'+(r+1)].s = stLeft; wsGenel['B'+(r+1)].s = stBold; }
     XLSX.utils.book_append_sheet(wb, wsGenel, 'GENEL_OZET');
 
-    const dData = [['BLOK','DAİRE','AKTİF İSİM','TELEFON','PLAKA','EV SAHİBİ','EV SAHİBİ TEL','FAZLA ÖDEME (ALACAK)','AİDAT BORCU','DEMİRBAŞ BORCU','TOPLAM BORÇ','ESKİ SAKİN VAR MI?','ESKİ SAKİN ADI','ESKİ SAKİN DURUMU','ESKİ SAKİN BORCU']];
+    const dData = [['BLOK','DAİRE','AKTİF İSİM','TELEFON','PLAKA','EV SAHİBİ','EV SAHİBİ TEL','ALACAK (₺)','AİDAT BORCU','DEMİRBAŞ BORCU','TOPLAM BORÇ','ESKİ SAKİN','ESKİ SAKİN ADI','ESKİ DURUM','ESKİ BORÇ']];
     db.apartments.forEach(function(a){
       const k = aptKey(a);
       const aBorc = aidatKalan(k);
@@ -3089,7 +3465,26 @@ function excelCikar(){
       ]);
     });
     const wsD = XLSX.utils.aoa_to_sheet(dData);
-    wsD['!cols'] = [{wch:6},{wch:8},{wch:26},{wch:16},{wch:14},{wch:24},{wch:16},{wch:20},{wch:14},{wch:16},{wch:14},{wch:18},{wch:24},{wch:18},{wch:16}];
+    wsD['!cols'] = [{wch:7},{wch:8},{wch:26},{wch:16},{wch:14},{wch:22},{wch:16},{wch:15},{wch:15},{wch:16},{wch:15},{wch:12},{wch:22},{wch:16},{wch:14}];
+    wsD['!rows'] = dData.map((_, idx) => ({hpt: idx === 0 ? 28 : 22}));
+    for(let c=0; c<15; c++) wsD[XLSX.utils.encode_cell({r:0, c:c})].s = stHeader;
+    for(let r=1; r<dData.length; r++){
+      for(let c=0; c<15; c++){
+        const ref = XLSX.utils.encode_cell({r:r, c:c});
+        if(!wsD[ref]) continue;
+        wsD[ref].s = (c === 2 || c === 5 || c === 12) ? stLeft : stCell;
+      }
+      const valAlacak = dData[r][7];
+      const valAidat = dData[r][8];
+      const valDem = dData[r][9];
+      const valTop = dData[r][10];
+      const valEski = dData[r][14];
+      applyMoneyFmt(wsD, r, 7, valAlacak > 0 ? stGreen : stCell);
+      applyMoneyFmt(wsD, r, 8, valAidat > 0 ? stRed : stGreen);
+      applyMoneyFmt(wsD, r, 9, valDem > 0 ? stRed : stGreen);
+      applyMoneyFmt(wsD, r, 10, valTop > 0 ? stRed : stGreen);
+      applyMoneyFmt(wsD, r, 14, valEski > 0 ? stRed : stCell);
+    }
     XLSX.utils.book_append_sheet(wb, wsD, 'DAIRELER');
 
     const tbl = getAidatTable();
@@ -3108,140 +3503,416 @@ function excelCikar(){
       aData.push([a.blok, a.daire, a.isim||''].concat(aylar).concat([aidatOdenen(k), fazlaOdemesi(k)||0, aidatKalan(k)]));
     });
     const wsA = XLSX.utils.aoa_to_sheet(aData);
-    wsA['!cols'] = [{wch:6},{wch:7},{wch:26}].concat(AY_ADLARI.map(()=>({wch:11}))).concat([{wch:16},{wch:14},{wch:14}]);
+    wsA['!cols'] = [{wch:7},{wch:7},{wch:26}].concat(AY_ADLARI.map(()=>({wch:13}))).concat([{wch:16},{wch:14},{wch:15}]);
+    wsA['!rows'] = aData.map((_, idx) => ({hpt: idx === 0 ? 28 : 22}));
+    for(let c=0; c<aHeader.length; c++) wsA[XLSX.utils.encode_cell({r:0, c:c})].s = stHeader;
+    for(let r=1; r<aData.length; r++){
+      wsA[XLSX.utils.encode_cell({r:r, c:0})].s = stBold;
+      wsA[XLSX.utils.encode_cell({r:r, c:1})].s = stBold;
+      wsA[XLSX.utils.encode_cell({r:r, c:2})].s = stLeft;
+      for(let m=0; m<12; m++){
+        const cIdx = 3 + m;
+        const val = aData[r][cIdx];
+        const ref = XLSX.utils.encode_cell({r:r, c:cIdx});
+        if(typeof val === 'number' && val > 0) applyMoneyFmt(wsA, r, cIdx, stGreen);
+        else if(val === 'ÖDENMEDİ') wsA[ref].s = stRed;
+        else if(val === 'MUAF' || String(val).indexOf('ESKİ') > -1) wsA[ref].s = stGray;
+        else wsA[ref].s = stCell;
+      }
+      applyMoneyFmt(wsA, r, 15, stGreen);
+      applyMoneyFmt(wsA, r, 16, aData[r][16] > 0 ? stGreen : stCell);
+      applyMoneyFmt(wsA, r, 17, aData[r][17] > 0 ? stRed : stGreen);
+    }
     XLSX.utils.book_append_sheet(wb, wsA, 'AIDAT_' + db.aktifYil);
 
-    const demData = [];
-    demData.push(['1. DEVREDEN DEMİRBAŞ TABLOSU (NEFESTEN KALAN)']);
-    demData.push(['BLOK','DAİRE','İSİM','NEFESTEN KALAN (₺)','ÖDENEN (₺)','KALAN BORÇ (₺)','DURUM']);
-    db.apartments.forEach(function(a){
-      const k = aptKey(a);
-      const d = db.demirbas[k] || {nefestenKalan:4250, odenen:0};
-      const kalan = Math.max(0, d.nefestenKalan - d.odenen);
-      demData.push([a.blok, a.daire, a.isim||'', d.nefestenKalan, d.odenen, kalan, kalan === 0 ? 'ÖDENDİ' : 'BORÇLU']);
-    });
-
-    demData.push([]);
-    demData.push(['2. YENİ DEMİRBAŞ PROJELERİ VE MALİYET KIRILIMLARI']);
+    const demData = [['DEMİRBAŞ PROJELERİ VE MALİYET KIRILIMLARI','','','','','']];
+    const demStyles = [{type:'banner'}];
 
     if(db.demirbasProjeler && db.demirbasProjeler.length){
       db.demirbasProjeler.forEach(function(p, pIdx){
-        demData.push(['PROJE #' + (pIdx+1), p.baslik, 'TARİH: ' + (p.tarih||''), 'TOPLAM MALİYET: ' + (p.toplam||0) + ' ₺', 'DAİRE BAŞI PAY: ' + (p.daireBasi||0) + ' ₺']);
-        demData.push(['--- Harcama Maddeleri / Kalemleri:']);
-        demData.push(['', 'Kalem / Malzeme Adı', 'Maliyet Tutarı (₺)']);
-        (p.kalemler||[]).forEach(function(klm){
-          demData.push(['', klm.ad, klm.tutar]);
+        demData.push(['PROJE #' + (pIdx+1), p.baslik, 'Tarih: ' + fmtDate(p.tarih), 'Toplam: ' + fmtMoney(p.toplam), 'Daire Başı: ' + fmtMoney(p.daireBasi), '']);
+        demStyles.push({type:'sub'});
+        demData.push(['Kalem No', 'Harcama Kalemi / Malzeme Adı', 'Maliyet Tutarı (₺)', '', '', '']);
+        demStyles.push({type:'head3'});
+        (p.kalemler||[]).forEach(function(klm, kIdx){
+          demData.push([kIdx+1, klm.ad, Number(klm.tutar)||0, '', '', '']);
+          demStyles.push({type:'kalem'});
         });
-        demData.push(['', 'Toplam Proje Tutarı', p.toplam]);
-        
-        demData.push(['--- Daire Bazlı Ödeme Durumu:']);
         demData.push(['Daire', 'Sakin İsmi', 'Daire Başı Pay (₺)', 'Ödenen Tutar (₺)', 'Kalan Borç (₺)', 'Durum']);
+        demStyles.push({type:'head6'});
         (p.secilenDaireler||[]).forEach(function(k){
           const apt = getApt(k);
-          const od = (p.odemeler && p.odemeler[k]) || 0;
+          const od = Number((p.odemeler && p.odemeler[k]) || 0);
           const kl = Math.max(0, p.daireBasi - od);
-          demData.push([k, apt ? (apt.isim||'') : '', p.daireBasi, od, kl, kl === 0 ? 'ÖDENDİ' : 'KALAN VAR']);
+          demData.push([k, apt ? (apt.isim||'') : '', p.daireBasi, od, kl, kl === 0 ? 'ÖDENDİ' : 'BORÇLU']);
+          demStyles.push({type:'daire', paid: kl === 0});
         });
-        demData.push([]);
+        demData.push(['','','','','','']);
+        demStyles.push({type:'empty'});
       });
     } else {
-      demData.push(['Henüz eklenmiş aktif bir yeni demirbaş projesi bulunmamaktadır.']);
+      demData.push(['Henüz eklenmiş aktif bir demirbaş projesi bulunmamaktadır.','','','','','']);
+      demStyles.push({type:'empty'});
     }
     const wsDem = XLSX.utils.aoa_to_sheet(demData);
-    wsDem['!cols'] = [{wch:12},{wch:28},{wch:22},{wch:18},{wch:16},{wch:16},{wch:14}];
+    wsDem['!cols'] = [{wch:12},{wch:30},{wch:20},{wch:18},{wch:18},{wch:15}];
+    wsDem['!rows'] = demStyles.map(s => ({hpt: s.type==='banner'?30:(s.type.startsWith('head')||s.type==='sub'?25:21)}));
+    demStyles.forEach((st, r) => {
+      if(st.type === 'banner'){
+        for(let c=0; c<6; c++) wsDem[XLSX.utils.encode_cell({r:r, c:c})].s = stBanner;
+      } else if(st.type === 'sub'){
+        for(let c=0; c<6; c++) wsDem[XLSX.utils.encode_cell({r:r, c:c})].s = stSubHeader;
+      } else if(st.type === 'head3'){
+        for(let c=0; c<3; c++) wsDem[XLSX.utils.encode_cell({r:r, c:c})].s = stHeader;
+      } else if(st.type === 'head6'){
+        for(let c=0; c<6; c++) wsDem[XLSX.utils.encode_cell({r:r, c:c})].s = stHeader;
+      } else if(st.type === 'kalem'){
+        wsDem[XLSX.utils.encode_cell({r:r, c:0})].s = stCell;
+        wsDem[XLSX.utils.encode_cell({r:r, c:1})].s = stLeft;
+        applyMoneyFmt(wsDem, r, 2, stBold);
+      } else if(st.type === 'daire'){
+        wsDem[XLSX.utils.encode_cell({r:r, c:0})].s = stBold;
+        wsDem[XLSX.utils.encode_cell({r:r, c:1})].s = stLeft;
+        applyMoneyFmt(wsDem, r, 2, stCell);
+        applyMoneyFmt(wsDem, r, 3, stGreen);
+        applyMoneyFmt(wsDem, r, 4, st.paid ? stGreen : stRed);
+        wsDem[XLSX.utils.encode_cell({r:r, c:5})].s = st.paid ? stGreen : stRed;
+      }
+    });
     XLSX.utils.book_append_sheet(wb, wsDem, 'DEMIRBASLAR');
 
     const gData = [['AÇIKLAMA','AİT OLDUĞU AY','TUTAR (₺)','TARİH','DURUM']];
     (db.giderler||[]).forEach(function(g){
-      gData.push([g.aciklama||'', g.ay||'', Number(g.tutar)||0, g.tarih||'', g.durum||'']);
+      gData.push([g.aciklama||'', g.ay||'', Number(g.tutar)||0, fmtDate(g.tarih), g.durum||'']);
     });
     const wsG = XLSX.utils.aoa_to_sheet(gData);
-    wsG['!cols'] = [{wch:36},{wch:16},{wch:14},{wch:14},{wch:14}];
+    wsG['!cols'] = [{wch:38},{wch:16},{wch:16},{wch:14},{wch:14}];
+    wsG['!rows'] = gData.map((_, i) => ({hpt: i===0?28:22}));
+    for(let c=0; c<5; c++) wsG[XLSX.utils.encode_cell({r:0, c:c})].s = stHeader;
+    for(let r=1; r<gData.length; r++){
+      wsG[XLSX.utils.encode_cell({r:r, c:0})].s = stLeft;
+      wsG[XLSX.utils.encode_cell({r:r, c:1})].s = stCell;
+      applyMoneyFmt(wsG, r, 2, stRed);
+      wsG[XLSX.utils.encode_cell({r:r, c:3})].s = stCell;
+      wsG[XLSX.utils.encode_cell({r:r, c:4})].s = stBold;
+    }
     XLSX.utils.book_append_sheet(wb, wsG, 'GIDERLER');
 
     const iData = [['TARİH','İŞLEM BAŞLIĞI','DETAYLI AÇIKLAMA / NOT']];
     (db.islemler||[]).forEach(function(i){
-      iData.push([i.tarih||'', i.baslik||'', i.aciklama||'']);
+      iData.push([fmtDate(i.tarih), i.baslik||'', i.aciklama||'']);
     });
     const wsI = XLSX.utils.aoa_to_sheet(iData);
-    wsI['!cols'] = [{wch:14},{wch:32},{wch:60}];
+    wsI['!cols'] = [{wch:14},{wch:34},{wch:62}];
+    wsI['!rows'] = iData.map((_, i) => ({hpt: i===0?28:24}));
+    for(let c=0; c<3; c++) wsI[XLSX.utils.encode_cell({r:0, c:c})].s = stHeader;
+    for(let r=1; r<iData.length; r++){
+      wsI[XLSX.utils.encode_cell({r:r, c:0})].s = stCell;
+      wsI[XLSX.utils.encode_cell({r:r, c:1})].s = stLeft;
+      wsI[XLSX.utils.encode_cell({r:r, c:2})].s = Object.assign({}, stLeft, {alignment:{vertical:'center', horizontal:'left', wrapText:true}});
+    }
     XLSX.utils.book_append_sheet(wb, wsI, 'YAPILAN_ISLEMLER');
-
-    const duyuruData = [['ID','TARİH','BAŞLIK','İÇERİK','HEDEF','ÖNEM DERECESİ','OKUYAN DAİRE SAYISI','OKUYANLARIN DETAYI']];
-    (db.duyurular||[]).forEach(function(d){
-      const okuyanDetayStr = (d.okumaDetaylari||[]).map(x => {
-        if(typeof x === 'object'){
-          const dDate = x.tarih ? new Date(x.tarih).toLocaleDateString('tr-TR') + ' ' + new Date(x.tarih).toLocaleTimeString('tr-TR') : '';
-          return x.daire + ' (' + (x.isim||'') + ' - ' + dDate + ')';
-        }
-        return String(x);
-      }).join(' | ');
-      const hedefStr = (d.hedef === 'secili' && d.seciliDaireler) ? ('Seçili: ' + d.seciliDaireler.join(',')) : 'Tüm 32 Daire';
-      duyuruData.push([d.id, d.tarih||'', d.baslik||'', d.icerik||'', hedefStr, d.onemli ? 'ÖNEMLİ' : 'NORMAL', (d.okuyanlar||[]).length, okuyanDetayStr || 'Henüz okuyan yok']);
-    });
-    const wsDuyuru = XLSX.utils.aoa_to_sheet(duyuruData);
-    wsDuyuru['!cols'] = [{wch:14},{wch:14},{wch:30},{wch:50},{wch:20},{wch:16},{wch:20},{wch:70}];
-    XLSX.utils.book_append_sheet(wb, wsDuyuru, 'DUYURULAR');
 
     const bhData = [['DAİRE','TARİH','GÖNDEREN İSİM','TUTAR (₺)','AÇIKLAMA / NOT']];
     (db.bankaHareketleri||[]).forEach(function(h){
       bhData.push([h.daire||'', h.tarih||'', h.isim||'', Number(h.tutar)||0, h.aciklama||'']);
     });
     const wsBH = XLSX.utils.aoa_to_sheet(bhData);
-    wsBH['!cols'] = [{wch:10},{wch:14},{wch:26},{wch:14},{wch:45}];
+    wsBH['!cols'] = [{wch:10},{wch:14},{wch:28},{wch:16},{wch:48}];
+    wsBH['!rows'] = bhData.map((_, i) => ({hpt: i===0?28:22}));
+    for(let c=0; c<5; c++) wsBH[XLSX.utils.encode_cell({r:0, c:c})].s = stHeader;
+    for(let r=1; r<bhData.length; r++){
+      wsBH[XLSX.utils.encode_cell({r:r, c:0})].s = stBold;
+      wsBH[XLSX.utils.encode_cell({r:r, c:1})].s = stCell;
+      wsBH[XLSX.utils.encode_cell({r:r, c:2})].s = stLeft;
+      applyMoneyFmt(wsBH, r, 3, stGreen);
+      wsBH[XLSX.utils.encode_cell({r:r, c:4})].s = stLeft;
+    }
     XLSX.utils.book_append_sheet(wb, wsBH, 'BANKA_HAREKETLERI');
 
-    const eData = [['BLOK','DAİRE','İSİM','DURUM','OTURDUĞU TARİH','ÇIKIŞ TARİHİ','KALAN BORÇ (₺)','ÖDENEN TUTAR (₺)','TOPLAM BORÇ (₺)','DURUM (BORÇ)','BAĞLI OLDUĞU AKTİF DAİRE']];
-    (db.eskiOturan||[]).forEach(function(e){
-      const blokTemiz = (e.blok||'').replace(/\s+/g,'');
-      const daireKodu = blokTemiz + (e.daire||'');
-      const aktifDaire = getApt(daireKodu);
-      const kalan = Number(e.kalan)||0;
-      const odenen = Number(e.odenen)||0;
-      eData.push([
-        e.blok||'', e.daire||'', e.isim||'', e.durum||'', e.oturdu||'', e.cikti||'', 
-        kalan, odenen, kalan + odenen,
-        kalan <= 0 ? 'BORÇSUZ' : 'BORÇLU',
-        aktifDaire ? (daireKodu + ' - ' + (aktifDaire.isim||'İsimsiz')) : 'Daire boş/bağlantı yok'
-      ]);
-    });
-    const wsE = XLSX.utils.aoa_to_sheet(eData);
-    wsE['!cols'] = [{wch:10},{wch:8},{wch:24},{wch:18},{wch:14},{wch:14},{wch:16},{wch:16},{wch:16},{wch:14},{wch:30}];
-    XLSX.utils.book_append_sheet(wb, wsE, 'ESKI_OTURANLAR');
-
-    const bildirimData = [['TARİH','DAİRE','TELEFON','TİP']];
-    (db.bildirimGecmisi||[]).slice().reverse().forEach(function(b){
-      const dt = b.tarih ? new Date(b.tarih).toLocaleDateString('tr-TR') + ' ' + new Date(b.tarih).toLocaleTimeString('tr-TR') : '-';
-      bildirimData.push([dt, b.daire||'', b.tel||'', b.tip === 'whatsapp' ? 'WhatsApp Bildirim' : (b.tip||'Bilinmiyor')]);
-    });
-    const wsBildirim = XLSX.utils.aoa_to_sheet(bildirimData);
-    wsBildirim['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:24}];
-    XLSX.utils.book_append_sheet(wb, wsBildirim, 'BILDIRIM_GECMISI');
-
-    const fazlaData = [['DAİRE','İSİM','FAZLA ÖDEME / ALACAK (₺)']];
-    db.apartments.forEach(function(a){
-      const k = aptKey(a);
-      const fazla = fazlaOdemesi(k);
-      if(fazla > 0){ fazlaData.push([k, a.isim||'', fazla]); }
-    });
-    if(fazlaData.length === 1){ fazlaData.push(['-','Kayıtlı fazla ödeme bulunmuyor', 0]); }
-    const wsFazla = XLSX.utils.aoa_to_sheet(fazlaData);
-    wsFazla['!cols'] = [{wch:10},{wch:28},{wch:24}];
-    XLSX.utils.book_append_sheet(wb, wsFazla, 'FAZLA_ODEMELER');
-
-    const denetimData = [['KAYIT ID','TARİH VE SAAT','TİP','DAİRE','AÇIKLAMA / İSİM']];
-    (db.denetimKayitlari||[]).slice().reverse().forEach(function(k){
-      const dt = k.tarih ? new Date(k.tarih).toLocaleDateString('tr-TR') + ' ' + new Date(k.tarih).toLocaleTimeString('tr-TR') : '-';
-      denetimData.push([k.id||'', dt, k.tip === 'sakin' ? 'Sakin Girişi' : 'Site Ziyareti', k.daire||'-', k.isim||'Anonim']);
-    });
-    const wsDenetim = XLSX.utils.aoa_to_sheet(denetimData);
-    wsDenetim['!cols'] = [{wch:18},{wch:20},{wch:16},{wch:10},{wch:26}];
-    XLSX.utils.book_append_sheet(wb, wsDenetim, 'DENETIM_KAYITLARI');
-
-    XLSX.writeFile(wb, 'Rojbin_Sitesi_Tam_Yonetim_Verisi_' + bugun() + '.xlsx');
+    XLSX.writeFile(wb, 'Rojbin_Sitesi_Renkli_Rapor_' + bugun() + '.xlsx');
   }catch(e){
     alert('Excel oluşturulurken hata meydana geldi: ' + e.message);
   }
+}
+
+/* ============ WHATSAPP GRUBU İÇİN HAZIR PDF RAPORU ============ */
+function pdfCikar(){
+  if(!isAdmin || sakinDaireKodu) return;
+  if(!window.html2pdf){
+    alert('PDF oluşturma modülü henüz yüklenmedi, lütfen birkaç saniye sonra tekrar deneyin.');
+    return;
+  }
+
+  const toplamKasa = bankaBaki();
+  const topGider = toplamGider();
+  const toplamAidatBorc = db.apartments.reduce((s,a)=>s+aidatKalan(aptKey(a)),0);
+  const toplamDemirbasBorc = db.apartments.reduce((s,a)=>s+demirbasToplamBorc(aptKey(a)),0);
+  const tarihStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+
+  const pageStyle = 'width:1060px;height:720px;overflow:hidden;box-sizing:border-box;padding:12px 16px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;color:#0f172a;position:relative;';
+  const pageBreakStyle = pageStyle + 'page-break-before:always;break-before:page;';
+
+  function renderHeaderBar(altBaslik){
+    return '<div style="background:#1e3f6e;color:#fff;padding:8px 14px;border-radius:7px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">'
+      + '<div><div style="font-size:14px;font-weight:800;letter-spacing:.3px;">ROJBİN SİTESİ YÖNETİMİ</div>'
+      + '<div style="font-size:10px;opacity:.92;margin-top:1px;">'+altBaslik+'</div></div>'
+      + '<div style="text-align:right;font-size:9.5px;opacity:.92;">Rapor Tarihi: <b>'+tarihStr+'</b></div>'
+      + '</div>';
+  }
+
+  function renderBlokTablosu(blok, kompakt){
+    const padY = kompakt ? '2.6px' : '4.2px';
+    const fontSz = kompakt ? '8px' : '8.5px';
+    let tbl = '<div style="font-size:11px;font-weight:800;color:#1e3f6e;margin-bottom:5px;border-bottom:2px solid #1e3f6e;padding-bottom:2px;">🏢 '+blok+' BLOK — '+db.aktifYil+' YILI AİDAT VE DEMİRBAŞ DURUM TABLOSU</div>'
+      + '<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:'+fontSz+';">'
+      + '<thead><tr style="background:#1e3f6e;color:#fff;">'
+      + '<th style="padding:'+padY+' 2px;border:1px solid #cbd5e1;width:36px;">Daire</th>'
+      + '<th style="padding:'+padY+' 5px;border:1px solid #cbd5e1;text-align:left;width:150px;">Sakin Adı</th>';
+    AY_ADLARI.forEach(ay => {
+      tbl += '<th style="padding:'+padY+' 1px;border:1px solid #cbd5e1;width:44px;">'+ay.slice(0,3)+'</th>';
+    });
+    tbl += '<th style="padding:'+padY+' 3px;border:1px solid #cbd5e1;width:68px;">Aidat Borç</th>'
+      + '<th style="padding:'+padY+' 3px;border:1px solid #cbd5e1;width:70px;">Demirbaş</th>'
+      + '<th style="padding:'+padY+' 3px;border:1px solid #cbd5e1;width:80px;">Toplam Borç</th>'
+      + '</tr></thead><tbody>';
+
+    const apts = db.apartments.filter(a => a.blok === blok).sort((x,y) => x.daire - y.daire);
+    apts.forEach(a => {
+      const k = aptKey(a);
+      const row = getAidatTable()[k] || [];
+      const aBorc = aidatKalan(k);
+      const dBorc = demirbasToplamBorc(k);
+      const topBorc = aBorc + dBorc;
+      const fazla = fazlaOdemesi(k);
+
+      tbl += '<tr>'
+        + '<td style="padding:'+padY+' 2px;border:1px solid #cbd5e1;text-align:center;font-weight:800;color:#1e3f6e;">'+k+'</td>'
+        + '<td style="padding:'+padY+' 5px;border:1px solid #cbd5e1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(a.isim||'Boş Daire')+(fazla>0?' <span style="color:#15803d;font-size:7px;">(+'+fmtMoney(fazla)+')</span>':'')+'</td>';
+
+      AY_ADLARI.forEach((_, i) => {
+        const v = row[i];
+        let bg = '#ffffff', clr = '#94a3b8', txt = '—';
+        if(v === 'MUAF'){ bg = '#e2e8f0'; clr = '#475569'; txt = 'Muaf'; }
+        else if(v === 'ÖDENMEDİ'){ bg = '#fee2e2'; clr = '#b91c1c'; txt = 'Borç'; }
+        else if(v && String(v).indexOf('ESKİ') > -1){ bg = '#f1f5f9'; clr = '#64748b'; txt = 'Eski'; }
+        else if(hucreTutar(v) > 0){ bg = '#dcfce7'; clr = '#166534'; txt = 'Ödendi'; }
+        tbl += '<td style="padding:'+padY+' 1px;border:1px solid #cbd5e1;text-align:center;background:'+bg+';color:'+clr+';font-weight:700;">'+txt+'</td>';
+      });
+
+      tbl += '<td style="padding:'+padY+' 3px;border:1px solid #cbd5e1;text-align:right;font-weight:700;color:'+(aBorc>0?'#dc2626':'#16a34a')+';">'+(aBorc>0?fmtMoney(aBorc):'0 ₺')+'</td>'
+        + '<td style="padding:'+padY+' 3px;border:1px solid #cbd5e1;text-align:right;font-weight:700;color:'+(dBorc>0?'#dc2626':'#16a34a')+';">'+(dBorc>0?fmtMoney(dBorc):'0 ₺')+'</td>'
+        + '<td style="padding:'+padY+' 3px;border:1px solid #cbd5e1;text-align:right;font-weight:800;background:'+(topBorc>0?'#fef2f2':'#f0fdf4')+';color:'+(topBorc>0?'#b91c1c':'#15803d')+';">'+(topBorc>0?fmtMoney(topBorc):'Borçsuz ✓')+'</td>'
+        + '</tr>';
+    });
+    tbl += '</tbody></table>';
+    return tbl;
+  }
+
+  let htmlContent = '<div id="pdfRenderRoot" style="width:1060px;margin:0;padding:0;background:#ffffff;">';
+
+  // SAYFA 1: GENEL MALİ ÖZET + A BLOK
+  htmlContent += '<div style="'+pageStyle+'">'
+    + renderHeaderBar('Güncel Mali Durum Özeti & A Blok Aidat/Demirbaş Tablosu ('+db.aktifYil+' Yılı)')
+    + '<table style="width:100%;table-layout:fixed;border-collapse:separate;border-spacing:6px 0;margin-bottom:7px;">'
+    + '<tr>'
+    + '<td style="background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:6px;text-align:center;">'
+    + '<div style="font-size:8px;font-weight:700;color:#166534;">KASA / BANKA BAKİYESİ</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#15803d;margin-top:1px;">'+fmtMoney(toplamKasa)+'</div></td>'
+    + '<td style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:6px;text-align:center;">'
+    + '<div style="font-size:8px;font-weight:700;color:#991b1b;">TOPLAM HARCANAN GİDER</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#b91c1c;margin-top:1px;">'+fmtMoney(topGider)+'</div></td>'
+    + '<td style="background:#fef3c7;border:1px solid #fde047;border-radius:6px;padding:6px;text-align:center;">'
+    + '<div style="font-size:8px;font-weight:700;color:#92400e;">BEKLENEN AİDAT ALACAĞI</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#b45309;margin-top:1px;">'+fmtMoney(toplamAidatBorc)+'</div></td>'
+    + '<td style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:6px;padding:6px;text-align:center;">'
+    + '<div style="font-size:8px;font-weight:700;color:#075985;">BEKLENEN DEMİRBAŞ ALACAĞI</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#0369a1;margin-top:1px;">'+fmtMoney(toplamDemirbasBorc)+'</div></td>'
+    + '</tr></table>'
+    + renderBlokTablosu('A', true)
+    + '</div>';
+
+  // SAYFA 2: B BLOK
+  htmlContent += '<div style="'+pageBreakStyle+'">'
+    + renderHeaderBar('B Blok Aidat & Demirbaş Tablosu ('+db.aktifYil+' Yılı)')
+    + renderBlokTablosu('B', false)
+    + '</div>';
+
+  // SAYFA 3+: HER BİR DEMİRBAŞ PROJESİ AYRI BİR SAYFA
+  if(db.demirbasProjeler && db.demirbasProjeler.length){
+    db.demirbasProjeler.forEach((p, idx) => {
+      let topOdenen = 0;
+      Object.keys(p.odemeler||{}).forEach(k => { topOdenen += Number(p.odemeler[k])||0; });
+      const daireList = p.secilenDaireler || [];
+      const topBeklenen = daireList.length * p.daireBasi;
+      const topKalan = Math.max(0, topBeklenen - topOdenen);
+      const kalemStr = (p.kalemler||[]).map(k => k.ad + ' (' + fmtMoney(k.tutar) + ')').join('  |  ');
+
+      htmlContent += '<div style="'+pageBreakStyle+'">'
+        + renderHeaderBar('Demirbaş Projesi Detay Raporu ('+(idx+1)+' / '+db.demirbasProjeler.length+')')
+        + '<div style="background:#f8fafc;border:1px solid #cbd5e1;border-left:5px solid #1e3f6e;border-radius:6px;padding:7px 12px;margin-bottom:8px;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+        + '<div style="font-size:12.5px;font-weight:800;color:#1e3f6e;">🏗️ '+p.baslik+'</div>'
+        + '<div style="font-size:9.5px;color:#475569;">Tarih: <b>'+fmtDate(p.tarih)+'</b> · Daire Başı Pay: <b>'+fmtMoney(p.daireBasi)+'</b></div>'
+        + '</div>'
+        + '<div style="font-size:9px;color:#334155;margin-top:3px;"><b>Harcama Kalemleri:</b> '+kalemStr+'</div>'
+        + '<div style="font-size:9.5px;margin-top:3px;display:flex;gap:18px;">'
+        + '<span>Toplam Bütçe: <b>'+fmtMoney(p.toplam)+'</b></span>'
+        + '<span style="color:#16a34a;">Toplanan: <b>'+fmtMoney(topOdenen)+'</b></span>'
+        + '<span style="color:#dc2626;">Kalan Alacak: <b>'+fmtMoney(topKalan)+'</b></span>'
+        + '</div></div>';
+
+      const yarim = Math.ceil(daireList.length / 2);
+      const solList = daireList.slice(0, yarim);
+      const sagList = daireList.slice(yarim);
+
+      function renderProjeAltTablo(list){
+        let t = '<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8px;">'
+          + '<thead><tr style="background:#1e3f6e;color:#fff;">'
+          + '<th style="padding:3.5px 2px;border:1px solid #cbd5e1;width:36px;">Daire</th>'
+          + '<th style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:left;">Sakin Adı</th>'
+          + '<th style="padding:3.5px 3px;border:1px solid #cbd5e1;width:65px;">Ödenen</th>'
+          + '<th style="padding:3.5px 3px;border:1px solid #cbd5e1;width:65px;">Kalan</th>'
+          + '<th style="padding:3.5px 2px;border:1px solid #cbd5e1;width:62px;">Durum</th>'
+          + '</tr></thead><tbody>';
+        list.forEach(k => {
+          const apt = getApt(k);
+          const od = Number((p.odemeler && p.odemeler[k]) || 0);
+          const kl = Math.max(0, p.daireBasi - od);
+          const bitti = kl === 0;
+          t += '<tr>'
+            + '<td style="padding:3px 2px;border:1px solid #cbd5e1;text-align:center;font-weight:800;color:#1e3f6e;">'+k+'</td>'
+            + '<td style="padding:3px 5px;border:1px solid #cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(apt ? (apt.isim||'Boş') : '-')+'</td>'
+            + '<td style="padding:3px 3px;border:1px solid #cbd5e1;text-align:right;color:#16a34a;font-weight:700;">'+fmtMoney(od)+'</td>'
+            + '<td style="padding:3px 3px;border:1px solid #cbd5e1;text-align:right;color:'+(bitti?'#16a34a':'#dc2626')+';font-weight:700;">'+fmtMoney(kl)+'</td>'
+            + '<td style="padding:3px 2px;border:1px solid #cbd5e1;text-align:center;font-weight:700;background:'+(bitti?'#dcfce7':'#fee2e2')+';color:'+(bitti?'#166534':'#991b1b')+';">'+(bitti?'Ödendi ✓':'Borçlu')+'</td>'
+            + '</tr>';
+        });
+        t += '</tbody></table>';
+        return t;
+      }
+
+      htmlContent += '<div style="display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="flex:1;">'+renderProjeAltTablo(solList)+'</div>'
+        + (sagList.length ? '<div style="flex:1;">'+renderProjeAltTablo(sagList)+'</div>' : '')
+        + '</div></div>';
+    });
+  }
+
+  // SAYFA: SİTE HARCAMA VE GİDER LİSTESİ (AYRI SAYFA)
+  htmlContent += '<div style="'+pageBreakStyle+'">'
+    + renderHeaderBar('Site Harcama ve Gider Kayıtları')
+    + '<div style="font-size:11.5px;font-weight:800;color:#1e3f6e;margin-bottom:6px;border-bottom:2px solid #1e3f6e;padding-bottom:3px;">🧾 SİTE GİDER LİSTESİ (Toplam: '+fmtMoney(topGider)+')</div>';
+
+  const tumGiderler = (db.giderler||[]).slice().sort((a,b)=> new Date(b.tarih)-new Date(a.tarih));
+  if(tumGiderler.length){
+    htmlContent += '<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8.5px;">'
+      + '<thead><tr style="background:#1e3f6e;color:#fff;">'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:85px;">Tarih</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;text-align:left;">Gider / Harcama Açıklaması</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:110px;">Ait Olduğu Dönem</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:85px;">Durum</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:100px;">Tutar</th>'
+      + '</tr></thead><tbody>';
+    tumGiderler.slice(0, 22).forEach(g => {
+      htmlContent += '<tr>'
+        + '<td style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:center;">'+fmtDate(g.tarih)+'</td>'
+        + '<td style="padding:3.5px 6px;border:1px solid #cbd5e1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(g.aciklama||'-')+'</td>'
+        + '<td style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:center;">'+(g.ay||'-')+'</td>'
+        + '<td style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:center;">'+(g.durum||'-')+'</td>'
+        + '<td style="padding:3.5px 6px;border:1px solid #cbd5e1;text-align:right;font-weight:700;color:#dc2626;">-'+fmtMoney(g.tutar)+'</td>'
+        + '</tr>';
+    });
+    htmlContent += '</tbody></table>';
+  } else {
+    htmlContent += '<div style="padding:20px;text-align:center;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;">Henüz kaydedilmiş site gideri bulunmamaktadır.</div>';
+  }
+  htmlContent += '</div>';
+
+  // SAYFA: YAPILAN İŞLEMLER VE DUYURULAR (AYRI SAYFA)
+  htmlContent += '<div style="'+pageBreakStyle+'">'
+    + renderHeaderBar('Yapılan Site İşlemleri ve Site Duyuruları')
+    + '<div style="font-size:11.5px;font-weight:800;color:#1e3f6e;margin-bottom:5px;border-bottom:2px solid #1e3f6e;padding-bottom:2px;">📋 YAPILAN SİTE İŞLEMLERİ</div>';
+
+  const tumIslemler = (db.islemler||[]).slice().sort((a,b)=> new Date(b.tarih)-new Date(a.tarih));
+  if(tumIslemler.length){
+    htmlContent += '<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8.5px;margin-bottom:12px;">'
+      + '<thead><tr style="background:#1e3f6e;color:#fff;">'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:85px;">Tarih</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;text-align:left;width:240px;">İşlem Başlığı</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;text-align:left;">Açıklama / Detay</th>'
+      + '</tr></thead><tbody>';
+    tumIslemler.slice(0, 10).forEach(i => {
+      htmlContent += '<tr>'
+        + '<td style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:center;">'+fmtDate(i.tarih)+'</td>'
+        + '<td style="padding:3.5px 6px;border:1px solid #cbd5e1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(i.baslik||'-')+'</td>'
+        + '<td style="padding:3.5px 6px;border:1px solid #cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(i.aciklama||'-')+'</td>'
+        + '</tr>';
+    });
+    htmlContent += '</tbody></table>';
+  } else {
+    htmlContent += '<div style="padding:10px;text-align:center;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;">Henüz kaydedilmiş site işlemi bulunmamaktadır.</div>';
+  }
+
+  htmlContent += '<div style="font-size:11.5px;font-weight:800;color:#1e3f6e;margin-bottom:5px;border-bottom:2px solid #1e3f6e;padding-bottom:2px;">📢 YAYINLANAN SİTE DUYURULARI</div>';
+  const tumDuyurular = (db.duyurular||[]).slice().sort((a,b)=> new Date(b.tarih)-new Date(a.tarih));
+  if(tumDuyurular.length){
+    htmlContent += '<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8.5px;">'
+      + '<thead><tr style="background:#1e3f6e;color:#fff;">'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:85px;">Tarih</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;text-align:left;width:220px;">Duyuru Başlığı</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;text-align:left;">Duyuru İçeriği</th>'
+      + '<th style="padding:4px;border:1px solid #cbd5e1;width:110px;">Hedef Kitle</th>'
+      + '</tr></thead><tbody>';
+    tumDuyurular.slice(0, 10).forEach(d => {
+      const hedefStr = (d.hedef === 'secili' && d.seciliDaireler && d.seciliDaireler.length) ? d.seciliDaireler.join(', ') : 'Tüm 32 Daire';
+      htmlContent += '<tr>'
+        + '<td style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:center;">'+fmtDate(d.tarih)+'</td>'
+        + '<td style="padding:3.5px 6px;border:1px solid #cbd5e1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(d.onemli?'🔴 ':'')+(d.baslik||'-')+'</td>'
+        + '<td style="padding:3.5px 6px;border:1px solid #cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(d.icerik||'-')+'</td>'
+        + '<td style="padding:3.5px 5px;border:1px solid #cbd5e1;text-align:center;">'+hedefStr+'</td>'
+        + '</tr>';
+    });
+    htmlContent += '</tbody></table>';
+  } else {
+    htmlContent += '<div style="padding:10px;text-align:center;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;">Henüz yayınlanmış duyuru bulunmamaktadır.</div>';
+  }
+
+  htmlContent += '<div style="position:absolute;bottom:10px;left:16px;right:16px;text-align:center;font-size:8.5px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:4px;">'
+    + 'Rojbin Sitesi Yönetim Sistemi tarafından hazırlanmıştır — WhatsApp Grubu Bilgilendirme Raporu'
+    + '</div></div>';
+
+  htmlContent += '</div>';
+
+  const modalHtml = '<div style="text-align:center;padding:10px 0 14px;">'
+    + '<div style="font-size:1.8rem;margin-bottom:4px;">📄</div>'
+    + '<h3 style="color:var(--primary);margin-bottom:4px;">Yatay PDF Raporu Oluşturuluyor...</h3>'
+    + '<div class="muted">Lütfen bekleyin, dosya otomatik olarak indirilecektir.</div>'
+    + '</div>'
+    + '<div style="overflow:hidden;max-height:240px;border:1px solid var(--border);border-radius:10px;background:#fff;">'
+    + htmlContent
+    + '</div>';
+
+  openModal(modalHtml, false);
+
+  const targetEl = document.getElementById('pdfRenderRoot');
+  const opt = {
+    margin:       [3, 3, 3, 3],
+    filename:     'Rojbin_Sitesi_Durum_Raporu_' + bugun() + '.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0, width: 1060, windowWidth: 1060 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+    pagebreak:    { mode: ['css'] }
+  };
+
+  setTimeout(function(){
+    html2pdf().set(opt).from(targetEl).save().then(function(){
+      closeModal();
+    }).catch(function(err){
+      closeModal();
+      alert('PDF oluşturulurken hata meydana geldi: ' + err.message);
+    });
+  }, 350);
 }
 
 /* ============ TOPLU BANKA EKSTRESİ ============ */
@@ -3329,9 +4000,14 @@ window.navTo = navTo;
 window.aptDetay = aptDetay;
 window.kaydetApt = kaydetApt;
 window.kaydetVeWhatsapp = kaydetVeWhatsapp;
-window.hizliKaydet = hizliKaydet;
-window.hizliAidatMenu = hizliAidatMenu;
-window.hizliAidatKaydet = hizliAidatKaydet;
+window.daireAidatOdemeAlModal = daireAidatOdemeAlModal;
+window.daireAidatSecimGuncelle = daireAidatSecimGuncelle;
+window.daireAidatOdemeKaydet = daireAidatOdemeKaydet;
+window.daireProjeOdemeAlModal = daireProjeOdemeAlModal;
+window.daireProjeOdemeKaydet = daireProjeOdemeKaydet;
+window.daireGenelOdemeAlModal = daireGenelOdemeAlModal;
+window.daireTahsilatOnizlemeGuncelle = daireTahsilatOnizlemeGuncelle;
+window.daireGenelOdemeKaydet = daireGenelOdemeKaydet;
 window.setAidatBlok = setAidatBlok;
 window.changeYear = changeYear;
 window.giderEkle = giderEkle;
@@ -3370,8 +4046,6 @@ window.projeDetay = projeDetay;
 window.odemeAlProje = odemeAlProje;
 window.odemeKaydetProje = odemeKaydetProje;
 window.projeSil = projeSil;
-window.demirbasOdemeAl = demirbasOdemeAl;
-window.demirbasOdemeKaydet = demirbasOdemeKaydet;
 window.secTum = secTum;
 window.secSecili = secSecili;
 window.toggleApt = toggleApt;
@@ -3390,6 +4064,7 @@ window.eskiOdemeAl = eskiOdemeAl;
 window.eskiOdemeKaydet = eskiOdemeKaydet;
 window.eskiSil = eskiSil;
 window.excelCikar = excelCikar;
+window.pdfCikar = pdfCikar;
 window.topluYukleForm = topluYukleForm;
 window.topluDosyaOku = topluDosyaOku;
 window.bankaBakiyeDuzenle = bankaBakiyeDuzenle;
@@ -3431,21 +4106,17 @@ if(document.readyState === 'loading'){
 <script>
 /* =========================================================
    YENİ ÖZELLİK: TOPLU BANKA EKSTRESİ YÜKLEME SİSTEMİ
-   (Tek Parça - Mevcut Hiçbir Kodu Bozmaz)
    ========================================================= */
 
-// 1. ESKİ EXCEL BUTONUNU DEVRE DIŞI BIRAK VE YENİ MENÜYE YÖNLENDİR
 window.topluYukleForm = function(){
   if(!isAdmin || sakinDaireKodu) return;
   topluBankaMenu();
 };
 
-// 2. VERİTABANI KONTROLÜ
 if(typeof db !== 'undefined' && !db.importGecmisi){
   db.importGecmisi = []; 
 }
 
-// 3. TÜRKÇE NORMALİZASYON VE PARSE YARDIMCILARI
 function trNormalize(s){
   if(s===undefined||s===null) return '';
   return String(s)
@@ -3466,31 +4137,25 @@ function tutarParse(str){
   return isNaN(n) ? 0 : n;
 }
 
-// 4. AKILLI DAİRE BULMA MOTORU
 function akilliDaireBul(aciklama, isim){
   const U = trNormalize((aciklama||'')+' '+(isim||''));
   let m;
 
-  // Örn: "A blok kat 2 daire 3" veya "B blok D:11"
   m = U.match(/\b(A|B)\s*BLOK\b[\s\S]{0,40}?\b(?:DAIRE|NO|D|NUMARA)\s*:?\s*(\d{1,2})\b/);
   if(m){ const k=m[1]+Number(m[2]); if(getApt(k)) return {kod:k,yontem:'blok+daire',guven:'yuksek'}; }
 
-  // Örn: "B BLOK 16 NUMARA"
   m = U.match(/\b(A|B)\s*BLOK\b[\s\S]{0,20}?\b(\d{1,2})\s*(?:NUMARA|NO|DAIRE)?\b/);
   if(m){ const k=m[1]+Number(m[2]); if(getApt(k)) return {kod:k,yontem:'blok+numara',guven:'yuksek'}; }
 
-  // Örn: "A1", "B-5", "A 13"
   m = U.match(/\b(A|B)\s*-?\s*(\d{1,2})\b/);
   if(m){ const k=m[1]+Number(m[2]); if(getApt(k)) return {kod:k,yontem:'kisa-format',guven:'yuksek'}; }
 
-  // Örn: "kat 2 daire 6" (Blok yoksa A ve B'ye bakar)
   m = U.match(/\bKAT\s*:?\s*(\d{1,2})\s*(?:DAIRE|NO|D)\s*:?\s*(\d{1,2})\b/);
   if(m){ const d=Number(m[2]);
     if(getApt('A'+d) && !getApt('B'+d)) return {kod:'A'+d,yontem:'kat+daire',guven:'orta'};
     if(getApt('B'+d) && !getApt('A'+d)) return {kod:'B'+d,yontem:'kat+daire',guven:'orta'};
   }
 
-  // İsim eşleştirme (son çare)
   const ad = (isim||'').trim();
   if(ad.length>=5){
     const ara = trNormalize(ad);
@@ -3504,14 +4169,12 @@ function akilliDaireBul(aciklama, isim){
   return {kod:null,yontem:'bulunamadi',guven:'yok'};
 }
 
-// 5. MÜKERRER KONTROLÜ
 function hareketMukerrerMi(h){
   return (db.bankaHareketleri||[]).some(function(x){
     return x.tarih===h.tarih && Math.abs((Number(x.tutar)||0)-(Number(h.tutar)||0))<0.01 && trNormalize(x.isim||'')===trNormalize(h.isim||'');
   });
 }
 
-// 6. PDF AYRIŞTIRICI
 async function pdfBankaEkstreOku(file){
   if(!window.pdfjsLib) throw new Error('pdf.js kütüphanesi yüklenemedi');
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -3557,7 +4220,6 @@ async function pdfBankaEkstreOku(file){
   return {hareketler, sonBakiye, toplamSayfa:pdf.numPages};
 }
 
-// 7. 3 SEKMELİ ANA MENÜ VE EKRANLAR
 let _bankaSekme = 'yeni';
 let _bankaOnizleme = null;
 let _bankaHareketFiltre = 'tumu';
@@ -3859,7 +4521,6 @@ function _importGeriAl(importId){
   saveDB(); topluBankaMenu();
 }
 
-// 8. FONKSİYONLARI PENCEREYE TANIT
 window.topluBankaMenu = topluBankaMenu;
 window.onIzlemeBaslat = onIzlemeBaslat;
 window.onizlemeOnayla = onizlemeOnayla;
@@ -3880,8 +4541,6 @@ window._importGeriAl = _importGeriAl;
    EK GÜNCELLEME: GEÇMİŞ DÜZELTMESİ + SAKİN İCMAL EKRANI
    ========================================================= */
 
-// 1. GEÇMİŞ SEKME DÜZELTMESİ
-// En son yükleme bilgisinin her zaman en üstte görünmesi için:
 const _eskiBankaSekmeGecmis = bankaSekmeGecmis;
 window.bankaSekmeGecmis = function(){
   let html = '<div class="uyari teal" style="margin-bottom:10px"><b>📌 Yükleme Geçmişi</b><br>Aşağıda sisteme eklediğiniz tüm PDF ekstrelerinin kayıtları ve içindeki en son transfer tarihleri yer alır.</div>';
@@ -3906,52 +4565,40 @@ window.bankaSekmeGecmis = function(){
   return html;
 };
 
-// Onayla dedikten sonra geçmişin anında güncellenmesi için yönlendirmeyi düzeltiyoruz:
 const _eskiOnizlemeOnayla = onizlemeOnayla;
 window.onizlemeOnayla = function(){
   _eskiOnizlemeOnayla();
-  _bankaSekme = 'gecmis'; // Onaydan sonra direkt geçmişe at
+  _bankaSekme = 'gecmis';
   topluBankaMenu();
 };
 
-/* =========================================================
-   2. SİTE SAKİNİ İÇİN GENEL İCMAL EKRANI
-   ========================================================= */
-
-// Sakine özel "Genel İcmal" butonunu ana sayfaya ekliyoruz
 const _eskiViewSakinHome = viewSakinHome;
 window.viewSakinHome = function(){
   let orijinalHtml = _eskiViewSakinHome();
   
-  // Sakin giriş sayfasındaki uyarı kutusunun hemen altına büyük butonu ekle
   let ekButon = '<div class="card" style="background:linear-gradient(135deg, #1e3f6e, #2563eb); color:#fff; text-align:center; margin-bottom:14px;" onclick="sakinIcmalGoster()">'
     + '<div style="font-size:2rem; margin-bottom:8px;">📊</div>'
     + '<div style="font-size:1.1rem; font-weight:800;">SİTE GENEL İCMALİ</div>'
     + '<div style="font-size:.75rem; opacity:.8; margin-top:4px;">Tüm dairelerin aidat ve demirbaş durumlarını görüntüle (Sadece Okuma)</div>'
     + '</div>';
     
-  // Uyarı div'inin (sakin-uyari) hemen sonrasına yerleştir
   return orijinalHtml.replace('<div class="stats">', ekButon + '<div class="stats">');
 };
 
-// İcmal Modalını Açan Fonksiyon
 function sakinIcmalGoster(){
   let body = '<h2>📊 Site Genel İcmali (Sadece Görüntüleme)</h2>';
   body += '<div class="uyari teal" style="margin-bottom:12px;">Aşağıda tüm blokların aidat ve demirbaş borç/ödeme durumları yer almaktadır. <b>Bu ekran sadece okuma amaçlıdır, değişiklik yapılamaz.</b></div>';
 
-  // Blokları sırala (A ve B)
   ['A','B'].forEach(blok => {
     body += '<div style="margin-bottom:15px;">';
     body += '<div style="font-weight:800; color:var(--primary); background:var(--surface-soft); padding:6px 10px; border-radius:6px; margin-bottom:8px;">'+blok+' BLOK</div>';
     
-    // Daireleri daire numarasına göre sırala
     const blokDaireleri = db.apartments.filter(a => a.blok === blok).sort((x,y) => x.daire - y.daire);
     
     blokDaireleri.forEach(a => {
       const k = aptKey(a);
       const aidatRow = getAidatTable()[k] || [];
       
-      // Aidat Ayları (Ocak - Aralık)
       let aylarHtml = '<div style="display:flex; gap:3px; flex-wrap:wrap; margin-top:6px;">';
       AY_ADLARI.forEach((ay, i) => {
         const v = aidatRow[i];
@@ -3963,23 +4610,18 @@ function sakinIcmalGoster(){
       });
       aylarHtml += '</div>';
 
-      // Demirbaş Durumu
-      const demir = db.demirbas[k] || {nefestenKalan:4250, odenen:0};
-      const dKalan = Math.max(0, demir.nefestenKalan - demir.odenen);
-      const demirDurum = dKalan === 0 ? '<span style="color:#16a34a; font-weight:700;">✅ Ödendi</span>' : '<span style="color:#dc2626; font-weight:700;">🔴 Kalan: '+fmtMoney(dKalan)+'</span>';
-      
-      // Projeler
       let projelerHtml = '';
       const projeler = (db.demirbasProjeler||[]).filter(p => p.secilenDaireler && p.secilenDaireler.includes(k));
       if(projeler.length){
-        projelerHtml += '<div style="font-size:.7rem; color:var(--text-soft); margin-top:6px;"><b>Demirbaş Projeleri:</b></div>';
+        projelerHtml += '<div style="font-size:.7rem; color:var(--text-soft); margin-top:6px;"><b>Demirbaş Durumu:</b></div>';
         projelerHtml += '<div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:2px;">';
         projeler.forEach(p => {
           const od = p.odemeler[k] || 0;
           const kl = Math.max(0, p.daireBasi - od);
           let pBg = kl === 0 ? '#dcfce7' : (od > 0 ? '#fef3c7' : '#fee2e2');
           let pColor = kl === 0 ? '#16a34a' : (od > 0 ? '#d97706' : '#dc2626');
-          projelerHtml += '<span style="background:'+pBg+'; color:'+pColor+'; font-size:.65rem; padding:3px 6px; border-radius:4px; font-weight:700; border:1px solid '+pColor+'33;">'+p.baslik.slice(0,15)+'... '+(kl===0?'✅':'❌')+'</span>';
+          const baslikKisa = p.baslik.length > 22 ? p.baslik.slice(0,22)+'...' : p.baslik;
+          projelerHtml += '<span style="background:'+pBg+'; color:'+pColor+'; font-size:.65rem; padding:3px 6px; border-radius:4px; font-weight:700; border:1px solid '+pColor+'33;">'+baslikKisa+' '+(kl===0?'✅ Ödendi':'❌ '+fmtMoney(kl))+'</span>';
         });
         projelerHtml += '</div>';
       }
@@ -3989,9 +4631,6 @@ function sakinIcmalGoster(){
         + '<div style="font-weight:800; color:var(--primary);">'+k+' - '+(a.isim||'İsimsiz')+'</div>'
         + '</div>'
         + aylarHtml
-        + '<div style="margin-top:8px; font-size:.75rem; display:flex; justify-content:space-between; align-items:center; background:var(--surface-soft); padding:5px 8px; border-radius:6px;">'
-        + '<span style="font-weight:700;">Demirbaş (Nefesten):</span> ' + demirDurum
-        + '</div>'
         + projelerHtml
         + '</div>';
     });
@@ -4008,17 +4647,14 @@ window.sakinIcmalGoster = sakinIcmalGoster;
 <script>
 /* =========================================================
    EK GÜNCELLEME: SES YÖNETİMİ VE DUYURU EKRANI
-   (Robot Sesi İptal Edildi - Sadece Link Çalar)
    ========================================================= */
 
-// 1. VERİTABANI KONTROLÜ
 if(typeof db !== 'undefined'){
   if(!db.settings) db.settings = {};
   if(db.settings.sakinGirisSesLinki === undefined) db.settings.sakinGirisSesLinki = '';
   if(db.settings.sakinDuyuruSesLinki === undefined) db.settings.sakinDuyuruSesLinki = '';
 }
 
-// 2. YÖNETİCİ PANELİNE SES AYARLARI BUTONU EKLE
 const _eskiViewHome = viewHome;
 window.viewHome = function(){
   let orijinalHtml = _eskiViewHome();
@@ -4033,7 +4669,6 @@ window.viewHome = function(){
   return orijinalHtml;
 };
 
-// 3. SES AYARLARI MODALI (İki Ayrı Link)
 function sesAyarlariModal(){
   if(!isAdmin || sakinDaireKodu) return;
   
@@ -4062,7 +4697,6 @@ function sesAyarlariModal(){
   openModal(body);
 }
 
-// 4. AYARLARI KAYDET
 function sesAyarlariKaydet(){
   const giris = document.getElementById('sesLinkGiris').value.trim();
   const duyuru = document.getElementById('sesLinkDuyuru').value.trim();
@@ -4074,7 +4708,6 @@ function sesAyarlariKaydet(){
   alert('Ses ayarları başarıyla kaydedildi.');
 }
 
-// 5. LİNK TEST ETME
 function testSesLinki(inputId){
   const val = document.getElementById(inputId).value.trim();
   if(!val){ alert('Lütfen önce bir link girin'); return; }
@@ -4082,16 +4715,12 @@ function testSesLinki(inputId){
   audio.play().catch(e => alert('Ses çalınamadı. Link geçerli bir ses dosyası olmayabilir.'));
 }
 
-// 6. ROBOT SESİNİ TAMAMEN KALDIR VE GİRİŞ SESİNİ BAĞLA
 const _eskiSakinLoginSubmit = sakinLoginSubmit;
 window.sakinLoginSubmit = function(){
-  // Önce mevcut giriş işlemlerini yap
   _eskiSakinLoginSubmit();
   
-  // Eski robot sesini (varsa) sustur
   if(window.speechSynthesis) window.speechSynthesis.cancel();
   
-  // Yönetici link girdiyse çal, girmediyse sessiz kal
   const link = db.settings.sakinGirisSesLinki;
   if(sakinDaireKodu && link && link.trim() !== ''){
     try {
@@ -4102,7 +4731,6 @@ window.sakinLoginSubmit = function(){
   }
 };
 
-// 7. ZORUNLU DUYURU EKRANINA ÇİFT BUTON EKLE
 const _eskiZorunluDuyuruBalonAc = zorunluDuyuruBalonAc;
 window.zorunluDuyuruBalonAc = function(d, daireKodu){
   window._aktifDuyuruMetni = d.icerik;
@@ -4122,9 +4750,8 @@ window.zorunluDuyuruBalonAc = function(d, daireKodu){
   openModal(body, false);
 };
 
-// 8. DUYURUYU DİNLE BUTONU (Sadece link varsa çalar, yoksa uyarı verir)
 function duyuruSesliDinle(){
-  if(window.speechSynthesis) window.speechSynthesis.cancel(); // Robot sesi iptal
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
   
   const link = db.settings.sakinDuyuruSesLinki;
   
@@ -4136,12 +4763,10 @@ function duyuruSesliDinle(){
       alert('Ses linki hatalı.');
     }
   } else {
-    // Link yoksa hiçbir ses çıkmasın, sadece uyarı versin
     alert('Yönetici bu duyuru için henüz bir ses kaydı eklememiş.');
   }
 }
 
-// Global Atamalar
 window.sesAyarlariModal = sesAyarlariModal;
 window.sesAyarlariKaydet = sesAyarlariKaydet;
 window.testSesLinki = testSesLinki;
@@ -4153,7 +4778,6 @@ window.duyuruSesliDinle = duyuruSesliDinle;
    EK MODÜL 1: DİNAMİK AİDAT TUTARI BELİRLEME (YIL BAZLI)
    ========================================================= */
 
-// Aidat ekranına "Aidat Belirle" butonu entegrasyonu
 const _orijinalViewAidat = window.viewAidat;
 window.viewAidat = function() {
   let html = _orijinalViewAidat();
@@ -4334,7 +4958,6 @@ window.viewSakinHome = function() {
    EK MODÜL 3: GELİŞMİŞ BASAMAKLI BORÇ DAĞITIM VE PDF MASASI
    ========================================================= */
 
-// Bir daire için gelen paranın basamaklı simülasyonunu hesaplar
 function hesaplaBasamakliDagitim(daireKodu, gelenTutar) {
   let kalanPara = Number(gelenTutar) || 0;
   const plan = {
@@ -4354,7 +4977,6 @@ function hesaplaBasamakliDagitim(daireKodu, gelenTutar) {
   const tblAidat = getAidatTable();
   const row = tblAidat[daireKodu] || [];
 
-  // 1. ADIM: Aidat Borçlarını Tara ve Kapat
   for (let m = 0; m < 12; m++) {
     const val = row[m];
     const borcluMu = (val === 'ÖDENMEDİ' || val === '' || val === null || val === undefined);
@@ -4365,18 +4987,6 @@ function hesaplaBasamakliDagitim(daireKodu, gelenTutar) {
     }
   }
 
-  // 2. ADIM: Devreden Demirbaş Borcunu Kapat
-  if (kalanPara > 0) {
-    const d = db.demirbas[daireKodu] || { nefestenKalan: 4250, odenen: 0 };
-    const demKalan = Math.max(0, (Number(d.nefestenKalan) || 0) - (Number(d.odenen) || 0));
-    if (demKalan > 0) {
-      const odenecekDem = Math.min(kalanPara, demKalan);
-      plan.devredenDemirbas = odenecekDem;
-      kalanPara -= odenecekDem;
-    }
-  }
-
-  // 3. ADIM: Demirbaş Projelerini Sırayla Kapat (Eskiden Yeniye)
   if (kalanPara > 0 && db.demirbasProjeler && db.demirbasProjeler.length) {
     db.demirbasProjeler.forEach(p => {
       if (kalanPara <= 0) return;
@@ -4392,18 +5002,13 @@ function hesaplaBasamakliDagitim(daireKodu, gelenTutar) {
     });
   }
 
-  // 4. ADIM: Artan Para Varsa Fazla Ödemeye Yaz
   if (kalanPara > 0) {
     plan.fazlaOdeme = kalanPara;
   }
 
-  // Görsel Özet Metni Hazırla
   let ozet = [];
   if (plan.aidatAylar.length) {
     ozet.push('💰 Aidat (' + plan.aidatAylar.map(x => x.ayAdi).join(', ') + '): ' + fmtMoney(plan.aidatToplam));
-  }
-  if (plan.devredenDemirbas > 0) {
-    ozet.push('🏗️ Devreden Demirbaş: ' + fmtMoney(plan.devredenDemirbas));
   }
   plan.projeler.forEach(pr => {
     ozet.push('🛠️ ' + pr.baslik + ': ' + fmtMoney(pr.tutar));
@@ -4416,7 +5021,6 @@ function hesaplaBasamakliDagitim(daireKodu, gelenTutar) {
   return plan;
 }
 
-// Ön İzleme Masası Render
 window.bankaOnizlemeRender = function() {
   const on = _bankaOnizleme;
   if (!on) return '';
@@ -4424,7 +5028,7 @@ window.bankaOnizlemeRender = function() {
   const guncelAidat = getGuncelAidatTutar();
   let html = '<div class="uyari teal" style="margin-bottom:10px">'
     + '<b>📋 PDF Analiz ve Dağıtım Masası</b><br>'
-    + 'Aylık Aidat Birimi: <b>' + fmtMoney(guncelAidat) + '</b>. Büyük tutarlar otomatik olarak sırasıyla <i>Ödenmemiş Aidatlara ➔ Devreden Demirbaşa ➔ Projelere ➔ Fazla Ödemeye</i> dağıtılır.'
+    + 'Aylık Aidat Birimi: <b>' + fmtMoney(guncelAidat) + '</b>. Büyük tutarlar otomatik olarak sırasıyla <i>Ödenmemiş Aidatlara ➔ Demirbaş Projelerine ➔ Fazla Ödemeye</i> dağıtılır.'
     + '</div>';
 
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'
@@ -4475,7 +5079,6 @@ window.bankaOnizlemeRender = function() {
       + '</div>'
       + '</div>';
 
-    // Otomatik dağıtım planının satır altı şeffaf dökümü
     if (h.islemModu === 'otomatik' && h.daire && h.daire !== 'genel') {
       html += '<div style="margin-top:8px;padding:6px 10px;background:#ffffff;border:1px dashed #86efac;border-radius:6px;font-size:.74rem;line-height:1.5;">'
         + '<div style="font-weight:800;color:#15803d;margin-bottom:2px;">⚡ Planlanan Borç Düşümü:</div>'
@@ -4505,7 +5108,6 @@ window._onizlemeModDegistir = function(index, yeniMod) {
   }
 };
 
-// Basamaklı Dağıtımı Sisteme Uygulama
 window.onizlemeBasamakliOnayla = function() {
   if (!isAdmin || sakinDaireKodu) return;
   if (!_bankaOnizleme) return;
@@ -4535,7 +5137,6 @@ window.onizlemeBasamakliOnayla = function() {
     const dKod = h.daire;
     const tutar = Number(h.tutar) || 0;
 
-    // 1. Banka Hareketine Kaydet
     db.bankaHareketleri.push({
       id: 'bh_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
       daire: dKod || 'genel',
@@ -4549,11 +5150,9 @@ window.onizlemeBasamakliOnayla = function() {
     });
     hareketEklenen++;
 
-    // 2. Otomatik Mod Seçildiyse Basamaklı Dağıtımı Uygula
     if (h.islemModu === 'otomatik' && dKod && dKod !== 'genel') {
       const plan = h._hesaplananPlan || hesaplaBasamakliDagitim(dKod, tutar);
 
-      // Aidatları İşle
       if (plan.aidatAylar && plan.aidatAylar.length) {
         if (!tblAidat[dKod]) tblAidat[dKod] = new Array(12).fill('');
         plan.aidatAylar.forEach(item => {
@@ -4562,14 +5161,6 @@ window.onizlemeBasamakliOnayla = function() {
         });
       }
 
-      // Devreden Demirbaşı Düş
-      if (plan.devredenDemirbas > 0) {
-        if (!db.demirbas[dKod]) db.demirbas[dKod] = { nefestenKalan: 4250, odenen: 0 };
-        db.demirbas[dKod].odenen = (Number(db.demirbas[dKod].odenen) || 0) + plan.devredenDemirbas;
-        toplamDemirbasTutar += plan.devredenDemirbas;
-      }
-
-      // Projeleri Düş
       if (plan.projeler && plan.projeler.length) {
         plan.projeler.forEach(pr => {
           const proje = db.demirbasProjeler.find(p => p.id === pr.projeId);
@@ -4581,7 +5172,6 @@ window.onizlemeBasamakliOnayla = function() {
         });
       }
 
-      // Artan Parayı Fazla Ödeme (Alacak) Olarak Yaz
       if (plan.fazlaOdeme > 0) {
         if (!db.fazlaOdemeler) db.fazlaOdemeler = {};
         db.fazlaOdemeler[dKod] = (Number(db.fazlaOdemeler[dKod]) || 0) + plan.fazlaOdeme;
